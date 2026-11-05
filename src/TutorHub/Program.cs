@@ -16,7 +16,14 @@ var connectionString = builder.Configuration.GetConnectionString("Default")
     ?? throw new InvalidOperationException(
         "Connection string 'Default' is not set. Use user-secrets or the ConnectionStrings__Default variable.");
 
-builder.Services.AddDbContext<AppDbContext>(o => o.UseNpgsql(connectionString));
+builder.Services.AddOutputCache(o => o.AddPolicy(
+    CacheInvalidationInterceptor.PolicyName,
+    policy => policy.Expire(TimeSpan.FromSeconds(60)).Tag(CacheInvalidationInterceptor.Tag)));
+builder.Services.AddSingleton<CacheInvalidationInterceptor>();
+
+builder.Services.AddDbContext<AppDbContext>((services, o) => o
+    .UseNpgsql(connectionString)
+    .AddInterceptors(services.GetRequiredService<CacheInvalidationInterceptor>()));
 builder.Services.AddSingleton<IFileStorage, LocalFileStorage>();
 builder.Services.AddScoped<MaterialService>();
 
@@ -63,6 +70,7 @@ app.UseHttpsRedirection();
 app.UseRouting();
 
 app.UseAuthorization();
+app.UseOutputCache();
 
 app.MapStaticAssets();
 

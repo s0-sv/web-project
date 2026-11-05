@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OutputCaching;
 using Microsoft.EntityFrameworkCore;
 using TutorHub.Contracts;
 using TutorHub.Data;
@@ -11,6 +12,7 @@ namespace TutorHub.Controllers.Api;
 public class MaterialsApiController(AppDbContext db, MaterialService materials) : ApiControllerBase
 {
     [HttpGet("materials")]
+    [OutputCache(PolicyName = CacheInvalidationInterceptor.PolicyName)]
     public Task<PagedResult<MaterialDto>> GetAll([FromQuery] PageQuery page, CancellationToken ct) =>
         db.LessonMaterials.AsNoTracking()
             .OrderByDescending(m => m.UploadedAt).ThenBy(m => m.Id)
@@ -18,6 +20,7 @@ public class MaterialsApiController(AppDbContext db, MaterialService materials) 
             .ToPagedResultAsync(page, Request, ct);
 
     [HttpGet("lessons/{lessonId:int}/materials")]
+    [OutputCache(PolicyName = CacheInvalidationInterceptor.PolicyName)]
     public async Task<ActionResult<PagedResult<MaterialDto>>> GetForLesson(
         int lessonId,
         [FromQuery] PageQuery page,
@@ -36,6 +39,7 @@ public class MaterialsApiController(AppDbContext db, MaterialService materials) 
     }
 
     [HttpGet("materials/{id:int}")]
+    [OutputCache(PolicyName = CacheInvalidationInterceptor.PolicyName)]
     public async Task<ActionResult<MaterialDto>> GetById(int id, CancellationToken ct)
     {
         var dto = await LoadDtoAsync(id, ct);

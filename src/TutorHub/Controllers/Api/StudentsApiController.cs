@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OutputCaching;
 using Microsoft.EntityFrameworkCore;
 using TutorHub.Contracts;
 using TutorHub.Data;
@@ -10,6 +11,7 @@ namespace TutorHub.Controllers.Api;
 public class StudentsApiController(AppDbContext db) : ApiControllerBase
 {
     [HttpGet]
+    [OutputCache(PolicyName = CacheInvalidationInterceptor.PolicyName)]
     public Task<PagedResult<StudentDto>> GetAll([FromQuery] PageQuery page, CancellationToken ct) =>
         db.Students.AsNoTracking()
             .OrderBy(s => s.FullName).ThenBy(s => s.Id)
@@ -17,6 +19,7 @@ public class StudentsApiController(AppDbContext db) : ApiControllerBase
             .ToPagedResultAsync(page, Request, ct);
 
     [HttpGet("{id:int}")]
+    [OutputCache(PolicyName = CacheInvalidationInterceptor.PolicyName)]
     public async Task<ActionResult<StudentDto>> GetById(int id, CancellationToken ct)
     {
         var dto = await db.Students.AsNoTracking().Where(s => s.Id == id).Select(StudentDto.Projection).FirstOrDefaultAsync(ct);
