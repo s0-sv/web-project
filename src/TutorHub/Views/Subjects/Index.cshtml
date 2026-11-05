@@ -1,0 +1,36 @@
+@model List<Subject>
+@{
+    ViewData["Title"] = "Предмети";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h3 mb-0">Предмети</h1>
+    <a class="btn btn-primary" asp-action="Create">Додати предмет</a>
+</div>
+
+@if (Model.Count == 0)
+{
+    <p class="text-muted">Предметів поки немає.</p>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead><tr><th>Назва</th><th>Опис</th><th>Занять</th><th></th></tr></thead>
+            <tbody>
+                @foreach (var subject in Model)
+                {
+                    <tr>
+                        <td><a asp-action="Details" asp-route-id="@subject.Id">@subject.Name</a></td>
+                        <td>@subject.Description</td>
+                        <td>@subject.Lessons.Count</td>
+                        <td class="text-end text-nowrap">
+                            <a class="btn btn-outline-secondary btn-sm" asp-action="Edit" asp-route-id="@subject.Id">Редагувати</a>
+                            <a class="btn btn-outline-danger btn-sm" asp-action="Delete" asp-route-id="@subject.Id">Видалити</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

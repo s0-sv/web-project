@@ -1,0 +1,11 @@
+@model Tutor
+@{
+    ViewData["Title"] = "Видалення репетитора";
+}
+
+<h1 class="h3 mb-3">Видалити репетитора «@Model.FullName»?</h1>
+<p>Репетитора можна видалити, лише якщо в нього немає занять.</p>
+<form asp-action="Delete" asp-route-id="@Model.Id" method="post">
+    <button type="submit" class="btn btn-danger">Видалити</button>
+    <a class="btn btn-link" asp-action="Details" asp-route-id="@Model.Id">Скасувати</a>
+</form>

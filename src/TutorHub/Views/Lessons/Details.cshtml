@@ -1,0 +1,47 @@
+@model Lesson
+@{
+    ViewData["Title"] = Model.Topic;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h3 mb-0">@Model.Topic <span class="badge @Model.Status.BadgeClass() fs-6">@Model.Status.Label()</span></h1>
+    <div class="text-nowrap">
+        <a class="btn btn-outline-secondary" asp-action="Edit" asp-route-id="@Model.Id">Редагувати</a>
+        <a class="btn btn-outline-danger" asp-action="Delete" asp-route-id="@Model.Id">Видалити</a>
+    </div>
+</div>
+
+<dl class="row">
+    <dt class="col-sm-3">Початок (за Києвом)</dt>
+    <dd class="col-sm-9">@AppTime.Format(Model.StartsAt)</dd>
+    <dt class="col-sm-3">Тривалість</dt>
+    <dd class="col-sm-9">@Model.DurationMinutes хв</dd>
+    <dt class="col-sm-3">Предмет</dt>
+    <dd class="col-sm-9"><a asp-controller="Subjects" asp-action="Details" asp-route-id="@Model.SubjectId">@Model.Subject?.Name</a></dd>
+    <dt class="col-sm-3">Репетитор</dt>
+    <dd class="col-sm-9"><a asp-controller="Tutors" asp-action="Details" asp-route-id="@Model.TutorId">@Model.Tutor?.FullName</a></dd>
+    <dt class="col-sm-3">Учень</dt>
+    <dd class="col-sm-9"><a asp-controller="Students" asp-action="Details" asp-route-id="@Model.StudentId">@Model.Student?.FullName</a></dd>
+    <dt class="col-sm-3">Онлайн-кімната</dt>
+    <dd class="col-sm-9">
+        @if (Model.MeetingUrl is null)
+        {
+            <text>—</text>
+        }
+        else
+        {
+            <a href="@Model.MeetingUrl" target="_blank" rel="noopener noreferrer">@Model.MeetingUrl</a>
+        }
+    </dd>
+    <dt class="col-sm-3">Нотатки</dt>
+    <dd class="col-sm-9">@(Model.Notes ?? "—")</dd>
+</dl>
+
+<div class="d-flex justify-content-between align-items-center mb-2">
+    <h2 class="h5 mb-0">Матеріали</h2>
+    <a class="btn btn-primary btn-sm" asp-controller="Materials" asp-action="Create" asp-route-lessonId="@Model.Id">Додати матеріал</a>
+</div>
+
+<partial name="_MaterialsTable" model="Model.Materials.OrderBy(m => m.Title)" />
+
+<a asp-action="Index">До списку занять</a>

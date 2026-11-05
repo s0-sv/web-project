@@ -1,0 +1,28 @@
+@model Tutor
+
+<div asp-validation-summary="ModelOnly" class="text-danger"></div>
+<div class="mb-3">
+    <label asp-for="FullName" class="form-label"></label>
+    <input asp-for="FullName" class="form-control" />
+    <span asp-validation-for="FullName" class="text-danger"></span>
+</div>
+<div class="mb-3">
+    <label asp-for="Email" class="form-label"></label>
+    <input asp-for="Email" class="form-control" />
+    <span asp-validation-for="Email" class="text-danger"></span>
+</div>
+<div class="mb-3">
+    <label asp-for="Phone" class="form-label"></label>
+    <input asp-for="Phone" class="form-control" />
+    <span asp-validation-for="Phone" class="text-danger"></span>
+</div>
+<div class="mb-3">
+    <label asp-for="HourlyRate" class="form-label"></label>
+    <input asp-for="HourlyRate" class="form-control" min="0" step="0.01" />
+    <span asp-validation-for="HourlyRate" class="text-danger"></span>
+</div>
+<div class="mb-3">
+    <label asp-for="Bio" class="form-label"></label>
+    <textarea asp-for="Bio" class="form-control" rows="4"></textarea>
+    <span asp-validation-for="Bio" class="text-danger"></span>
+</div>

@@ -1,0 +1,11 @@
+@model List<Lesson>
+@{
+    ViewData["Title"] = "Заняття";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h3 mb-0">Заняття</h1>
+    <a class="btn btn-primary" asp-action="Create">Запланувати заняття</a>
+</div>
+
+<partial name="_LessonsTable" model="Model" />

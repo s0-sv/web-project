@@ -1,0 +1,63 @@
+@model LessonFormModel
+
+<div asp-validation-summary="ModelOnly" class="text-danger"></div>
+<div class="row">
+    <div class="col-md-4 mb-3">
+        <label asp-for="TutorId" class="form-label"></label>
+        <select asp-for="TutorId" asp-items="ViewBag.Tutors" class="form-select">
+            <option value="">Оберіть…</option>
+        </select>
+        <span asp-validation-for="TutorId" class="text-danger"></span>
+    </div>
+    <div class="col-md-4 mb-3">
+        <label asp-for="StudentId" class="form-label"></label>
+        <select asp-for="StudentId" asp-items="ViewBag.Students" class="form-select">
+            <option value="">Оберіть…</option>
+        </select>
+        <span asp-validation-for="StudentId" class="text-danger"></span>
+    </div>
+    <div class="col-md-4 mb-3">
+        <label asp-for="SubjectId" class="form-label"></label>
+        <select asp-for="SubjectId" asp-items="ViewBag.Subjects" class="form-select">
+            <option value="">Оберіть…</option>
+        </select>
+        <span asp-validation-for="SubjectId" class="text-danger"></span>
+    </div>
+</div>
+<div class="mb-3">
+    <label asp-for="Topic" class="form-label"></label>
+    <input asp-for="Topic" class="form-control" />
+    <span asp-validation-for="Topic" class="text-danger"></span>
+</div>
+<div class="row">
+    <div class="col-md-4 mb-3">
+        <label asp-for="StartsAt" class="form-label"></label>
+        <input asp-for="StartsAt" asp-format="{0:yyyy-MM-ddTHH:mm}" type="datetime-local" class="form-control" />
+        <span asp-validation-for="StartsAt" class="text-danger"></span>
+    </div>
+    <div class="col-md-4 mb-3">
+        <label asp-for="DurationMinutes" class="form-label"></label>
+        <input asp-for="DurationMinutes" class="form-control" min="15" max="480" step="5" />
+        <span asp-validation-for="DurationMinutes" class="text-danger"></span>
+    </div>
+    <div class="col-md-4 mb-3">
+        <label asp-for="Status" class="form-label"></label>
+        <select asp-for="Status" class="form-select">
+            @foreach (var status in Enum.GetValues<LessonStatus>())
+            {
+                <option value="@status">@status.Label()</option>
+            }
+        </select>
+        <span asp-validation-for="Status" class="text-danger"></span>
+    </div>
+</div>
+<div class="mb-3">
+    <label asp-for="MeetingUrl" class="form-label"></label>
+    <input asp-for="MeetingUrl" class="form-control" placeholder="https://" />
+    <span asp-validation-for="MeetingUrl" class="text-danger"></span>
+</div>
+<div class="mb-3">
+    <label asp-for="Notes" class="form-label"></label>
+    <textarea asp-for="Notes" class="form-control" rows="3"></textarea>
+    <span asp-validation-for="Notes" class="text-danger"></span>
+</div>

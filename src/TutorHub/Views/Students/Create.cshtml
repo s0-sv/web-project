@@ -1,0 +1,15 @@
+@model Student
+@{
+    ViewData["Title"] = "Новий учень";
+}
+
+<h1 class="h3 mb-3">Новий учень</h1>
+<form asp-action="Create" method="post" class="col-lg-6">
+    <partial name="_Form" model="Model" />
+    <button type="submit" class="btn btn-primary">Створити</button>
+    <a class="btn btn-link" asp-action="Index">Скасувати</a>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

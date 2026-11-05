@@ -1,0 +1,38 @@
+@model List<Student>
+@{
+    ViewData["Title"] = "Учні";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h3 mb-0">Учні</h1>
+    <a class="btn btn-primary" asp-action="Create">Додати учня</a>
+</div>
+
+@if (Model.Count == 0)
+{
+    <p class="text-muted">Учнів поки немає.</p>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead><tr><th>ПІБ</th><th>Email</th><th>Телефон</th><th>Навчальна мета</th><th>Занять</th><th></th></tr></thead>
+            <tbody>
+                @foreach (var student in Model)
+                {
+                    <tr>
+                        <td><a asp-action="Details" asp-route-id="@student.Id">@student.FullName</a></td>
+                        <td>@student.Email</td>
+                        <td>@student.Phone</td>
+                        <td>@student.LearningGoal</td>
+                        <td>@student.Lessons.Count</td>
+                        <td class="text-end text-nowrap">
+                            <a class="btn btn-outline-secondary btn-sm" asp-action="Edit" asp-route-id="@student.Id">Редагувати</a>
+                            <a class="btn btn-outline-danger btn-sm" asp-action="Delete" asp-route-id="@student.Id">Видалити</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

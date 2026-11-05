@@ -1,0 +1,17 @@
+@model Lesson
+@{
+    ViewData["Title"] = "Видалення заняття";
+}
+
+<h1 class="h3 mb-3">Видалити заняття «@Model.Topic»?</h1>
+<p>
+    @AppTime.Format(Model.StartsAt), @Model.Tutor?.FullName, @Model.Student?.FullName.
+    @if (Model.Materials.Count > 0)
+    {
+        <strong>Разом із заняттям буде видалено матеріалів: @Model.Materials.Count.</strong>
+    }
+</p>
+<form asp-action="Delete" asp-route-id="@Model.Id" method="post">
+    <button type="submit" class="btn btn-danger">Видалити</button>
+    <a class="btn btn-link" asp-action="Details" asp-route-id="@Model.Id">Скасувати</a>
+</form>

@@ -1,0 +1,11 @@
+@model Subject
+@{
+    ViewData["Title"] = "Видалення предмета";
+}
+
+<h1 class="h3 mb-3">Видалити предмет «@Model.Name»?</h1>
+<p>Предмет можна видалити, лише якщо за ним немає занять.</p>
+<form asp-action="Delete" asp-route-id="@Model.Id" method="post">
+    <button type="submit" class="btn btn-danger">Видалити</button>
+    <a class="btn btn-link" asp-action="Details" asp-route-id="@Model.Id">Скасувати</a>
+</form>

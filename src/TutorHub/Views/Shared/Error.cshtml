@@ -1,0 +1,14 @@
+﻿@model ErrorViewModel
+@{
+    ViewData["Title"] = "Помилка";
+}
+
+<h1 class="text-danger">Сталася помилка</h1>
+<p>Не вдалося обробити запит. Спробуйте ще раз трохи згодом.</p>
+
+@if (Model.ShowRequestId)
+{
+    <p><strong>Ідентифікатор запиту:</strong> <code>@Model.RequestId</code></p>
+}
+
+<a asp-controller="Home" asp-action="Index">На головну</a>

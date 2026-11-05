@@ -1,0 +1,19 @@
+@model Subject
+@{
+    ViewData["Title"] = Model.Name;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h3 mb-0">@Model.Name</h1>
+    <div class="text-nowrap">
+        <a class="btn btn-outline-secondary" asp-action="Edit" asp-route-id="@Model.Id">Редагувати</a>
+        <a class="btn btn-outline-danger" asp-action="Delete" asp-route-id="@Model.Id">Видалити</a>
+    </div>
+</div>
+
+<p>@Model.Description</p>
+
+<h2 class="h5">Заняття</h2>
+<partial name="_LessonsTable" model="Model.Lessons.OrderByDescending(l => l.StartsAt)" />
+
+<a asp-action="Index">До списку предметів</a>

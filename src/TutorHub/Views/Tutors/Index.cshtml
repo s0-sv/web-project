@@ -1,0 +1,38 @@
+@model List<Tutor>
+@{
+    ViewData["Title"] = "Репетитори";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h3 mb-0">Репетитори</h1>
+    <a class="btn btn-primary" asp-action="Create">Додати репетитора</a>
+</div>
+
+@if (Model.Count == 0)
+{
+    <p class="text-muted">Репетиторів поки немає.</p>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead><tr><th>ПІБ</th><th>Email</th><th>Телефон</th><th>Ставка, грн/год</th><th>Занять</th><th></th></tr></thead>
+            <tbody>
+                @foreach (var tutor in Model)
+                {
+                    <tr>
+                        <td><a asp-action="Details" asp-route-id="@tutor.Id">@tutor.FullName</a></td>
+                        <td>@tutor.Email</td>
+                        <td>@tutor.Phone</td>
+                        <td>@tutor.HourlyRate.ToString("0.##")</td>
+                        <td>@tutor.Lessons.Count</td>
+                        <td class="text-end text-nowrap">
+                            <a class="btn btn-outline-secondary btn-sm" asp-action="Edit" asp-route-id="@tutor.Id">Редагувати</a>
+                            <a class="btn btn-outline-danger btn-sm" asp-action="Delete" asp-route-id="@tutor.Id">Видалити</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

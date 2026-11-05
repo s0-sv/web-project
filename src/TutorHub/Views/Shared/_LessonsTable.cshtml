@@ -1,0 +1,36 @@
+@model IEnumerable<Lesson>
+
+@if (!Model.Any())
+{
+    <p class="text-muted">Занять поки немає.</p>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead>
+                <tr>
+                    <th>Початок</th>
+                    <th>Тема</th>
+                    <th>Предмет</th>
+                    <th>Репетитор</th>
+                    <th>Учень</th>
+                    <th>Статус</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var lesson in Model)
+                {
+                    <tr>
+                        <td class="text-nowrap">@AppTime.Format(lesson.StartsAt)</td>
+                        <td><a asp-controller="Lessons" asp-action="Details" asp-route-id="@lesson.Id">@lesson.Topic</a></td>
+                        <td>@lesson.Subject?.Name</td>
+                        <td>@lesson.Tutor?.FullName</td>
+                        <td>@lesson.Student?.FullName</td>
+                        <td><span class="badge @lesson.Status.BadgeClass()">@lesson.Status.Label()</span></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

@@ -1,0 +1,24 @@
+@model MaterialFormModel
+
+<div asp-validation-summary="ModelOnly" class="text-danger"></div>
+<p class="text-muted">Заняття: @Model.LessonTopic</p>
+<input asp-for="LessonId" type="hidden" />
+<div class="mb-3">
+    <label asp-for="Title" class="form-label"></label>
+    <input asp-for="Title" class="form-control" />
+    <span asp-validation-for="Title" class="text-danger"></span>
+</div>
+<div class="mb-3">
+    <label asp-for="File" class="form-label"></label>
+    <input asp-for="File" class="form-control" accept="@MaterialFileRules.AcceptAttribute"
+           data-max-bytes="@MaterialFileRules.MaxSizeBytes"
+           data-max-message="Файл завеликий: максимум @(MaterialFileRules.MaxSizeBytes / 1024 / 1024) МБ." />
+    <div class="form-text">
+        До @(MaterialFileRules.MaxSizeBytes / 1024 / 1024) МБ.
+        @if (Model.CurrentFileName is not null)
+        {
+            <text>Поточний файл: @Model.CurrentFileName. Залиште поле порожнім, щоб не змінювати його.</text>
+        }
+    </div>
+    <span asp-validation-for="File" class="text-danger"></span>
+</div>

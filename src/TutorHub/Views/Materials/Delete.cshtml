@@ -1,0 +1,11 @@
+@model LessonMaterial
+@{
+    ViewData["Title"] = "Видалення матеріалу";
+}
+
+<h1 class="h3 mb-3">Видалити матеріал «@Model.Title»?</h1>
+<p>Заняття: @Model.Lesson?.Topic. Файл @Model.OriginalFileName буде видалено без можливості відновлення.</p>
+<form asp-action="Delete" asp-route-id="@Model.Id" method="post">
+    <button type="submit" class="btn btn-danger">Видалити</button>
+    <a class="btn btn-link" asp-controller="Lessons" asp-action="Details" asp-route-id="@Model.LessonId">Скасувати</a>
+</form>

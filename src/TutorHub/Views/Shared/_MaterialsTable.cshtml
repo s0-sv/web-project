@@ -1,0 +1,30 @@
+@model IEnumerable<LessonMaterial>
+
+@if (!Model.Any())
+{
+    <p class="text-muted">Матеріалів поки немає.</p>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead><tr><th>Назва</th><th>Файл</th><th>Розмір</th><th>Заняття</th><th>Завантажено</th><th></th></tr></thead>
+            <tbody>
+                @foreach (var material in Model)
+                {
+                    <tr>
+                        <td>@material.Title</td>
+                        <td><a asp-controller="Materials" asp-action="Download" asp-route-id="@material.Id">@material.OriginalFileName</a></td>
+                        <td class="text-nowrap">@MaterialFileRules.FormatSize(material.SizeBytes)</td>
+                        <td><a asp-controller="Lessons" asp-action="Details" asp-route-id="@material.LessonId">@material.Lesson?.Topic</a></td>
+                        <td class="text-nowrap">@AppTime.Format(material.UploadedAt)</td>
+                        <td class="text-end text-nowrap">
+                            <a class="btn btn-outline-secondary btn-sm" asp-controller="Materials" asp-action="Edit" asp-route-id="@material.Id">Редагувати</a>
+                            <a class="btn btn-outline-danger btn-sm" asp-controller="Materials" asp-action="Delete" asp-route-id="@material.Id">Видалити</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
