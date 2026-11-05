@@ -14,7 +14,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 var connectionString = builder.Configuration.GetConnectionString("Default")
     ?? throw new InvalidOperationException(
-        "Connection string 'Default' is not set. See README.md (user-secrets or ConnectionStrings__Default).");
+        "Connection string 'Default' is not set. Use user-secrets or the ConnectionStrings__Default variable.");
 
 builder.Services.AddDbContext<AppDbContext>(o => o.UseNpgsql(connectionString));
 builder.Services.AddSingleton<IFileStorage, LocalFileStorage>();

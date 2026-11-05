@@ -10,8 +10,11 @@ namespace TutorHub.Controllers.Api;
 public class StudentsApiController(AppDbContext db) : ApiControllerBase
 {
     [HttpGet]
-    public async Task<List<StudentDto>> GetAll(CancellationToken ct) =>
-        await db.Students.AsNoTracking().OrderBy(s => s.FullName).Select(StudentDto.Projection).ToListAsync(ct);
+    public Task<PagedResult<StudentDto>> GetAll([FromQuery] PageQuery page, CancellationToken ct) =>
+        db.Students.AsNoTracking()
+            .OrderBy(s => s.FullName).ThenBy(s => s.Id)
+            .Select(StudentDto.Projection)
+            .ToPagedResultAsync(page, Request, ct);
 
     [HttpGet("{id:int}")]
     public async Task<ActionResult<StudentDto>> GetById(int id, CancellationToken ct)

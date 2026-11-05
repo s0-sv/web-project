@@ -11,14 +11,17 @@ namespace TutorHub.Controllers.Api;
 public class MaterialsApiController(AppDbContext db, MaterialService materials) : ApiControllerBase
 {
     [HttpGet("materials")]
-    public async Task<List<MaterialDto>> GetAll(CancellationToken ct) =>
-        await db.LessonMaterials.AsNoTracking()
-            .OrderByDescending(m => m.UploadedAt)
+    public Task<PagedResult<MaterialDto>> GetAll([FromQuery] PageQuery page, CancellationToken ct) =>
+        db.LessonMaterials.AsNoTracking()
+            .OrderByDescending(m => m.UploadedAt).ThenBy(m => m.Id)
             .Select(MaterialDto.Projection)
-            .ToListAsync(ct);
+            .ToPagedResultAsync(page, Request, ct);
 
     [HttpGet("lessons/{lessonId:int}/materials")]
-    public async Task<ActionResult<List<MaterialDto>>> GetForLesson(int lessonId, CancellationToken ct)
+    public async Task<ActionResult<PagedResult<MaterialDto>>> GetForLesson(
+        int lessonId,
+        [FromQuery] PageQuery page,
+        CancellationToken ct)
     {
         if (!await db.Lessons.AnyAsync(l => l.Id == lessonId, ct))
         {
@@ -27,9 +30,9 @@ public class MaterialsApiController(AppDbContext db, MaterialService materials) 
 
         return await db.LessonMaterials.AsNoTracking()
             .Where(m => m.LessonId == lessonId)
-            .OrderBy(m => m.Title)
+            .OrderBy(m => m.Title).ThenBy(m => m.Id)
             .Select(MaterialDto.Projection)
-            .ToListAsync(ct);
+            .ToPagedResultAsync(page, Request, ct);
     }
 
     [HttpGet("materials/{id:int}")]
