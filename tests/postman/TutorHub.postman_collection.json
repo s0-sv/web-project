@@ -1,0 +1,2898 @@
+{
+  "info": {
+    "name": "TutorHub API",
+    "description": "Automated checks of the TutorHub REST API. Run from the repository root: npx newman@6.2.3 run tests/postman/TutorHub.postman_collection.json",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "if (!pm.collectionVariables.get('runId')) {",
+          "    pm.collectionVariables.set('runId', Date.now().toString());",
+          "}"
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5298"
+    }
+  ],
+  "item": [
+    {
+      "name": "Subjects",
+      "item": [
+        {
+          "name": "Create subject",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "pm.collectionVariables.set(\"subjectId\", pm.response.json().id);",
+                  "pm.test(\"Location points to the record\", function () {",
+                  "    pm.expect(pm.response.headers.get('Location')).to.include('/api/subjects/' + pm.response.json().id);",
+                  "});",
+                  "pm.test(\"description is correct\", function () {",
+                  "    pm.expect(pm.response.json().description).to.eql('Organic');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/subjects",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\": \"Chemistry {{runId}}\", \"description\": \"Organic\"}"
+            }
+          }
+        },
+        {
+          "name": "Create second subject",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "pm.collectionVariables.set(\"subject2Id\", pm.response.json().id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/subjects",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\": \"Biology {{runId}}\"}"
+            }
+          }
+        },
+        {
+          "name": "Get subject",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Returns the created record\", function () {",
+                  "    pm.expect(pm.response.json().name).to.eql('Chemistry ' + pm.collectionVariables.get('runId'));",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/subjects/{{subjectId}}"
+          }
+        },
+        {
+          "name": "Update subject",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"description is correct\", function () {",
+                  "    pm.expect(pm.response.json().description).to.eql('Updated');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/subjects/{{subjectId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\": \"Chemistry {{runId}} advanced\", \"description\": \"Updated\"}"
+            }
+          }
+        },
+        {
+          "name": "Empty name is rejected",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "pm.test(\"Reports Name error\", function () {",
+                  "    pm.expect(pm.response.json().errors).to.have.property(\"Name\");",
+                  "});",
+                  "pm.test(\"Error uses problem+json\", function () {",
+                  "    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/problem+json');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/subjects",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\": \"\"}"
+            }
+          }
+        },
+        {
+          "name": "Too long name is rejected",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "pm.test(\"Reports Name error\", function () {",
+                  "    pm.expect(pm.response.json().errors).to.have.property(\"Name\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/subjects",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\": \"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\"}"
+            }
+          }
+        },
+        {
+          "name": "Malformed JSON is rejected",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "pm.test(\"Error uses problem+json\", function () {",
+                  "    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/problem+json');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/subjects",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\":"
+            }
+          }
+        },
+        {
+          "name": "Wrong content type is rejected",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 415\", function () {",
+                  "    pm.response.to.have.status(415);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "text/plain"
+              }
+            ],
+            "url": "{{baseUrl}}/api/subjects",
+            "body": {
+              "mode": "raw",
+              "raw": "hello"
+            }
+          }
+        },
+        {
+          "name": "Duplicate name conflicts",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 409\", function () {",
+                  "    pm.response.to.have.status(409);",
+                  "});",
+                  "pm.test(\"Error uses problem+json\", function () {",
+                  "    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/problem+json');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/subjects",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\": \"Chemistry {{runId}} advanced\"}"
+            }
+          }
+        },
+        {
+          "name": "Update to a taken name conflicts",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 409\", function () {",
+                  "    pm.response.to.have.status(409);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/subjects/{{subject2Id}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\": \"Chemistry {{runId}} advanced\"}"
+            }
+          }
+        },
+        {
+          "name": "Unknown subject is 404",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 404\", function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});",
+                  "pm.test(\"Error uses problem+json\", function () {",
+                  "    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/problem+json');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/subjects/99999999"
+          }
+        },
+        {
+          "name": "Update of unknown subject is 404",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 404\", function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/subjects/99999999",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\": \"Nobody {{runId}}\"}"
+            }
+          }
+        },
+        {
+          "name": "Delete of unknown subject is 404",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 404\", function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/subjects/99999999"
+          }
+        },
+        {
+          "name": "Unknown route is 404",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 404\", function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});",
+                  "pm.test(\"Error uses problem+json\", function () {",
+                  "    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/problem+json');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/does-not-exist"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Tutors",
+      "item": [
+        {
+          "name": "Create tutor",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "pm.collectionVariables.set(\"tutorId\", pm.response.json().id);",
+                  "pm.test(\"Email is normalised\", function () {",
+                  "    pm.expect(pm.response.json().email).to.eql('tutor.' + pm.collectionVariables.get('runId') + '@example.com');",
+                  "});",
+                  "pm.test(\"hourlyRate is correct\", function () {",
+                  "    pm.expect(pm.response.json().hourlyRate).to.eql(450.5);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/tutors",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"fullName\": \"Demo Tutor\", \"email\": \"  Tutor.{{runId}}@Example.COM \", \"hourlyRate\": 450.5}"
+            }
+          }
+        },
+        {
+          "name": "Get tutor",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"fullName is correct\", function () {",
+                  "    pm.expect(pm.response.json().fullName).to.eql('Demo Tutor');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/tutors/{{tutorId}}"
+          }
+        },
+        {
+          "name": "Update tutor",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"fullName is correct\", function () {",
+                  "    pm.expect(pm.response.json().fullName).to.eql('Tutor Updated');",
+                  "});",
+                  "pm.test(\"hourlyRate is correct\", function () {",
+                  "    pm.expect(pm.response.json().hourlyRate).to.eql(500);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/tutors/{{tutorId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"fullName\": \"Tutor Updated\", \"email\": \"tutor.{{runId}}@example.com\", \"hourlyRate\": 500, \"phone\": \"+380501234567\"}"
+            }
+          }
+        },
+        {
+          "name": "Bad email and negative rate are rejected",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "pm.test(\"Reports Email error\", function () {",
+                  "    pm.expect(pm.response.json().errors).to.have.property(\"Email\");",
+                  "});",
+                  "pm.test(\"Reports HourlyRate error\", function () {",
+                  "    pm.expect(pm.response.json().errors).to.have.property(\"HourlyRate\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/tutors",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"fullName\": \"X\", \"email\": \"nope\", \"hourlyRate\": -1}"
+            }
+          }
+        },
+        {
+          "name": "Missing rate is rejected",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "pm.test(\"Reports HourlyRate error\", function () {",
+                  "    pm.expect(pm.response.json().errors).to.have.property(\"HourlyRate\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/tutors",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"fullName\": \"X\", \"email\": \"x.{{runId}}@example.com\"}"
+            }
+          }
+        },
+        {
+          "name": "Duplicate email in another case conflicts",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 409\", function () {",
+                  "    pm.response.to.have.status(409);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/tutors",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"fullName\": \"Copy\", \"email\": \"TUTOR.{{runId}}@example.com\", \"hourlyRate\": 1}"
+            }
+          }
+        },
+        {
+          "name": "Unknown tutor is 404",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 404\", function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/tutors/99999999"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Students",
+      "item": [
+        {
+          "name": "Create student",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "pm.collectionVariables.set(\"studentId\", pm.response.json().id);",
+                  "pm.test(\"learningGoal is correct\", function () {",
+                  "    pm.expect(pm.response.json().learningGoal).to.eql('Pass the exam');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/students",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"fullName\": \"Demo Student\", \"email\": \"student.{{runId}}@example.com\", \"learningGoal\": \"Pass the exam\"}"
+            }
+          }
+        },
+        {
+          "name": "Get student",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"fullName is correct\", function () {",
+                  "    pm.expect(pm.response.json().fullName).to.eql('Demo Student');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/students/{{studentId}}"
+          }
+        },
+        {
+          "name": "Update student",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"fullName is correct\", function () {",
+                  "    pm.expect(pm.response.json().fullName).to.eql('Student Updated');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/students/{{studentId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"fullName\": \"Student Updated\", \"email\": \"student.{{runId}}@example.com\"}"
+            }
+          }
+        },
+        {
+          "name": "Bad email is rejected",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "pm.test(\"Reports Email error\", function () {",
+                  "    pm.expect(pm.response.json().errors).to.have.property(\"Email\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/students",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"fullName\": \"X\", \"email\": \"nope\"}"
+            }
+          }
+        },
+        {
+          "name": "Duplicate email conflicts",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 409\", function () {",
+                  "    pm.response.to.have.status(409);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/students",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"fullName\": \"Copy\", \"email\": \"student.{{runId}}@example.com\"}"
+            }
+          }
+        },
+        {
+          "name": "Unknown student is 404",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 404\", function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/students/99999999"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Lessons",
+      "item": [
+        {
+          "name": "Create lesson",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "pm.collectionVariables.set(\"lessonId\", pm.response.json().id);",
+                  "pm.test(\"status is correct\", function () {",
+                  "    pm.expect(pm.response.json().status).to.eql('Scheduled');",
+                  "});",
+                  "pm.test(\"tutorName is correct\", function () {",
+                  "    pm.expect(pm.response.json().tutorName).to.eql('Tutor Updated');",
+                  "});",
+                  "pm.test(\"studentName is correct\", function () {",
+                  "    pm.expect(pm.response.json().studentName).to.eql('Student Updated');",
+                  "});",
+                  "pm.test(\"materialsCount is correct\", function () {",
+                  "    pm.expect(pm.response.json().materialsCount).to.eql(0);",
+                  "});",
+                  "pm.test(\"Start time is stored in UTC\", function () {",
+                  "    pm.expect(new Date(pm.response.json().startsAt).toISOString()).to.eql('2027-03-10T14:00:00.000Z');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/lessons",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"tutorId\": {{tutorId}}, \"studentId\": {{studentId}}, \"subjectId\": {{subjectId}}, \"topic\": \"Alkanes\", \"startsAt\": \"2027-03-10T16:00:00+02:00\", \"durationMinutes\": 60, \"meetingUrl\": \"https://meet.example.com/demo\"}"
+            }
+          }
+        },
+        {
+          "name": "Get lesson",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"topic is correct\", function () {",
+                  "    pm.expect(pm.response.json().topic).to.eql('Alkanes');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/lessons/{{lessonId}}"
+          }
+        },
+        {
+          "name": "Complete lesson",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"status is correct\", function () {",
+                  "    pm.expect(pm.response.json().status).to.eql('Completed');",
+                  "});",
+                  "pm.test(\"notes is correct\", function () {",
+                  "    pm.expect(pm.response.json().notes).to.eql('Done');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/lessons/{{lessonId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"tutorId\": {{tutorId}}, \"studentId\": {{studentId}}, \"subjectId\": {{subjectId}}, \"topic\": \"Alkanes\", \"startsAt\": \"2027-03-10T16:00:00+02:00\", \"durationMinutes\": 60, \"meetingUrl\": \"https://meet.example.com/demo\", \"status\": \"Completed\", \"notes\": \"Done\"}"
+            }
+          }
+        },
+        {
+          "name": "Too short lesson is rejected",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "pm.test(\"Reports DurationMinutes error\", function () {",
+                  "    pm.expect(pm.response.json().errors).to.have.property(\"DurationMinutes\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/lessons",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"tutorId\": {{tutorId}}, \"studentId\": {{studentId}}, \"subjectId\": {{subjectId}}, \"topic\": \"Alkanes\", \"startsAt\": \"2027-03-10T16:00:00+02:00\", \"durationMinutes\": 5, \"meetingUrl\": \"https://meet.example.com/demo\"}"
+            }
+          }
+        },
+        {
+          "name": "Unknown status is rejected",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/lessons",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"tutorId\": {{tutorId}}, \"studentId\": {{studentId}}, \"subjectId\": {{subjectId}}, \"topic\": \"Alkanes\", \"startsAt\": \"2027-03-10T16:00:00+02:00\", \"durationMinutes\": 60, \"meetingUrl\": \"https://meet.example.com/demo\", \"status\": \"Paused\"}"
+            }
+          }
+        },
+        {
+          "name": "Numeric status is rejected",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/lessons",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"tutorId\": {{tutorId}}, \"studentId\": {{studentId}}, \"subjectId\": {{subjectId}}, \"topic\": \"Alkanes\", \"startsAt\": \"2027-03-10T16:00:00+02:00\", \"durationMinutes\": 60, \"meetingUrl\": \"https://meet.example.com/demo\", \"status\": 1}"
+            }
+          }
+        },
+        {
+          "name": "Script URL is rejected",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "pm.test(\"Reports MeetingUrl error\", function () {",
+                  "    pm.expect(pm.response.json().errors).to.have.property(\"MeetingUrl\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/lessons",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"tutorId\": {{tutorId}}, \"studentId\": {{studentId}}, \"subjectId\": {{subjectId}}, \"topic\": \"Alkanes\", \"startsAt\": \"2027-03-10T16:00:00+02:00\", \"durationMinutes\": 60, \"meetingUrl\": \"javascript:alert(1)\"}"
+            }
+          }
+        },
+        {
+          "name": "Unknown tutor reference is rejected",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "pm.test(\"Error uses problem+json\", function () {",
+                  "    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/problem+json');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/lessons",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"tutorId\": 99999999, \"studentId\": {{studentId}}, \"subjectId\": {{subjectId}}, \"topic\": \"Alkanes\", \"startsAt\": \"2027-03-10T16:00:00+02:00\", \"durationMinutes\": 60, \"meetingUrl\": \"https://meet.example.com/demo\"}"
+            }
+          }
+        },
+        {
+          "name": "Missing start time is rejected",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "pm.test(\"Reports StartsAt error\", function () {",
+                  "    pm.expect(pm.response.json().errors).to.have.property(\"StartsAt\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/lessons",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"tutorId\": {{tutorId}}, \"studentId\": {{studentId}}, \"subjectId\": {{subjectId}}, \"topic\": \"Alkanes\", \"startsAt\": null, \"durationMinutes\": 60, \"meetingUrl\": \"https://meet.example.com/demo\"}"
+            }
+          }
+        },
+        {
+          "name": "Subject in use cannot be deleted",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 409\", function () {",
+                  "    pm.response.to.have.status(409);",
+                  "});",
+                  "pm.test(\"Error uses problem+json\", function () {",
+                  "    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/problem+json');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/subjects/{{subjectId}}"
+          }
+        },
+        {
+          "name": "Tutor in use cannot be deleted",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 409\", function () {",
+                  "    pm.response.to.have.status(409);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/tutors/{{tutorId}}"
+          }
+        },
+        {
+          "name": "Student in use cannot be deleted",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 409\", function () {",
+                  "    pm.response.to.have.status(409);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/students/{{studentId}}"
+          }
+        },
+        {
+          "name": "Unknown lesson is 404",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 404\", function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/lessons/99999999"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Materials",
+      "item": [
+        {
+          "name": "Upload material",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "pm.collectionVariables.set(\"materialId\", pm.response.json().id);",
+                  "pm.collectionVariables.set(\"fileUrl\", pm.response.json().fileUrl);",
+                  "pm.test(\"title is correct\", function () {",
+                  "    pm.expect(pm.response.json().title).to.eql('Notes');",
+                  "});",
+                  "pm.test(\"fileName is correct\", function () {",
+                  "    pm.expect(pm.response.json().fileName).to.eql('api-demo-output.txt');",
+                  "});",
+                  "pm.test(\"contentType is correct\", function () {",
+                  "    pm.expect(pm.response.json().contentType).to.eql('text/plain');",
+                  "});",
+                  "pm.test(\"Size is recorded\", function () {",
+                  "    pm.expect(pm.response.json().sizeBytes).to.be.above(0);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/api/lessons/{{lessonId}}/materials",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "title",
+                  "value": "Notes",
+                  "type": "text"
+                },
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": "docs/api-demo-output.txt"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Second material for cascade check",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "pm.collectionVariables.set(\"material2Id\", pm.response.json().id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/api/lessons/{{lessonId}}/materials",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "title",
+                  "value": "Extra",
+                  "type": "text"
+                },
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": "docs/api-demo-output.txt"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Lesson counts its materials",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"materialsCount is correct\", function () {",
+                  "    pm.expect(pm.response.json().materialsCount).to.eql(2);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/lessons/{{lessonId}}"
+          }
+        },
+        {
+          "name": "List lesson materials",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Has the page envelope\", function () {",
+                  "    const j = pm.response.json();",
+                  "    pm.expect(j.items).to.be.an('array');",
+                  "    pm.expect(j).to.include.all.keys('skip', 'limit', 'total', 'nextLink');",
+                  "});",
+                  "pm.test(\"total is correct\", function () {",
+                  "    pm.expect(pm.response.json().total).to.eql(2);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/lessons/{{lessonId}}/materials"
+          }
+        },
+        {
+          "name": "Get material",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"title is correct\", function () {",
+                  "    pm.expect(pm.response.json().title).to.eql('Notes');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/materials/{{materialId}}"
+          }
+        },
+        {
+          "name": "Download file",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Sent as an attachment\", function () {",
+                  "    pm.expect(pm.response.headers.get('Content-Disposition')).to.include('attachment');",
+                  "});",
+                  "pm.test(\"Content is not empty\", function () {",
+                  "    pm.expect(pm.response.text().length).to.be.above(0);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/materials/{{materialId}}/file"
+          }
+        },
+        {
+          "name": "Rename material",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"title is correct\", function () {",
+                  "    pm.expect(pm.response.json().title).to.eql('Notes final');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/materials/{{materialId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"title\": \"Notes final\"}"
+            }
+          }
+        },
+        {
+          "name": "Replace file",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"title is correct\", function () {",
+                  "    pm.expect(pm.response.json().title).to.eql('Notes final');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": "{{baseUrl}}/api/materials/{{materialId}}/file",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": "docs/api-demo-output.txt"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Disallowed file type is rejected",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "pm.test(\"Reports file error\", function () {",
+                  "    pm.expect(pm.response.json().errors).to.have.property(\"file\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/api/lessons/{{lessonId}}/materials",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "title",
+                  "value": "Script",
+                  "type": "text"
+                },
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": "docs/api-demo.sh"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Upload without file is rejected",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/api/lessons/{{lessonId}}/materials",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "title",
+                  "value": "Nothing",
+                  "type": "text"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Upload without title is rejected",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/api/lessons/{{lessonId}}/materials",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": "docs/api-demo-output.txt"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Upload to unknown lesson is 404",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 404\", function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/api/lessons/99999999/materials",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "title",
+                  "value": "Lost",
+                  "type": "text"
+                },
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": "docs/api-demo-output.txt"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Unknown material is 404",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 404\", function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/materials/99999999"
+          }
+        },
+        {
+          "name": "Unknown material file is 404",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 404\", function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/materials/99999999/file"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Pagination (B1)",
+      "item": [
+        {
+          "name": "Defaults",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Has the page envelope\", function () {",
+                  "    const j = pm.response.json();",
+                  "    pm.expect(j.items).to.be.an('array');",
+                  "    pm.expect(j).to.include.all.keys('skip', 'limit', 'total', 'nextLink');",
+                  "});",
+                  "pm.test(\"skip is correct\", function () {",
+                  "    pm.expect(pm.response.json().skip).to.eql(0);",
+                  "});",
+                  "pm.test(\"limit is correct\", function () {",
+                  "    pm.expect(pm.response.json().limit).to.eql(20);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/subjects"
+          }
+        },
+        {
+          "name": "First page",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Has the page envelope\", function () {",
+                  "    const j = pm.response.json();",
+                  "    pm.expect(j.items).to.be.an('array');",
+                  "    pm.expect(j).to.include.all.keys('skip', 'limit', 'total', 'nextLink');",
+                  "});",
+                  "pm.test(\"limit is correct\", function () {",
+                  "    pm.expect(pm.response.json().limit).to.eql(1);",
+                  "});",
+                  "pm.test(\"Holds one item\", function () {",
+                  "    pm.expect(pm.response.json().items).to.have.lengthOf(1);",
+                  "});",
+                  "pm.test(\"Links to the next page\", function () {",
+                  "    pm.expect(pm.response.json().nextLink).to.eql('/api/subjects?skip=1&limit=1');",
+                  "});",
+                  "pm.collectionVariables.set(\"firstPageId\", pm.response.json().items[0].id);",
+                  "pm.collectionVariables.set(\"nextLink\", pm.response.json().nextLink);",
+                  "pm.collectionVariables.set(\"lastSkip\", pm.response.json().total - 1);",
+                  "pm.collectionVariables.set(\"pastEnd\", pm.response.json().total);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/subjects?limit=1"
+          }
+        },
+        {
+          "name": "Follow nextLink",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"skip is correct\", function () {",
+                  "    pm.expect(pm.response.json().skip).to.eql(1);",
+                  "});",
+                  "pm.test(\"Holds a different item\", function () {",
+                  "    pm.expect(pm.response.json().items[0].id).to.not.eql(Number(pm.collectionVariables.get('firstPageId')));",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}{{nextLink}}"
+          }
+        },
+        {
+          "name": "Last page has no nextLink",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Holds one item\", function () {",
+                  "    pm.expect(pm.response.json().items).to.have.lengthOf(1);",
+                  "});",
+                  "pm.test(\"nextLink is correct\", function () {",
+                  "    pm.expect(pm.response.json().nextLink).to.eql(null);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/subjects?skip={{lastSkip}}&limit=1"
+          }
+        },
+        {
+          "name": "Past the end is empty",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Holds no items\", function () {",
+                  "    pm.expect(pm.response.json().items).to.have.lengthOf(0);",
+                  "});",
+                  "pm.test(\"nextLink is correct\", function () {",
+                  "    pm.expect(pm.response.json().nextLink).to.eql(null);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/subjects?skip={{pastEnd}}"
+          }
+        },
+        {
+          "name": "Maximum limit is accepted",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"limit is correct\", function () {",
+                  "    pm.expect(pm.response.json().limit).to.eql(100);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/subjects?limit=100"
+          }
+        },
+        {
+          "name": "Zero limit is rejected",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "pm.test(\"Reports Limit error\", function () {",
+                  "    pm.expect(pm.response.json().errors).to.have.property(\"Limit\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/subjects?limit=0"
+          }
+        },
+        {
+          "name": "Limit above maximum is rejected",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "pm.test(\"Reports Limit error\", function () {",
+                  "    pm.expect(pm.response.json().errors).to.have.property(\"Limit\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/subjects?limit=101"
+          }
+        },
+        {
+          "name": "Negative skip is rejected",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "pm.test(\"Reports Skip error\", function () {",
+                  "    pm.expect(pm.response.json().errors).to.have.property(\"Skip\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/subjects?skip=-1"
+          }
+        },
+        {
+          "name": "Non-numeric skip is rejected",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/subjects?skip=abc"
+          }
+        },
+        {
+          "name": "Largest skip does not overflow",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"nextLink is correct\", function () {",
+                  "    pm.expect(pm.response.json().nextLink).to.eql(null);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/subjects?skip=2147483647&limit=100"
+          }
+        },
+        {
+          "name": "Tutors are paged",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Has the page envelope\", function () {",
+                  "    const j = pm.response.json();",
+                  "    pm.expect(j.items).to.be.an('array');",
+                  "    pm.expect(j).to.include.all.keys('skip', 'limit', 'total', 'nextLink');",
+                  "});",
+                  "pm.test(\"limit is correct\", function () {",
+                  "    pm.expect(pm.response.json().limit).to.eql(1);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/tutors?limit=1"
+          }
+        },
+        {
+          "name": "Students are paged",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Has the page envelope\", function () {",
+                  "    const j = pm.response.json();",
+                  "    pm.expect(j.items).to.be.an('array');",
+                  "    pm.expect(j).to.include.all.keys('skip', 'limit', 'total', 'nextLink');",
+                  "});",
+                  "pm.test(\"limit is correct\", function () {",
+                  "    pm.expect(pm.response.json().limit).to.eql(1);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/students?limit=1"
+          }
+        },
+        {
+          "name": "Lessons are paged",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Has the page envelope\", function () {",
+                  "    const j = pm.response.json();",
+                  "    pm.expect(j.items).to.be.an('array');",
+                  "    pm.expect(j).to.include.all.keys('skip', 'limit', 'total', 'nextLink');",
+                  "});",
+                  "pm.test(\"limit is correct\", function () {",
+                  "    pm.expect(pm.response.json().limit).to.eql(1);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/lessons?limit=1"
+          }
+        },
+        {
+          "name": "Materials are paged",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Has the page envelope\", function () {",
+                  "    const j = pm.response.json();",
+                  "    pm.expect(j.items).to.be.an('array');",
+                  "    pm.expect(j).to.include.all.keys('skip', 'limit', 'total', 'nextLink');",
+                  "});",
+                  "pm.test(\"limit is correct\", function () {",
+                  "    pm.expect(pm.response.json().limit).to.eql(1);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/materials?limit=1"
+          }
+        },
+        {
+          "name": "Lesson materials link keeps the path",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Has the page envelope\", function () {",
+                  "    const j = pm.response.json();",
+                  "    pm.expect(j.items).to.be.an('array');",
+                  "    pm.expect(j).to.include.all.keys('skip', 'limit', 'total', 'nextLink');",
+                  "});",
+                  "pm.test(\"Links to the next page\", function () {",
+                  "    pm.expect(pm.response.json().nextLink).to.eql('/api/lessons/' + pm.collectionVariables.get('lessonId') + '/materials?skip=1&limit=1');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/lessons/{{lessonId}}/materials?limit=1"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Caching (B9)",
+      "item": [
+        {
+          "name": "Write clears the cache",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/subjects/{{subjectId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\": \"Chemistry {{runId}} cached\", \"description\": \"Before\"}"
+            }
+          }
+        },
+        {
+          "name": "First read is a miss",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Not served from cache\", function () {",
+                  "    pm.expect(pm.response.headers.has('Age')).to.eql(false);",
+                  "});",
+                  "pm.test(\"description is correct\", function () {",
+                  "    pm.expect(pm.response.json().description).to.eql('Before');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/subjects/{{subjectId}}"
+          }
+        },
+        {
+          "name": "Second read is a hit",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Served from cache\", function () {",
+                  "    pm.expect(pm.response.headers.has('Age')).to.eql(true);",
+                  "});",
+                  "pm.test(\"description is correct\", function () {",
+                  "    pm.expect(pm.response.json().description).to.eql('Before');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/subjects/{{subjectId}}"
+          }
+        },
+        {
+          "name": "List first read is a miss",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Not served from cache\", function () {",
+                  "    pm.expect(pm.response.headers.has('Age')).to.eql(false);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/subjects?limit=2"
+          }
+        },
+        {
+          "name": "List second read is a hit",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Served from cache\", function () {",
+                  "    pm.expect(pm.response.headers.has('Age')).to.eql(true);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/subjects?limit=2"
+          }
+        },
+        {
+          "name": "Other query is cached separately",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Not served from cache\", function () {",
+                  "    pm.expect(pm.response.headers.has('Age')).to.eql(false);",
+                  "});",
+                  "pm.test(\"limit is correct\", function () {",
+                  "    pm.expect(pm.response.json().limit).to.eql(3);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/subjects?limit=3"
+          }
+        },
+        {
+          "name": "Update evicts the cache",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/subjects/{{subjectId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\": \"Chemistry {{runId}} cached\", \"description\": \"After\"}"
+            }
+          }
+        },
+        {
+          "name": "Record is fresh after update",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Not served from cache\", function () {",
+                  "    pm.expect(pm.response.headers.has('Age')).to.eql(false);",
+                  "});",
+                  "pm.test(\"description is correct\", function () {",
+                  "    pm.expect(pm.response.json().description).to.eql('After');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/subjects/{{subjectId}}"
+          }
+        },
+        {
+          "name": "List is fresh after update",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Not served from cache\", function () {",
+                  "    pm.expect(pm.response.headers.has('Age')).to.eql(false);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/subjects?limit=2"
+          }
+        },
+        {
+          "name": "Lesson is cached",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/lessons/{{lessonId}}"
+          }
+        },
+        {
+          "name": "Lesson read is a hit",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Served from cache\", function () {",
+                  "    pm.expect(pm.response.headers.has('Age')).to.eql(true);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/lessons/{{lessonId}}"
+          }
+        },
+        {
+          "name": "Rename tutor",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/tutors/{{tutorId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"fullName\": \"Tutor Renamed\", \"email\": \"tutor.{{runId}}@example.com\", \"hourlyRate\": 500}"
+            }
+          }
+        },
+        {
+          "name": "Lesson shows the new tutor name",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Not served from cache\", function () {",
+                  "    pm.expect(pm.response.headers.has('Age')).to.eql(false);",
+                  "});",
+                  "pm.test(\"tutorName is correct\", function () {",
+                  "    pm.expect(pm.response.json().tutorName).to.eql('Tutor Renamed');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/lessons/{{lessonId}}"
+          }
+        },
+        {
+          "name": "File download first read",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Not served from cache\", function () {",
+                  "    pm.expect(pm.response.headers.has('Age')).to.eql(false);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/materials/{{materialId}}/file"
+          }
+        },
+        {
+          "name": "File download is not cached",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Not served from cache\", function () {",
+                  "    pm.expect(pm.response.headers.has('Age')).to.eql(false);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/materials/{{materialId}}/file"
+          }
+        },
+        {
+          "name": "Not found first read",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 404\", function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});",
+                  "pm.test(\"Not served from cache\", function () {",
+                  "    pm.expect(pm.response.headers.has('Age')).to.eql(false);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/subjects/99999999"
+          }
+        },
+        {
+          "name": "Not found is not cached",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 404\", function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});",
+                  "pm.test(\"Not served from cache\", function () {",
+                  "    pm.expect(pm.response.headers.has('Age')).to.eql(false);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/subjects/99999999"
+          }
+        },
+        {
+          "name": "Bad request first read",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "pm.test(\"Not served from cache\", function () {",
+                  "    pm.expect(pm.response.headers.has('Age')).to.eql(false);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/subjects?limit=0"
+          }
+        },
+        {
+          "name": "Bad request is not cached",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "pm.test(\"Not served from cache\", function () {",
+                  "    pm.expect(pm.response.headers.has('Age')).to.eql(false);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/subjects?limit=0"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Cleanup",
+      "item": [
+        {
+          "name": "Delete material",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 204\", function () {",
+                  "    pm.response.to.have.status(204);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/materials/{{materialId}}"
+          }
+        },
+        {
+          "name": "Deleted material is gone",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 404\", function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/materials/{{materialId}}"
+          }
+        },
+        {
+          "name": "Deleted material file is gone",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 404\", function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}{{fileUrl}}"
+          }
+        },
+        {
+          "name": "Delete lesson",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 204\", function () {",
+                  "    pm.response.to.have.status(204);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/lessons/{{lessonId}}"
+          }
+        },
+        {
+          "name": "Deleted lesson is gone",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 404\", function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/lessons/{{lessonId}}"
+          }
+        },
+        {
+          "name": "Lesson materials went with it",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 404\", function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/materials/{{material2Id}}"
+          }
+        },
+        {
+          "name": "Delete subject",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 204\", function () {",
+                  "    pm.response.to.have.status(204);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/subjects/{{subjectId}}"
+          }
+        },
+        {
+          "name": "Delete second subject",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 204\", function () {",
+                  "    pm.response.to.have.status(204);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/subjects/{{subject2Id}}"
+          }
+        },
+        {
+          "name": "Delete tutor",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 204\", function () {",
+                  "    pm.response.to.have.status(204);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/tutors/{{tutorId}}"
+          }
+        },
+        {
+          "name": "Delete student",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 204\", function () {",
+                  "    pm.response.to.have.status(204);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/students/{{studentId}}"
+          }
+        },
+        {
+          "name": "Deleted subject is gone",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 404\", function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/subjects/{{subjectId}}"
+          }
+        },
+        {
+          "name": "Deleted tutor is gone",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 404\", function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/tutors/{{tutorId}}"
+          }
+        },
+        {
+          "name": "Deleted student is gone",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 404\", function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/students/{{studentId}}"
+          }
+        }
+      ]
+    }
+  ]
+}
