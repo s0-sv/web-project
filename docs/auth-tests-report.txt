@@ -1,5 +1,6 @@
   Passed TutorHub.AuthTests.BlobStorageTests.Containers_are_created_repeatedly_without_error
   Passed TutorHub.AuthTests.BlobStorageTests.Public_image_delete_removes_it
+  Passed TutorHub.AuthTests.BlobStorageTests.Startup_makes_a_public_materials_container_private_again
   Passed TutorHub.AuthTests.BlobStorageTests.Material_is_not_readable_without_credentials
   Passed TutorHub.AuthTests.BlobStorageTests.Missing_keys_are_handled_quietly
   Passed TutorHub.AuthTests.BlobStorageTests.Public_image_is_readable_with_its_type_and_long_cache
@@ -210,6 +211,6 @@
   Passed TutorHub.AuthTests.TenantIsolationTests.Without_a_tenant_queries_return_nothing_and_inserts_fail
   Passed TutorHub.AuthTests.TenantIsolationTests.Another_tenants_material_is_hidden_everywhere
 Test Run Successful.
-Total tests: 211
-     Passed: 211
- Total time: 23.9291 Seconds
+Total tests: 212
+     Passed: 212
+ Total time: 24.5969 Seconds

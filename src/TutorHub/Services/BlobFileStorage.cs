@@ -18,6 +18,7 @@ public class BlobFileStorage : IFileStorage
 
         _materials = service.GetBlobContainerClient(MaterialsContainer);
         _materials.CreateIfNotExists(PublicAccessType.None);
+        _materials.SetAccessPolicy(PublicAccessType.None);
 
         _publicImages = service.GetBlobContainerClient(PublicImagesContainer);
         _publicImages.CreateIfNotExists(PublicAccessType.Blob);

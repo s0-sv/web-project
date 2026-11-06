@@ -1,5 +1,7 @@
 using System.Net;
 using System.Text;
+using Azure.Storage.Blobs;
+using Azure.Storage.Blobs.Models;
 using Microsoft.Extensions.Configuration;
 using TutorHub.Services;
 using Xunit;
@@ -66,6 +68,23 @@ public class BlobStorageTests
 
         Assert.NotEqual(HttpStatusCode.OK, response.StatusCode);
         Assert.DoesNotContain("private notes", await response.Content.ReadAsStringAsync());
+    }
+
+    [BlobFact]
+    public async Task Startup_makes_a_public_materials_container_private_again()
+    {
+        var storage = CreateStorage();
+        var key = await storage.SaveAsync(Bytes("private notes"), ".txt");
+        var url = PrivateUrlFor(storage, key);
+        var container = new BlobServiceClient(Environment.GetEnvironmentVariable(BlobFactAttribute.Variable))
+            .GetBlobContainerClient(BlobFileStorage.MaterialsContainer);
+
+        await container.SetAccessPolicyAsync(PublicAccessType.Blob);
+        Assert.Equal(HttpStatusCode.OK, (await Anonymous.GetAsync(url)).StatusCode);
+
+        CreateStorage();
+
+        Assert.NotEqual(HttpStatusCode.OK, (await Anonymous.GetAsync(url)).StatusCode);
     }
 
     [BlobFact]
