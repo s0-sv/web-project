@@ -2,4 +2,7 @@
   <Folder Name="/src/">
     <Project Path="src/TutorHub/TutorHub.csproj" />
   </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/TutorHub.AuthTests/TutorHub.AuthTests.csproj" />
+  </Folder>
 </Solution>

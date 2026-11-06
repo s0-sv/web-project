@@ -1,0 +1,154 @@
+  Passed TutorHub.AuthTests.ApiAuthTests.Anonymous_read_is_rejected(path: "/api/subjects/1")
+  Passed TutorHub.AuthTests.ApiAuthTests.Anonymous_read_is_rejected(path: "/api/students")
+  Passed TutorHub.AuthTests.ApiAuthTests.Anonymous_read_is_rejected(path: "/api/lessons/1/materials")
+  Passed TutorHub.AuthTests.ApiAuthTests.Anonymous_read_is_rejected(path: "/api/subjects")
+  Passed TutorHub.AuthTests.ApiAuthTests.Anonymous_read_is_rejected(path: "/api/lessons")
+  Passed TutorHub.AuthTests.ApiAuthTests.Anonymous_read_is_rejected(path: "/api/materials/1/file")
+  Passed TutorHub.AuthTests.ApiAuthTests.Anonymous_read_is_rejected(path: "/api/auth/me")
+  Passed TutorHub.AuthTests.ApiAuthTests.Anonymous_read_is_rejected(path: "/api/analytics")
+  Passed TutorHub.AuthTests.ApiAuthTests.Anonymous_read_is_rejected(path: "/api/tutors")
+  Passed TutorHub.AuthTests.ApiAuthTests.Anonymous_read_is_rejected(path: "/api/materials")
+  Passed TutorHub.AuthTests.ApiAuthTests.Duplicate_email_is_rejected_regardless_of_case
+  Passed TutorHub.AuthTests.ApiAuthTests.Token_endpoint_issues_a_working_token
+  Passed TutorHub.AuthTests.ApiAuthTests.Anonymous_write_is_rejected
+  Passed TutorHub.AuthTests.ApiAuthTests.Token_holds_tenant_and_role_but_no_security_stamp
+  Passed TutorHub.AuthTests.ApiAuthTests.Token_signed_with_another_key_is_rejected
+  Passed TutorHub.AuthTests.ApiAuthTests.Token_for_another_issuer_is_rejected
+  Passed TutorHub.AuthTests.ApiAuthTests.Unsigned_token_is_rejected
+  Passed TutorHub.AuthTests.ApiAuthTests.Control_token_signed_with_the_real_key_is_accepted
+  Passed TutorHub.AuthTests.ApiAuthTests.Account_locks_after_five_failures_even_for_the_right_password
+  Passed TutorHub.AuthTests.ApiAuthTests.Registration_needs_a_workspace_or_an_invite
+  Passed TutorHub.AuthTests.ApiAuthTests.Expired_token_is_rejected
+  Passed TutorHub.AuthTests.ApiAuthTests.Weak_password_is_rejected(password: "no-digits-here")
+  Passed TutorHub.AuthTests.ApiAuthTests.Weak_password_is_rejected(password: "short1")
+  Passed TutorHub.AuthTests.ApiAuthTests.Wrong_password_and_unknown_email_look_the_same
+  Passed TutorHub.AuthTests.ApiAuthTests.Malformed_token_is_rejected
+  Passed TutorHub.AuthTests.ApiAuthTests.Token_for_another_audience_is_rejected
+  Passed TutorHub.AuthTests.ApiAuthTests.Registered_token_grants_access_and_identifies_the_user
+  Passed TutorHub.AuthTests.EndpointSecurityTests.Staff_controllers_require_the_staff_policy(controller: "AnalyticsApi")
+  Passed TutorHub.AuthTests.EndpointSecurityTests.Staff_controllers_require_the_staff_policy(controller: "Plan")
+  Passed TutorHub.AuthTests.EndpointSecurityTests.Staff_controllers_require_the_staff_policy(controller: "TutorsApi")
+  Passed TutorHub.AuthTests.EndpointSecurityTests.Staff_controllers_require_the_staff_policy(controller: "StudentsApi")
+  Passed TutorHub.AuthTests.EndpointSecurityTests.Staff_controllers_require_the_staff_policy(controller: "Analytics")
+  Passed TutorHub.AuthTests.EndpointSecurityTests.Staff_controllers_require_the_staff_policy(controller: "Tutors")
+  Passed TutorHub.AuthTests.EndpointSecurityTests.Staff_controllers_require_the_staff_policy(controller: "SubjectsApi")
+  Passed TutorHub.AuthTests.EndpointSecurityTests.Staff_controllers_require_the_staff_policy(controller: "Students")
+  Passed TutorHub.AuthTests.EndpointSecurityTests.Staff_controllers_require_the_staff_policy(controller: "Subjects")
+  Passed TutorHub.AuthTests.EndpointSecurityTests.Every_action_outside_the_allow_list_requires_authorization
+  Passed TutorHub.AuthTests.FeatureFlagTests.Plan_page_rejects_invalid_plans_without_changing_anything(plan: "")
+  Passed TutorHub.AuthTests.FeatureFlagTests.Plan_page_rejects_invalid_plans_without_changing_anything(plan: "Platinum")
+  Passed TutorHub.AuthTests.FeatureFlagTests.Member_uses_but_cannot_change_the_plan
+  Passed TutorHub.AuthTests.FeatureFlagTests.Plan_change_takes_effect_immediately_in_both_directions
+  Passed TutorHub.AuthTests.FeatureFlagTests.New_tenant_starts_on_free_without_features
+  Passed TutorHub.AuthTests.FeatureFlagTests.Student_is_denied_analytics_even_on_premium
+  Passed TutorHub.AuthTests.FeatureFlagTests.Analytics_counts_only_the_tenants_completed_lessons
+  Passed TutorHub.AuthTests.FeatureFlagTests.Analytics_page_follows_the_plan
+  Passed TutorHub.AuthTests.FeatureFlagTests.Member_page_post_cannot_change_the_plan
+  Passed TutorHub.AuthTests.FeatureFlagTests.Plan_of_one_tenant_does_not_affect_another
+  Passed TutorHub.AuthTests.FeatureFlagTests.Unknown_plan_is_rejected
+  Passed TutorHub.AuthTests.FeatureFlagTests.Free_plan_cannot_read_analytics
+  Passed TutorHub.AuthTests.MvcAuthTests.Registration_shows_validation_errors
+  Passed TutorHub.AuthTests.MvcAuthTests.Anonymous_page_redirects_to_login(path: "/Subjects")
+  Passed TutorHub.AuthTests.MvcAuthTests.Anonymous_page_redirects_to_login(path: "/Lessons/Details/1")
+  Passed TutorHub.AuthTests.MvcAuthTests.Anonymous_page_redirects_to_login(path: "/Materials/Download/1")
+  Passed TutorHub.AuthTests.MvcAuthTests.Anonymous_page_redirects_to_login(path: "/Analytics")
+  Passed TutorHub.AuthTests.MvcAuthTests.Anonymous_page_redirects_to_login(path: "/Tutors")
+  Passed TutorHub.AuthTests.MvcAuthTests.Anonymous_page_redirects_to_login(path: "/")
+  Passed TutorHub.AuthTests.MvcAuthTests.Anonymous_page_redirects_to_login(path: "/Materials")
+  Passed TutorHub.AuthTests.MvcAuthTests.Anonymous_page_redirects_to_login(path: "/Plan")
+  Passed TutorHub.AuthTests.MvcAuthTests.Anonymous_page_redirects_to_login(path: "/Students")
+  Passed TutorHub.AuthTests.MvcAuthTests.Anonymous_page_redirects_to_login(path: "/Lessons")
+  Passed TutorHub.AuthTests.MvcAuthTests.Public_resources_are_available(path: "/Account/Register")
+  Passed TutorHub.AuthTests.MvcAuthTests.Public_resources_are_available(path: "/Account/Login")
+  Passed TutorHub.AuthTests.MvcAuthTests.Public_resources_are_available(path: "/js/site.js")
+  Passed TutorHub.AuthTests.MvcAuthTests.Pages_render_for_a_signed_in_owner(path: "/Analytics")
+  Passed TutorHub.AuthTests.MvcAuthTests.Pages_render_for_a_signed_in_owner(path: "/Students/Create")
+  Passed TutorHub.AuthTests.MvcAuthTests.Pages_render_for_a_signed_in_owner(path: "/Lessons")
+  Passed TutorHub.AuthTests.MvcAuthTests.Pages_render_for_a_signed_in_owner(path: "/Lessons/Create")
+  Passed TutorHub.AuthTests.MvcAuthTests.Pages_render_for_a_signed_in_owner(path: "/Subjects/Create")
+  Passed TutorHub.AuthTests.MvcAuthTests.Pages_render_for_a_signed_in_owner(path: "/")
+  Passed TutorHub.AuthTests.MvcAuthTests.Pages_render_for_a_signed_in_owner(path: "/Students")
+  Passed TutorHub.AuthTests.MvcAuthTests.Pages_render_for_a_signed_in_owner(path: "/Tutors/Create")
+  Passed TutorHub.AuthTests.MvcAuthTests.Pages_render_for_a_signed_in_owner(path: "/Tutors")
+  Passed TutorHub.AuthTests.MvcAuthTests.Pages_render_for_a_signed_in_owner(path: "/Subjects")
+  Passed TutorHub.AuthTests.MvcAuthTests.Pages_render_for_a_signed_in_owner(path: "/Plan")
+  Passed TutorHub.AuthTests.MvcAuthTests.Pages_render_for_a_signed_in_owner(path: "/Materials")
+  Passed TutorHub.AuthTests.MvcAuthTests.Login_ignores_an_external_return_url(target: "https://evil.example.com/")
+  Passed TutorHub.AuthTests.MvcAuthTests.Login_ignores_an_external_return_url(target: "//evil.example.com/")
+  Passed TutorHub.AuthTests.MvcAuthTests.Owner_can_use_crud_pages_inside_their_tenant
+  Passed TutorHub.AuthTests.MvcAuthTests.Pages_ignore_the_bearer_token
+  Passed TutorHub.AuthTests.MvcAuthTests.Registration_without_workspace_or_invite_shows_error
+  Passed TutorHub.AuthTests.MvcAuthTests.Registration_creates_an_owner_and_signs_in
+  Passed TutorHub.AuthTests.MvcAuthTests.Logout_ends_the_session
+  Passed TutorHub.AuthTests.MvcAuthTests.Api_ignores_the_session_cookie
+  Passed TutorHub.AuthTests.MvcAuthTests.Post_without_antiforgery_token_is_rejected
+  Passed TutorHub.AuthTests.MvcAuthTests.Login_locks_after_five_failures
+  Passed TutorHub.AuthTests.MvcAuthTests.Login_returns_to_a_local_url
+  Passed TutorHub.AuthTests.MvcAuthTests.Login_with_wrong_password_shows_error_and_stays_anonymous
+  Passed TutorHub.AuthTests.MvcAuthTests.Session_cookie_is_http_only
+  Passed TutorHub.AuthTests.OAuthTests.Only_external_providers_can_be_challenged(provider: "Identity.Application")
+  Passed TutorHub.AuthTests.OAuthTests.Only_external_providers_can_be_challenged(provider: "Unknown")
+  Passed TutorHub.AuthTests.OAuthTests.Only_external_providers_can_be_challenged(provider: "Bearer")
+  Passed TutorHub.AuthTests.OAuthTests.Callback_without_provider_data_returns_to_login
+  Passed TutorHub.AuthTests.OAuthTests.Provider_error_returns_to_login
+  Passed TutorHub.AuthTests.OAuthTests.Login_page_offers_the_configured_provider
+  Passed TutorHub.AuthTests.OAuthTests.External_registration_without_provider_data_creates_nothing
+  Passed TutorHub.AuthTests.OAuthTests.First_google_login_asks_for_workspace_then_creates_an_owner
+  Passed TutorHub.AuthTests.OAuthTests.Returning_google_user_signs_in_directly
+  Passed TutorHub.AuthTests.OAuthTests.Google_user_can_join_with_a_student_invite
+  Passed TutorHub.AuthTests.OAuthTests.Google_account_does_not_take_over_an_existing_email
+  Passed TutorHub.AuthTests.RoleTests.Member_cannot_use_owner_actions
+  Passed TutorHub.AuthTests.RoleTests.Student_downloads_only_their_own_materials
+  Passed TutorHub.AuthTests.RoleTests.Student_pages_for_staff_are_denied(path: "/Plan")
+  Passed TutorHub.AuthTests.RoleTests.Student_pages_for_staff_are_denied(path: "/Students")
+  Passed TutorHub.AuthTests.RoleTests.Student_pages_for_staff_are_denied(path: "/Lessons/Create")
+  Passed TutorHub.AuthTests.RoleTests.Student_pages_for_staff_are_denied(path: "/Analytics")
+  Passed TutorHub.AuthTests.RoleTests.Student_pages_for_staff_are_denied(path: "/Subjects")
+  Passed TutorHub.AuthTests.RoleTests.Student_pages_for_staff_are_denied(path: "/Tutors")
+  Passed TutorHub.AuthTests.RoleTests.Student_record_can_be_deleted_and_the_account_then_sees_nothing
+  Passed TutorHub.AuthTests.RoleTests.Student_cannot_read_staff_resources(path: "/api/analytics")
+  Passed TutorHub.AuthTests.RoleTests.Student_cannot_read_staff_resources(path: "/api/students")
+  Passed TutorHub.AuthTests.RoleTests.Student_cannot_read_staff_resources(path: "/api/tutors")
+  Passed TutorHub.AuthTests.RoleTests.Student_cannot_read_staff_resources(path: "/api/subjects")
+  Passed TutorHub.AuthTests.RoleTests.Member_page_hides_invite_codes_and_denies_owner_posts
+  Passed TutorHub.AuthTests.RoleTests.Student_sees_only_their_own_lessons
+  Passed TutorHub.AuthTests.RoleTests.Member_has_crud_access
+  Passed TutorHub.AuthTests.RoleTests.Student_invite_works_only_once
+  Passed TutorHub.AuthTests.RoleTests.Student_lesson_shows_related_names
+  Passed TutorHub.AuthTests.RoleTests.Student_pages_show_only_own_lessons_without_edit_controls
+  Passed TutorHub.AuthTests.RoleTests.Student_invite_links_the_account_to_the_student_record
+  Passed TutorHub.AuthTests.RoleTests.Owner_page_shows_invite_code
+  Passed TutorHub.AuthTests.RoleTests.Student_with_an_account_cannot_get_another_invite
+  Passed TutorHub.AuthTests.RoleTests.Student_cannot_change_lessons_or_materials
+  Passed TutorHub.AuthTests.TenantIsolationTests.Lists_hold_only_the_tenants_records
+  Passed TutorHub.AuthTests.TenantIsolationTests.Upload_to_another_tenants_lesson_is_rejected
+  Passed TutorHub.AuthTests.TenantIsolationTests.Cached_response_never_crosses_tenants
+  Passed TutorHub.AuthTests.TenantIsolationTests.Lesson_cannot_reference_another_tenants_record(foreign: "tutor")
+  Passed TutorHub.AuthTests.TenantIsolationTests.Lesson_cannot_reference_another_tenants_record(foreign: "student")
+  Passed TutorHub.AuthTests.TenantIsolationTests.Lesson_cannot_reference_another_tenants_record(foreign: "subject")
+  Passed TutorHub.AuthTests.TenantIsolationTests.Pages_hide_another_tenants_records(template: "/Lessons/Details/{lesson}")
+  Passed TutorHub.AuthTests.TenantIsolationTests.Pages_hide_another_tenants_records(template: "/Tutors/Details/{tutor}")
+  Passed TutorHub.AuthTests.TenantIsolationTests.Pages_hide_another_tenants_records(template: "/Tutors/Delete/{tutor}")
+  Passed TutorHub.AuthTests.TenantIsolationTests.Pages_hide_another_tenants_records(template: "/Tutors/Edit/{tutor}")
+  Passed TutorHub.AuthTests.TenantIsolationTests.Pages_hide_another_tenants_records(template: "/Materials/Create?lessonId={lesson}")
+  Passed TutorHub.AuthTests.TenantIsolationTests.Pages_hide_another_tenants_records(template: "/Students/Details/{student}")
+  Passed TutorHub.AuthTests.TenantIsolationTests.Pages_hide_another_tenants_records(template: "/Lessons/Edit/{lesson}")
+  Passed TutorHub.AuthTests.TenantIsolationTests.Pages_hide_another_tenants_records(template: "/Subjects/Details/{subject}")
+  Passed TutorHub.AuthTests.TenantIsolationTests.Page_post_cannot_delete_another_tenants_record
+  Passed TutorHub.AuthTests.TenantIsolationTests.Regenerated_member_invite_replaces_the_old_code
+  Passed TutorHub.AuthTests.TenantIsolationTests.Another_tenants_record_looks_missing(resource: "subjects")
+  Passed TutorHub.AuthTests.TenantIsolationTests.Another_tenants_record_looks_missing(resource: "lessons")
+  Passed TutorHub.AuthTests.TenantIsolationTests.Another_tenants_record_looks_missing(resource: "tutors")
+  Passed TutorHub.AuthTests.TenantIsolationTests.Another_tenants_record_looks_missing(resource: "students")
+  Passed TutorHub.AuthTests.TenantIsolationTests.Member_invite_joins_the_inviting_tenant
+  Passed TutorHub.AuthTests.TenantIsolationTests.Demo_seed_creates_isolated_tenants_and_can_run_twice
+  Passed TutorHub.AuthTests.TenantIsolationTests.Another_tenants_record_cannot_be_updated
+  Passed TutorHub.AuthTests.TenantIsolationTests.Same_names_and_emails_are_allowed_in_different_tenants
+  Passed TutorHub.AuthTests.TenantIsolationTests.Failed_registration_leaves_no_workspace_behind
+  Passed TutorHub.AuthTests.TenantIsolationTests.Unknown_invite_code_is_rejected
+  Passed TutorHub.AuthTests.TenantIsolationTests.Without_a_tenant_queries_return_nothing_and_inserts_fail
+  Passed TutorHub.AuthTests.TenantIsolationTests.Another_tenants_material_is_hidden_everywhere
+Test Run Successful.
+Total tests: 150
+     Passed: 150
+ Total time: 17.2177 Seconds
