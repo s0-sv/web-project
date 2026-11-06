@@ -28,7 +28,7 @@ public class LessonsController(AppDbContext db, MaterialService materials) : App
     [Authorize(Policy = AppPolicies.Staff)]
     public async Task<IActionResult> Create()
     {
-        await PopulateSelectsAsync();
+        await PopulateSelectsAsync(new LessonFormModel());
         return View(new LessonFormModel());
     }
 
@@ -38,7 +38,7 @@ public class LessonsController(AppDbContext db, MaterialService materials) : App
     {
         if (!ModelState.IsValid)
         {
-            await PopulateSelectsAsync();
+            await PopulateSelectsAsync(input);
             return View(input);
         }
 
@@ -48,7 +48,7 @@ public class LessonsController(AppDbContext db, MaterialService materials) : App
 
         if (!await TrySaveAsync())
         {
-            await PopulateSelectsAsync();
+            await PopulateSelectsAsync(input);
             return View(input);
         }
 
@@ -65,8 +65,7 @@ public class LessonsController(AppDbContext db, MaterialService materials) : App
             return NotFound();
         }
 
-        await PopulateSelectsAsync();
-        return View(new LessonFormModel
+        var form = new LessonFormModel
         {
             Id = lesson.Id,
             TutorId = lesson.TutorId,
@@ -78,7 +77,10 @@ public class LessonsController(AppDbContext db, MaterialService materials) : App
             MeetingUrl = lesson.MeetingUrl,
             Status = lesson.Status,
             Notes = lesson.Notes
-        });
+        };
+
+        await PopulateSelectsAsync(form);
+        return View(form);
     }
 
     [HttpPost]
@@ -88,7 +90,7 @@ public class LessonsController(AppDbContext db, MaterialService materials) : App
         input.Id = id;
         if (!ModelState.IsValid)
         {
-            await PopulateSelectsAsync();
+            await PopulateSelectsAsync(input);
             return View(input);
         }
 
@@ -102,7 +104,7 @@ public class LessonsController(AppDbContext db, MaterialService materials) : App
 
         if (!await TrySaveAsync())
         {
-            await PopulateSelectsAsync();
+            await PopulateSelectsAsync(input);
             return View(input);
         }
 
@@ -167,13 +169,28 @@ public class LessonsController(AppDbContext db, MaterialService materials) : App
         }
     }
 
-    private async Task PopulateSelectsAsync()
+    private async Task PopulateSelectsAsync(LessonFormModel? form = null)
     {
         ViewBag.Tutors = new SelectList(
-            await db.Tutors.AsNoTracking().OrderBy(t => t.FullName).ToListAsync(), nameof(Tutor.Id), nameof(Tutor.FullName));
+            await db.Tutors.AsNoTracking()
+                .Where(t => t.Id == form!.TutorId)
+                .Select(t => new { t.Id, Text = t.FullName + " (" + t.Email + ")" })
+                .ToListAsync(),
+            "Id",
+            "Text");
         ViewBag.Students = new SelectList(
-            await db.Students.AsNoTracking().OrderBy(s => s.FullName).ToListAsync(), nameof(Student.Id), nameof(Student.FullName));
+            await db.Students.AsNoTracking()
+                .Where(s => s.Id == form!.StudentId)
+                .Select(s => new { s.Id, Text = s.FullName + " (" + s.Email + ")" })
+                .ToListAsync(),
+            "Id",
+            "Text");
         ViewBag.Subjects = new SelectList(
-            await db.Subjects.AsNoTracking().OrderBy(s => s.Name).ToListAsync(), nameof(Subject.Id), nameof(Subject.Name));
+            await db.Subjects.AsNoTracking()
+                .Where(s => s.Id == form!.SubjectId)
+                .Select(s => new { s.Id, Text = s.Name })
+                .ToListAsync(),
+            "Id",
+            "Text");
     }
 }

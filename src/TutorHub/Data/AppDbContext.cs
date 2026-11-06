@@ -47,6 +47,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, TenantContext 
     {
         base.OnModelCreating(model);
 
+        model.HasPostgresExtension("pg_trgm");
+
         model.Entity<Tenant>(e =>
         {
             e.Property(x => x.Name).HasMaxLength(100);
@@ -70,6 +72,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, TenantContext 
             e.Property(x => x.Description).HasMaxLength(1000);
             e.HasAlternateKey(x => new { x.TenantId, x.Id });
             e.HasIndex(x => new { x.TenantId, x.Name }).IsUnique();
+            e.HasIndex(x => x.Name, "IX_Subjects_Name_Trgm").HasMethod("gin").HasOperators("gin_trgm_ops");
             e.HasOne<Tenant>().WithMany().HasForeignKey(x => x.TenantId).OnDelete(DeleteBehavior.Restrict);
             e.HasQueryFilter(x => x.TenantId == CurrentTenantId);
         });
@@ -87,6 +90,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, TenantContext 
             e.Property(x => x.PhotoKey).HasMaxLength(100);
             e.HasIndex(x => new { x.TenantId, x.Email }).IsUnique();
             e.HasIndex(x => x.Slug).IsUnique();
+            e.HasIndex(x => x.FullName, "IX_Tutors_FullName_Trgm").HasMethod("gin").HasOperators("gin_trgm_ops");
+            e.HasIndex(x => x.Email, "IX_Tutors_Email_Trgm").HasMethod("gin").HasOperators("gin_trgm_ops");
             e.HasOne<Tenant>().WithMany().HasForeignKey(x => x.TenantId).OnDelete(DeleteBehavior.Restrict);
             e.HasQueryFilter(x => x.TenantId == CurrentTenantId);
         });
@@ -101,6 +106,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, TenantContext 
             e.HasAlternateKey(x => new { x.TenantId, x.Id });
             e.HasIndex(x => new { x.TenantId, x.Email }).IsUnique();
             e.HasIndex(x => x.InviteCode).IsUnique();
+            e.HasIndex(x => x.FullName, "IX_Students_FullName_Trgm").HasMethod("gin").HasOperators("gin_trgm_ops");
+            e.HasIndex(x => x.Email, "IX_Students_Email_Trgm").HasMethod("gin").HasOperators("gin_trgm_ops");
             e.HasOne<Tenant>().WithMany().HasForeignKey(x => x.TenantId).OnDelete(DeleteBehavior.Restrict);
             e.HasQueryFilter(x => x.TenantId == CurrentTenantId && (!IsStudentScope || x.Id == CurrentStudentId));
         });

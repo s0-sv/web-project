@@ -1,25 +1,38 @@
+@using TutorHub.Controllers
 @model LessonFormModel
 
 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 <div class="row">
     <div class="col-md-4 mb-3">
         <label asp-for="TutorId" class="form-label"></label>
-        <select asp-for="TutorId" asp-items="ViewBag.Tutors" class="form-select">
-            <option value="">Оберіть…</option>
+        <select asp-for="TutorId" asp-items="ViewBag.Tutors" class="form-select"
+                data-lookup-url="@Url.Action("Tutors", "Lookup")"
+                data-lookup-min-length="@LookupController.MinQueryLength"
+                data-lookup-delay="@LookupController.DelayMilliseconds"
+                data-lookup-placeholder="Почніть вводити…">
+            <option value=""></option>
         </select>
         <span asp-validation-for="TutorId" class="text-danger"></span>
     </div>
     <div class="col-md-4 mb-3">
         <label asp-for="StudentId" class="form-label"></label>
-        <select asp-for="StudentId" asp-items="ViewBag.Students" class="form-select">
-            <option value="">Оберіть…</option>
+        <select asp-for="StudentId" asp-items="ViewBag.Students" class="form-select"
+                data-lookup-url="@Url.Action("Students", "Lookup")"
+                data-lookup-min-length="@LookupController.MinQueryLength"
+                data-lookup-delay="@LookupController.DelayMilliseconds"
+                data-lookup-placeholder="Почніть вводити…">
+            <option value=""></option>
         </select>
         <span asp-validation-for="StudentId" class="text-danger"></span>
     </div>
     <div class="col-md-4 mb-3">
         <label asp-for="SubjectId" class="form-label"></label>
-        <select asp-for="SubjectId" asp-items="ViewBag.Subjects" class="form-select">
-            <option value="">Оберіть…</option>
+        <select asp-for="SubjectId" asp-items="ViewBag.Subjects" class="form-select"
+                data-lookup-url="@Url.Action("Subjects", "Lookup")"
+                data-lookup-min-length="@LookupController.MinQueryLength"
+                data-lookup-delay="@LookupController.DelayMilliseconds"
+                data-lookup-placeholder="Почніть вводити…">
+            <option value=""></option>
         </select>
         <span asp-validation-for="SubjectId" class="text-danger"></span>
     </div>

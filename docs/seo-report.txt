@@ -1,0 +1,32 @@
+Оцінка SEO лендінгу репетитора (задача C7)
+
+Інструмент: Lighthouse 13.6.0, профіль мобільного пристрою
+Сторінка: /tutor/olena-koval, локальний сервер у режимі Development
+
+Оцінки
+- Performance: 93
+- Accessibility: 100
+- Best Practices: 100
+- SEO: 100
+
+Перевірки категорії SEO
+- OK: is-crawlable
+- OK: document-title
+- OK: meta-description
+- OK: http-status-code
+- OK: link-text
+- OK: crawlable-anchors
+- OK: robots-txt
+- OK: hreflang
+- OK: canonical
+
+Швидкість
+- first-contentful-paint: 2.6 s
+- largest-contentful-paint: 2.6 s
+- cumulative-layout-shift: 0
+- total-blocking-time: 0 ms
+
+Зауваження
+Це локальний замір із затримкою мобільної мережі, яку імітує Lighthouse. Для реального сайту оцінки можуть відрізнятися.
+Аудит Seobility потребує публічної адреси, тому його треба виконати після викладання в хмару (C2).
+Перед цим потрібно задати Seo:BaseUrl, інакше canonical, sitemap і robots міститимуть адресу із запиту.

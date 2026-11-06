@@ -31,7 +31,9 @@ builder.Services.AddScoped<TenantContext>();
 builder.Services.AddDbContext<AppDbContext>((services, o) => o
     .UseNpgsql(connectionString)
     .AddInterceptors(services.GetRequiredService<CacheInvalidationInterceptor>())
-    .ConfigureWarnings(w => w.Ignore(CoreEventId.PossibleIncorrectRequiredNavigationWithQueryFilterInteractionWarning)));
+    .ConfigureWarnings(w => w.Ignore(
+        CoreEventId.PossibleIncorrectRequiredNavigationWithQueryFilterInteractionWarning,
+        CoreEventId.RowLimitingOperationWithoutOrderByWarning)));
 if (string.IsNullOrEmpty(builder.Configuration["Storage:Blob:ConnectionString"]))
 {
     builder.Services.AddSingleton<IFileStorage, LocalFileStorage>();

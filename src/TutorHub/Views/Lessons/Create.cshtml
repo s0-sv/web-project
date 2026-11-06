@@ -10,6 +10,12 @@
     <a class="btn btn-link" asp-action="Index">Скасувати</a>
 </form>
 
+@section Styles {
+    <link rel="stylesheet" href="~/lib/select2/dist/css/select2.min.css" />
+}
+
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script src="~/lib/select2/dist/js/select2.min.js"></script>
+    <script src="~/js/lookup.js" asp-append-version="true"></script>
 }

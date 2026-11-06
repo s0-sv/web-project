@@ -62,6 +62,7 @@ public class EndpointSecurityTests(AuthTestFactory factory)
     [InlineData("StudentsApi")]
     [InlineData("SubjectsApi")]
     [InlineData("AnalyticsApi")]
+    [InlineData("Lookup")]
     public void Staff_controllers_require_the_staff_policy(string controller)
     {
         var actions = ControllerActions().Where(a => a.Name.StartsWith($"{controller}.")).ToList();

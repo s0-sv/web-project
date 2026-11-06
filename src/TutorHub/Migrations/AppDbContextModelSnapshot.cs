@@ -19,6 +19,7 @@ namespace TutorHub.Migrations
                 .HasAnnotation("ProductVersion", "10.0.14")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
+            NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "pg_trgm");
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
@@ -320,6 +321,16 @@ namespace TutorHub.Migrations
                     b.HasIndex("TenantId", "Email")
                         .IsUnique();
 
+                    b.HasIndex(new[] { "Email" }, "IX_Students_Email_Trgm");
+
+                    NpgsqlIndexBuilderExtensions.HasMethod(b.HasIndex(new[] { "Email" }, "IX_Students_Email_Trgm"), "gin");
+                    NpgsqlIndexBuilderExtensions.HasOperators(b.HasIndex(new[] { "Email" }, "IX_Students_Email_Trgm"), new[] { "gin_trgm_ops" });
+
+                    b.HasIndex(new[] { "FullName" }, "IX_Students_FullName_Trgm");
+
+                    NpgsqlIndexBuilderExtensions.HasMethod(b.HasIndex(new[] { "FullName" }, "IX_Students_FullName_Trgm"), "gin");
+                    NpgsqlIndexBuilderExtensions.HasOperators(b.HasIndex(new[] { "FullName" }, "IX_Students_FullName_Trgm"), new[] { "gin_trgm_ops" });
+
                     b.ToTable("Students");
                 });
 
@@ -347,6 +358,11 @@ namespace TutorHub.Migrations
 
                     b.HasIndex("TenantId", "Name")
                         .IsUnique();
+
+                    b.HasIndex(new[] { "Name" }, "IX_Subjects_Name_Trgm");
+
+                    NpgsqlIndexBuilderExtensions.HasMethod(b.HasIndex(new[] { "Name" }, "IX_Subjects_Name_Trgm"), "gin");
+                    NpgsqlIndexBuilderExtensions.HasOperators(b.HasIndex(new[] { "Name" }, "IX_Subjects_Name_Trgm"), new[] { "gin_trgm_ops" });
 
                     b.ToTable("Subjects");
                 });
@@ -439,6 +455,16 @@ namespace TutorHub.Migrations
 
                     b.HasIndex("TenantId", "Email")
                         .IsUnique();
+
+                    b.HasIndex(new[] { "Email" }, "IX_Tutors_Email_Trgm");
+
+                    NpgsqlIndexBuilderExtensions.HasMethod(b.HasIndex(new[] { "Email" }, "IX_Tutors_Email_Trgm"), "gin");
+                    NpgsqlIndexBuilderExtensions.HasOperators(b.HasIndex(new[] { "Email" }, "IX_Tutors_Email_Trgm"), new[] { "gin_trgm_ops" });
+
+                    b.HasIndex(new[] { "FullName" }, "IX_Tutors_FullName_Trgm");
+
+                    NpgsqlIndexBuilderExtensions.HasMethod(b.HasIndex(new[] { "FullName" }, "IX_Tutors_FullName_Trgm"), "gin");
+                    NpgsqlIndexBuilderExtensions.HasOperators(b.HasIndex(new[] { "FullName" }, "IX_Tutors_FullName_Trgm"), new[] { "gin_trgm_ops" });
 
                     b.ToTable("Tutors");
                 });
