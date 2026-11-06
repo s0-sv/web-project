@@ -30,6 +30,16 @@ public static class DbSeeder
             await SeedSecondTenantAsync(db, second.Id);
         }
 
+        var featured = await db.Tutors.IgnoreQueryFilters()
+            .FirstOrDefaultAsync(t => t.TenantId == demo.Id && t.Email == "olena.koval@example.com");
+        if (featured is { Slug: null })
+        {
+            featured.Slug = Tutor.GenerateSlug(featured.FullName);
+            featured.Headline = "Підготовка до НМТ з математики онлайн";
+            featured.IsPublished = true;
+            await db.SaveChangesAsync();
+        }
+
         if (config["Seed:DemoPassword"] is not { Length: > 0 } password)
         {
             return;

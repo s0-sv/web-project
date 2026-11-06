@@ -37,6 +37,7 @@ builder.Services.AddScoped<MaterialService>();
 builder.Services.AddScoped<JwtTokenService>();
 builder.Services.AddScoped<TenantRegistration>();
 builder.Services.AddScoped<FeatureFlags>();
+builder.Services.AddScoped<TutorHub.Controllers.TutorPublishing>();
 builder.Services.AddScoped<LearningAnalytics>();
 
 builder.Services.AddIdentityCore<ApplicationUser>(o =>

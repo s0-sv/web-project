@@ -22,7 +22,9 @@ public class EndpointSecurityTests(AuthTestFactory factory)
         "Home.Status",
         "Home.Error",
         "AuthApi.Register",
-        "AuthApi.Token"
+        "AuthApi.Token",
+        "TutorProfile.Index",
+        "TutorProfile.Photo"
     ];
 
     private List<(string Name, EndpointMetadataCollection Metadata)> ControllerActions() =>

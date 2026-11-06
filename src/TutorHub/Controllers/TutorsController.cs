@@ -3,11 +3,12 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TutorHub.Data;
 using TutorHub.Models;
+using TutorHub.Services;
 
 namespace TutorHub.Controllers;
 
 [Authorize(Policy = AppPolicies.Staff)]
-public class TutorsController(AppDbContext db) : AppController
+public class TutorsController(AppDbContext db, IFileStorage storage, TutorPublishing publishing) : AppController
 {
     public async Task<IActionResult> Index() =>
         View(await db.Tutors.AsNoTracking().Include(t => t.Lessons).OrderBy(t => t.FullName).ToListAsync());
@@ -25,7 +26,7 @@ public class TutorsController(AppDbContext db) : AppController
     public IActionResult Create() => View(new Tutor());
 
     [HttpPost]
-    public async Task<IActionResult> Create([Bind("FullName,Email,Phone,Bio,HourlyRate")] Tutor input)
+    public async Task<IActionResult> Create([Bind("FullName,Email,Phone,Bio,HourlyRate,Headline,Slug")] Tutor input)
     {
         if (!ModelState.IsValid)
         {
@@ -43,7 +44,7 @@ public class TutorsController(AppDbContext db) : AppController
     }
 
     [HttpPost]
-    public async Task<IActionResult> Edit(int id, [Bind("FullName,Email,Phone,Bio,HourlyRate")] Tutor input)
+    public async Task<IActionResult> Edit(int id, [Bind("FullName,Email,Phone,Bio,HourlyRate,Headline,Slug")] Tutor input)
     {
         input.Id = id;
         if (!ModelState.IsValid)
@@ -62,6 +63,8 @@ public class TutorsController(AppDbContext db) : AppController
         tutor.Phone = input.Phone;
         tutor.Bio = input.Bio;
         tutor.HourlyRate = input.HourlyRate;
+        tutor.Headline = input.Headline;
+        tutor.Slug = input.Slug ?? tutor.Slug;
         return await SaveAsync(tutor, "Зміни збережено.") ?? View(input);
     }
 
@@ -91,8 +94,60 @@ public class TutorsController(AppDbContext db) : AppController
             return RedirectToAction(nameof(Delete), new { id });
         }
 
+        if (tutor.PhotoKey is not null)
+        {
+            storage.DeletePublic(tutor.PhotoKey);
+        }
+
         FlashSuccess("Репетитора видалено.");
         return RedirectToAction(nameof(Index));
+    }
+
+    [Authorize(Policy = AppPolicies.OwnerOnly)]
+    [HttpPost]
+    public async Task<IActionResult> Publish(int id, bool published)
+    {
+        var tutor = await db.Tutors.FindAsync(id);
+        if (tutor is null)
+        {
+            return NotFound();
+        }
+
+        await publishing.SetPublishedAsync(tutor, published);
+        FlashSuccess(published ? "Сторінку опубліковано. Контакти тепер видимі всім." : "Сторінку знято з публікації.");
+        return RedirectToAction(nameof(Details), new { id });
+    }
+
+    [HttpPost]
+    [RequestSizeLimit(PhotoRules.MaxRequestBytes)]
+    [RequestFormLimits(MultipartBodyLengthLimit = PhotoRules.MaxRequestBytes)]
+    public async Task<IActionResult> Photo(int id, IFormFile? photo)
+    {
+        var tutor = await db.Tutors.FindAsync(id);
+        if (tutor is null)
+        {
+            return NotFound();
+        }
+
+        var (extension, contentType, error) = await PhotoRules.InspectAsync(photo);
+        if (error is not null)
+        {
+            FlashError(error);
+            return RedirectToAction(nameof(Details), new { id });
+        }
+
+        await using var content = photo!.OpenReadStream();
+        var previous = tutor.PhotoKey;
+        tutor.PhotoKey = await storage.SavePublicAsync(content, extension!, contentType!);
+        await db.SaveChangesAsync();
+
+        if (previous is not null)
+        {
+            storage.DeletePublic(previous);
+        }
+
+        FlashSuccess("Фото оновлено.");
+        return RedirectToAction(nameof(Details), new { id });
     }
 
     private async Task<IActionResult?> SaveAsync(Tutor tutor, string message)
@@ -100,6 +155,11 @@ public class TutorsController(AppDbContext db) : AppController
         try
         {
             await db.SaveChangesAsync();
+        }
+        catch (DbUpdateException e) when (e.ViolatesIndexOn(nameof(Tutor.Slug)))
+        {
+            ModelState.AddModelError(nameof(Tutor.Slug), "Ця адреса сторінки вже зайнята.");
+            return null;
         }
         catch (DbUpdateException e) when (e.IsUniqueViolation())
         {

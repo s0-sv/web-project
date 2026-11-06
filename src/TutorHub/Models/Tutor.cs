@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.Text;
 
 namespace TutorHub.Models;
 
@@ -38,5 +39,50 @@ public class Tutor : ITenantEntity
     [Range(typeof(decimal), "0", "100000", ErrorMessage = "Ставка має бути від 0 до 100000")]
     public decimal HourlyRate { get; set; }
 
+    [Display(Name = "Короткий заголовок")]
+    [StringLength(200, ErrorMessage = "Заголовок не може перевищувати 200 символів")]
+    public string? Headline { get; set; }
+
+    [Display(Name = "Адреса сторінки")]
+    [StringLength(100, ErrorMessage = "Адреса не може перевищувати 100 символів")]
+    [RegularExpression("^[a-z0-9]+(-[a-z0-9]+)*$", ErrorMessage = "Лише малі латинські літери, цифри й дефіси")]
+    public string? Slug { get; set; }
+
+    public string? PhotoKey { get; set; }
+
+    public bool IsPublished { get; set; }
+
     public List<Lesson> Lessons { get; set; } = [];
+
+    public static string GenerateSlug(string fullName)
+    {
+        var slug = new StringBuilder();
+        foreach (var letter in fullName.Trim().ToLowerInvariant())
+        {
+            if (Transliteration.TryGetValue(letter, out var latin))
+            {
+                slug.Append(latin);
+            }
+            else if (letter is >= 'a' and <= 'z' or >= '0' and <= '9')
+            {
+                slug.Append(letter);
+            }
+            else if (slug.Length > 0 && slug[^1] != '-' && letter != '\'' && letter != '’' && letter != 'ь')
+            {
+                slug.Append('-');
+            }
+        }
+
+        var result = slug.ToString().Trim('-');
+        return result.Length <= 90 ? result : result[..90].Trim('-');
+    }
+
+    private static readonly Dictionary<char, string> Transliteration = new()
+    {
+        ['а'] = "a", ['б'] = "b", ['в'] = "v", ['г'] = "h", ['ґ'] = "g", ['д'] = "d", ['е'] = "e",
+        ['є'] = "ie", ['ж'] = "zh", ['з'] = "z", ['и'] = "y", ['і'] = "i", ['ї'] = "i", ['й'] = "i",
+        ['к'] = "k", ['л'] = "l", ['м'] = "m", ['н'] = "n", ['о'] = "o", ['п'] = "p", ['р'] = "r",
+        ['с'] = "s", ['т'] = "t", ['у'] = "u", ['ф'] = "f", ['х'] = "kh", ['ц'] = "ts", ['ч'] = "ch",
+        ['ш'] = "sh", ['щ'] = "shch", ['ю'] = "iu", ['я'] = "ia"
+    };
 }

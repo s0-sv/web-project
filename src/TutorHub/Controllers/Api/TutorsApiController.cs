@@ -5,12 +5,13 @@ using Microsoft.EntityFrameworkCore;
 using TutorHub.Contracts;
 using TutorHub.Data;
 using TutorHub.Models;
+using TutorHub.Services;
 
 namespace TutorHub.Controllers.Api;
 
 [Authorize(Policy = AppPolicies.Staff)]
 [Route("api/tutors")]
-public class TutorsApiController(AppDbContext db) : ApiControllerBase
+public class TutorsApiController(AppDbContext db, IFileStorage storage, TutorPublishing publishing) : ApiControllerBase
 {
     [HttpGet]
     [OutputCache(PolicyName = CacheInvalidationInterceptor.PolicyName)]
@@ -39,6 +40,10 @@ public class TutorsApiController(AppDbContext db) : ApiControllerBase
         {
             await db.SaveChangesAsync(ct);
         }
+        catch (DbUpdateException e) when (e.ViolatesIndexOn(nameof(Tutor.Slug)))
+        {
+            return ConflictProblem("This page address is already taken.");
+        }
         catch (DbUpdateException e) when (e.IsUniqueViolation())
         {
             return ConflictProblem("A tutor with this email already exists.");
@@ -61,6 +66,10 @@ public class TutorsApiController(AppDbContext db) : ApiControllerBase
         try
         {
             await db.SaveChangesAsync(ct);
+        }
+        catch (DbUpdateException e) when (e.ViolatesIndexOn(nameof(Tutor.Slug)))
+        {
+            return ConflictProblem("This page address is already taken.");
         }
         catch (DbUpdateException e) when (e.IsUniqueViolation())
         {
@@ -90,7 +99,26 @@ public class TutorsApiController(AppDbContext db) : ApiControllerBase
             return ConflictProblem("The tutor cannot be deleted while lessons reference them.");
         }
 
+        if (tutor.PhotoKey is not null)
+        {
+            storage.DeletePublic(tutor.PhotoKey);
+        }
+
         return NoContent();
+    }
+
+    [Authorize(Policy = AppPolicies.OwnerOnly)]
+    [HttpPut("{id:int}/publication")]
+    public async Task<ActionResult<TutorDto>> SetPublication(int id, TutorPublicationRequest request, CancellationToken ct)
+    {
+        var tutor = await db.Tutors.FindAsync([id], ct);
+        if (tutor is null)
+        {
+            return NotFound();
+        }
+
+        await publishing.SetPublishedAsync(tutor, request.IsPublished!.Value, ct);
+        return ToDto(tutor);
     }
 
     private static void Apply(TutorRequest request, Tutor tutor)
@@ -100,7 +128,10 @@ public class TutorsApiController(AppDbContext db) : ApiControllerBase
         tutor.Phone = request.Phone;
         tutor.Bio = request.Bio;
         tutor.HourlyRate = request.HourlyRate!.Value;
+        tutor.Headline = request.Headline;
+        tutor.Slug = request.Slug ?? tutor.Slug;
     }
 
-    private static TutorDto ToDto(Tutor t) => new(t.Id, t.FullName, t.Email, t.Phone, t.Bio, t.HourlyRate);
+    private static TutorDto ToDto(Tutor t) =>
+        new(t.Id, t.FullName, t.Email, t.Phone, t.Bio, t.HourlyRate, t.Headline, t.Slug, t.IsPublished);
 }

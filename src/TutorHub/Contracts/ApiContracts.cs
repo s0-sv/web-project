@@ -15,10 +15,19 @@ public record SubjectRequest(
     [Required, StringLength(100)] string Name,
     [StringLength(1000)] string? Description);
 
-public record TutorDto(int Id, string FullName, string Email, string? Phone, string? Bio, decimal HourlyRate)
+public record TutorDto(
+    int Id,
+    string FullName,
+    string Email,
+    string? Phone,
+    string? Bio,
+    decimal HourlyRate,
+    string? Headline,
+    string? Slug,
+    bool IsPublished)
 {
     public static readonly Expression<Func<Tutor, TutorDto>> Projection =
-        t => new TutorDto(t.Id, t.FullName, t.Email, t.Phone, t.Bio, t.HourlyRate);
+        t => new TutorDto(t.Id, t.FullName, t.Email, t.Phone, t.Bio, t.HourlyRate, t.Headline, t.Slug, t.IsPublished);
 }
 
 public record TutorRequest(
@@ -26,7 +35,11 @@ public record TutorRequest(
     [Required, EmailAddress, StringLength(254)] string Email,
     [Phone, StringLength(30)] string? Phone,
     [StringLength(2000)] string? Bio,
-    [Required, Range(typeof(decimal), "0", "100000")] decimal? HourlyRate);
+    [Required, Range(typeof(decimal), "0", "100000")] decimal? HourlyRate,
+    [StringLength(200)] string? Headline = null,
+    [StringLength(100), RegularExpression("^[a-z0-9]+(-[a-z0-9]+)*$")] string? Slug = null);
+
+public record TutorPublicationRequest([Required] bool? IsPublished);
 
 public record StudentDto(int Id, string FullName, string Email, string? Phone, string? LearningGoal)
 {

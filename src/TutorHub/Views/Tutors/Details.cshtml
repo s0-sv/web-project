@@ -22,6 +22,43 @@
     <dd class="col-sm-9">@(Model.Bio ?? "—")</dd>
 </dl>
 
+<div class="card mb-3">
+    <div class="card-body">
+        <h2 class="h6">Публічна сторінка</h2>
+        @if (Model.IsPublished)
+        {
+            <p class="mb-2">
+                <span class="badge text-bg-success">Опубліковано</span>
+                <a asp-controller="TutorProfile" asp-action="Index" asp-route-slug="@Model.Slug" target="_blank" rel="noopener">Відкрити сторінку</a>
+            </p>
+        }
+        else
+        {
+            <p class="mb-2"><span class="badge text-bg-secondary">Не опубліковано</span></p>
+        }
+        <p class="text-muted small">На публічній сторінці всім видно ім'я, опис, ставку, email і телефон репетитора.</p>
+        @if (User.IsInRole(TenantRoles.Owner))
+        {
+            <form asp-action="Publish" asp-route-id="@Model.Id" asp-route-published="@(!Model.IsPublished)" method="post" class="mb-3">
+                <button type="submit" class="btn btn-outline-primary btn-sm">@(Model.IsPublished ? "Зняти з публікації" : "Опублікувати")</button>
+            </form>
+        }
+        else
+        {
+            <p class="small">Опублікувати сторінку може лише власник простору.</p>
+        }
+        <form asp-action="Photo" asp-route-id="@Model.Id" method="post" enctype="multipart/form-data" class="row g-2 align-items-end">
+            <div class="col-sm-8">
+                <label for="photo" class="form-label small">Фото: PNG, JPEG або WebP, до 5 МБ</label>
+                <input id="photo" name="photo" type="file" class="form-control form-control-sm" accept="@PhotoRules.AcceptAttribute" required />
+            </div>
+            <div class="col-sm-4">
+                <button type="submit" class="btn btn-outline-secondary btn-sm">Завантажити фото</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <h2 class="h5">Заняття</h2>
 <partial name="_LessonsTable" model="Model.Lessons.OrderByDescending(l => l.StartsAt)" />
 

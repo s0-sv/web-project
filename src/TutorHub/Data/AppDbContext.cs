@@ -82,7 +82,11 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, TenantContext 
             e.Property(x => x.Bio).HasMaxLength(2000);
             e.Property(x => x.HourlyRate).HasPrecision(10, 2);
             e.HasAlternateKey(x => new { x.TenantId, x.Id });
+            e.Property(x => x.Headline).HasMaxLength(200);
+            e.Property(x => x.Slug).HasMaxLength(100);
+            e.Property(x => x.PhotoKey).HasMaxLength(100);
             e.HasIndex(x => new { x.TenantId, x.Email }).IsUnique();
+            e.HasIndex(x => x.Slug).IsUnique();
             e.HasOne<Tenant>().WithMany().HasForeignKey(x => x.TenantId).OnDelete(DeleteBehavior.Restrict);
             e.HasQueryFilter(x => x.TenantId == CurrentTenantId);
         });

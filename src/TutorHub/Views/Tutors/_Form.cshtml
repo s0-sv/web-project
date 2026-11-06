@@ -22,6 +22,17 @@
     <span asp-validation-for="HourlyRate" class="text-danger"></span>
 </div>
 <div class="mb-3">
+    <label asp-for="Headline" class="form-label"></label>
+    <input asp-for="Headline" class="form-control" />
+    <span asp-validation-for="Headline" class="text-danger"></span>
+</div>
+<div class="mb-3">
+    <label asp-for="Slug" class="form-label"></label>
+    <input asp-for="Slug" class="form-control" />
+    <div class="form-text">Частина адреси публічної сторінки. Якщо залишити порожньою, вона створиться під час публікації.</div>
+    <span asp-validation-for="Slug" class="text-danger"></span>
+</div>
+<div class="mb-3">
     <label asp-for="Bio" class="form-label"></label>
     <textarea asp-for="Bio" class="form-control" rows="4"></textarea>
     <span asp-validation-for="Bio" class="text-danger"></span>
