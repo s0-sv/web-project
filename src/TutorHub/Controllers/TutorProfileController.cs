@@ -75,9 +75,9 @@ public class TutorProfileController(AppDbContext db, IFileStorage storage) : App
     }
 
     [HttpGet("/tutor/photo/{key}")]
-    public IActionResult Photo(string key)
+    public async Task<IActionResult> Photo(string key)
     {
-        var stream = storage.OpenPublicRead(key);
+        var stream = await storage.OpenPublicReadAsync(key);
         if (stream is null)
         {
             return NotFound();

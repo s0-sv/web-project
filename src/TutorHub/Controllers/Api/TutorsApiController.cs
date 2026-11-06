@@ -101,7 +101,7 @@ public class TutorsApiController(AppDbContext db, IFileStorage storage, TutorPub
 
         if (tutor.PhotoKey is not null)
         {
-            storage.DeletePublic(tutor.PhotoKey);
+            await storage.DeletePublicAsync(tutor.PhotoKey, ct);
         }
 
         return NoContent();

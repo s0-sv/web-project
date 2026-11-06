@@ -96,7 +96,7 @@ public class TutorsController(AppDbContext db, IFileStorage storage, TutorPublis
 
         if (tutor.PhotoKey is not null)
         {
-            storage.DeletePublic(tutor.PhotoKey);
+            await storage.DeletePublicAsync(tutor.PhotoKey);
         }
 
         FlashSuccess("Репетитора видалено.");
@@ -143,7 +143,7 @@ public class TutorsController(AppDbContext db, IFileStorage storage, TutorPublis
 
         if (previous is not null)
         {
-            storage.DeletePublic(previous);
+            await storage.DeletePublicAsync(previous);
         }
 
         FlashSuccess("Фото оновлено.");

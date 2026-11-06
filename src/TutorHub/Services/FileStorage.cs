@@ -5,11 +5,11 @@ namespace TutorHub.Services;
 public interface IFileStorage
 {
     Task<string> SaveAsync(Stream content, string extension, CancellationToken ct = default);
-    Stream? OpenRead(string key);
-    void Delete(string key);
+    Task<Stream?> OpenReadAsync(string key, CancellationToken ct = default);
+    Task DeleteAsync(string key, CancellationToken ct = default);
     Task<string> SavePublicAsync(Stream content, string extension, string contentType, CancellationToken ct = default);
-    Stream? OpenPublicRead(string key);
-    void DeletePublic(string key);
+    Task<Stream?> OpenPublicReadAsync(string key, CancellationToken ct = default);
+    Task DeletePublicAsync(string key, CancellationToken ct = default);
     string PublicUrl(string key);
 }
 
@@ -83,18 +83,22 @@ public partial class LocalFileStorage : IFileStorage
         return key;
     }
 
-    public Stream? OpenPublicRead(string key)
+    public Task<Stream?> OpenPublicReadAsync(string key, CancellationToken ct = default)
     {
         if (!IsValidKey(key))
         {
-            return null;
+            return Task.FromResult<Stream?>(null);
         }
 
         var path = PublicPathFor(key);
-        return File.Exists(path) ? new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read) : null;
+        return Task.FromResult<Stream?>(File.Exists(path) ? new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read) : null);
     }
 
-    public void DeletePublic(string key) => File.Delete(PublicPathFor(key));
+    public Task DeletePublicAsync(string key, CancellationToken ct = default)
+    {
+        File.Delete(PublicPathFor(key));
+        return Task.CompletedTask;
+    }
 
     public string PublicUrl(string key) => $"/tutor/photo/{key}";
 
@@ -118,13 +122,17 @@ public partial class LocalFileStorage : IFileStorage
         return key;
     }
 
-    public Stream? OpenRead(string key)
+    public Task<Stream?> OpenReadAsync(string key, CancellationToken ct = default)
     {
         var path = PathFor(key);
-        return File.Exists(path) ? new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read) : null;
+        return Task.FromResult<Stream?>(File.Exists(path) ? new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read) : null);
     }
 
-    public void Delete(string key) => File.Delete(PathFor(key));
+    public Task DeleteAsync(string key, CancellationToken ct = default)
+    {
+        File.Delete(PathFor(key));
+        return Task.CompletedTask;
+    }
 
     private string PathFor(string key)
     {

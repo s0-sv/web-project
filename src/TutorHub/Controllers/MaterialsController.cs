@@ -19,7 +19,7 @@ public class MaterialsController(AppDbContext db, MaterialService materials) : A
     public async Task<IActionResult> Download(int id)
     {
         var material = await db.LessonMaterials.AsNoTracking().FirstOrDefaultAsync(m => m.Id == id);
-        var stream = material is null ? null : materials.OpenFile(material);
+        var stream = material is null ? null : await materials.OpenFileAsync(material);
 
         return stream is null
             ? NotFound()

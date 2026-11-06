@@ -32,7 +32,15 @@ builder.Services.AddDbContext<AppDbContext>((services, o) => o
     .UseNpgsql(connectionString)
     .AddInterceptors(services.GetRequiredService<CacheInvalidationInterceptor>())
     .ConfigureWarnings(w => w.Ignore(CoreEventId.PossibleIncorrectRequiredNavigationWithQueryFilterInteractionWarning)));
-builder.Services.AddSingleton<IFileStorage, LocalFileStorage>();
+if (string.IsNullOrEmpty(builder.Configuration["Storage:Blob:ConnectionString"]))
+{
+    builder.Services.AddSingleton<IFileStorage, LocalFileStorage>();
+}
+else
+{
+    builder.Services.AddSingleton<IFileStorage, BlobFileStorage>();
+}
+
 builder.Services.AddScoped<MaterialService>();
 builder.Services.AddScoped<JwtTokenService>();
 builder.Services.AddScoped<TenantRegistration>();

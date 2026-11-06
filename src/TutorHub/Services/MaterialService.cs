@@ -18,7 +18,7 @@ public class MaterialService(AppDbContext db, IFileStorage storage, ILogger<Mate
         }
         catch
         {
-            DeleteFile(material.StorageKey);
+            await DeleteFileAsync(material.StorageKey);
             throw;
         }
 
@@ -43,7 +43,7 @@ public class MaterialService(AppDbContext db, IFileStorage storage, ILogger<Mate
         {
             if (newFile is not null)
             {
-                DeleteFile(material.StorageKey);
+                await DeleteFileAsync(material.StorageKey);
             }
 
             throw;
@@ -51,7 +51,7 @@ public class MaterialService(AppDbContext db, IFileStorage storage, ILogger<Mate
 
         if (newFile is not null)
         {
-            DeleteFile(previousKey);
+            await DeleteFileAsync(previousKey);
         }
     }
 
@@ -59,7 +59,7 @@ public class MaterialService(AppDbContext db, IFileStorage storage, ILogger<Mate
     {
         db.LessonMaterials.Remove(material);
         await db.SaveChangesAsync(ct);
-        DeleteFile(material.StorageKey);
+        await DeleteFileAsync(material.StorageKey);
     }
 
     public async Task DeleteLessonAsync(Lesson lesson, CancellationToken ct = default)
@@ -74,11 +74,12 @@ public class MaterialService(AppDbContext db, IFileStorage storage, ILogger<Mate
 
         foreach (var key in keys)
         {
-            DeleteFile(key);
+            await DeleteFileAsync(key);
         }
     }
 
-    public Stream? OpenFile(LessonMaterial material) => storage.OpenRead(material.StorageKey);
+    public Task<Stream?> OpenFileAsync(LessonMaterial material, CancellationToken ct = default) =>
+        storage.OpenReadAsync(material.StorageKey, ct);
 
     private async Task StoreFileAsync(LessonMaterial material, IFormFile file, CancellationToken ct)
     {
@@ -92,13 +93,13 @@ public class MaterialService(AppDbContext db, IFileStorage storage, ILogger<Mate
         material.UploadedAt = DateTimeOffset.UtcNow;
     }
 
-    private void DeleteFile(string key)
+    private async Task DeleteFileAsync(string key)
     {
         try
         {
-            storage.Delete(key);
+            await storage.DeleteAsync(key, CancellationToken.None);
         }
-        catch (Exception e) when (e is IOException or UnauthorizedAccessException)
+        catch (Exception e) when (e is IOException or UnauthorizedAccessException or Azure.RequestFailedException)
         {
             logger.LogWarning(e, "Could not delete stored file {Key}", key);
         }

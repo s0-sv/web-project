@@ -52,7 +52,7 @@ public class MaterialsApiController(AppDbContext db, MaterialService materials) 
     public async Task<IActionResult> Download(int id, CancellationToken ct)
     {
         var material = await db.LessonMaterials.AsNoTracking().FirstOrDefaultAsync(m => m.Id == id, ct);
-        var stream = material is null ? null : materials.OpenFile(material);
+        var stream = material is null ? null : await materials.OpenFileAsync(material, ct);
 
         return stream is null
             ? NotFound()
