@@ -5,6 +5,29 @@
 
 <h1 class="h3 mb-3">@Model.Name</h1>
 
+<div class="card mb-3">
+    <div class="card-body">
+        <h2 class="h5">План: <span class="badge @(Model.Plan == TenantPlan.Premium ? "text-bg-warning" : "text-bg-secondary")">@Model.Plan</span></h2>
+        <p>
+            @(Model.Plan == TenantPlan.Premium
+                ? "Доступна аналітика навчання."
+                : "Перейдіть на Premium, щоб відкрити аналітику навчання.")
+        </p>
+        <p class="text-muted small">Це навчальний проєкт: зміна плану безкоштовна й миттєва.</p>
+        @if (User.IsInRole(TenantRoles.Owner))
+        {
+            var target = Model.Plan == TenantPlan.Premium ? TenantPlan.Free : TenantPlan.Premium;
+            <form asp-action="Change" asp-route-plan="@target" method="post">
+                <button type="submit" class="btn btn-primary btn-sm">Перейти на @target</button>
+            </form>
+        }
+        else
+        {
+            <p class="mb-0">Змінити план може лише власник простору.</p>
+        }
+    </div>
+</div>
+
 @if (User.IsInRole(TenantRoles.Owner))
 {
     <div class="card mb-3">

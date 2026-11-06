@@ -51,6 +51,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, TenantContext 
         {
             e.Property(x => x.Name).HasMaxLength(100);
             e.Property(x => x.MemberInviteCode).HasMaxLength(64);
+            e.Property(x => x.Plan).HasConversion<string>().HasMaxLength(20).HasDefaultValue(TenantPlan.Free);
             e.HasIndex(x => x.MemberInviteCode).IsUnique();
         });
 

@@ -17,8 +17,8 @@ public static class DbSeeder
         UserManager<ApplicationUser> users,
         IConfiguration config)
     {
-        var demo = await EnsureTenantAsync(db, DemoTenant);
-        var second = await EnsureTenantAsync(db, SecondTenant);
+        var demo = await EnsureTenantAsync(db, DemoTenant, TenantPlan.Premium);
+        var second = await EnsureTenantAsync(db, SecondTenant, TenantPlan.Free);
 
         if (!await db.Subjects.IgnoreQueryFilters().AnyAsync(s => s.TenantId == demo.Id))
         {
@@ -44,7 +44,7 @@ public static class DbSeeder
         await EnsureUserAsync(users, "owner@second.example.com", "Власник Second School", second.Id, TenantRoles.Owner, null, password);
     }
 
-    private static async Task<Tenant> EnsureTenantAsync(AppDbContext db, string name)
+    private static async Task<Tenant> EnsureTenantAsync(AppDbContext db, string name, TenantPlan plan)
     {
         var tenant = await db.Tenants.FirstOrDefaultAsync(t => t.Name == name);
         if (tenant is not null)
@@ -52,7 +52,7 @@ public static class DbSeeder
             return tenant;
         }
 
-        tenant = new Tenant { Name = name };
+        tenant = new Tenant { Name = name, Plan = plan };
         db.Tenants.Add(tenant);
         await db.SaveChangesAsync();
         return tenant;

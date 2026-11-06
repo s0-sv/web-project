@@ -369,6 +369,13 @@ namespace TutorHub.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
+                    b.Property<string>("Plan")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasDefaultValue("Free");
+
                     b.HasKey("Id");
 
                     b.HasIndex("MemberInviteCode")

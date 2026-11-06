@@ -15,6 +15,22 @@ public class PlanController(AppDbContext db, TenantContext tenant) : AppControll
 
     [Authorize(Policy = AppPolicies.OwnerOnly)]
     [HttpPost]
+    public async Task<IActionResult> Change(TenantPlan? plan)
+    {
+        if (!ModelState.IsValid || plan is null || !Enum.IsDefined(plan.Value))
+        {
+            return BadRequest();
+        }
+
+        var current = await db.Tenants.FirstAsync(t => t.Id == tenant.TenantId);
+        current.Plan = plan.Value;
+        await db.SaveChangesAsync();
+        FlashSuccess($"План змінено на {plan}.");
+        return RedirectToAction(nameof(Index));
+    }
+
+    [Authorize(Policy = AppPolicies.OwnerOnly)]
+    [HttpPost]
     public async Task<IActionResult> RegenerateInvite()
     {
         var current = await db.Tenants.FirstAsync(t => t.Id == tenant.TenantId);

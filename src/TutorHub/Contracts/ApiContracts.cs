@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.Linq.Expressions;
 using TutorHub.Models;
+using TutorHub.Services;
 
 namespace TutorHub.Contracts;
 
@@ -117,6 +118,31 @@ public record TokenRequest([Required] string Email, [Required] string Password);
 
 public record TokenResponse(string AccessToken, string TokenType, int ExpiresIn);
 
-public record CurrentUserDto(string Id, string Email, string FullName, int TenantId, string TenantName, string Role, int? StudentId);
+public record CurrentUserDto(
+    string Id,
+    string Email,
+    string FullName,
+    int TenantId,
+    string TenantName,
+    string Role,
+    int? StudentId,
+    TenantPlan Plan,
+    IReadOnlyList<AppFeature> Features);
+
+public record PlanChangeRequest([EnumDataType(typeof(TenantPlan))] TenantPlan Plan);
+
+public record SubjectAnalyticsDto(string Subject, int Lessons, decimal Hours);
+
+public record TutorAnalyticsDto(string Tutor, int Lessons, decimal Hours, decimal Revenue);
+
+public record AnalyticsDto(
+    int TotalLessons,
+    int CompletedLessons,
+    int ScheduledLessons,
+    int CancelledLessons,
+    decimal CompletedHours,
+    decimal EstimatedRevenue,
+    IReadOnlyList<SubjectAnalyticsDto> Subjects,
+    IReadOnlyList<TutorAnalyticsDto> Tutors);
 
 public record InviteCodeDto(string InviteCode);

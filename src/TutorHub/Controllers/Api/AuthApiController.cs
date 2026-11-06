@@ -54,8 +54,17 @@ public class AuthApiController(
             return Unauthorized();
         }
 
-        var tenantName = await db.Tenants.Where(t => t.Id == user.TenantId).Select(t => t.Name).FirstAsync();
-        return new CurrentUserDto(user.Id, user.Email!, user.FullName, user.TenantId, tenantName, user.Role, user.StudentId);
+        var current = await db.Tenants.AsNoTracking().FirstAsync(t => t.Id == user.TenantId);
+        return new CurrentUserDto(
+            user.Id,
+            user.Email!,
+            user.FullName,
+            user.TenantId,
+            current.Name,
+            user.Role,
+            user.StudentId,
+            current.Plan,
+            FeatureFlags.FeaturesFor(current.Plan));
     }
 
     [Authorize(Policy = AppPolicies.OwnerOnly)]
@@ -66,6 +75,16 @@ public class AuthApiController(
         current.MemberInviteCode = Tenant.NewInviteCode();
         await db.SaveChangesAsync();
         return new InviteCodeDto(current.MemberInviteCode);
+    }
+
+    [Authorize(Policy = AppPolicies.OwnerOnly)]
+    [HttpPut("plan")]
+    public async Task<IActionResult> ChangePlan(PlanChangeRequest request)
+    {
+        var current = await db.Tenants.FirstAsync(t => t.Id == tenant.TenantId);
+        current.Plan = request.Plan;
+        await db.SaveChangesAsync();
+        return NoContent();
     }
 
     private ObjectResult InvalidCredentials() =>

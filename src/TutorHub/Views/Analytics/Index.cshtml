@@ -1,0 +1,63 @@
+@using TutorHub.Contracts
+@model AnalyticsDto
+@{
+    ViewData["Title"] = "Аналітика навчання";
+    var stats = new (string Label, string Value)[]
+    {
+        ("Усього занять", Model.TotalLessons.ToString()),
+        ("Проведено", Model.CompletedLessons.ToString()),
+        ("Заплановано", Model.ScheduledLessons.ToString()),
+        ("Скасовано", Model.CancelledLessons.ToString()),
+        ("Годин проведено", Model.CompletedHours.ToString("0.##")),
+        ("Оцінка доходу, грн", Model.EstimatedRevenue.ToString("0.##"))
+    };
+}
+
+<h1 class="h3 mb-3">Аналітика навчання <span class="badge text-bg-warning fs-6">Premium</span></h1>
+
+<div class="row g-3 mb-4">
+    @foreach (var stat in stats)
+    {
+        <div class="col-6 col-md-4 col-lg-2">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="h4 mb-0">@stat.Value</div>
+                    <div class="text-muted small">@stat.Label</div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<p class="text-muted">Години й дохід рахуються лише за проведеними заняттями.</p>
+
+<div class="row">
+    <div class="col-lg-6">
+        <h2 class="h5">За предметами</h2>
+        <div class="table-responsive">
+            <table class="table align-middle">
+                <thead><tr><th>Предмет</th><th>Занять</th><th>Годин</th></tr></thead>
+                <tbody>
+                    @foreach (var subject in Model.Subjects)
+                    {
+                        <tr><td>@subject.Subject</td><td>@subject.Lessons</td><td>@subject.Hours.ToString("0.##")</td></tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <h2 class="h5">За репетиторами</h2>
+        <div class="table-responsive">
+            <table class="table align-middle">
+                <thead><tr><th>Репетитор</th><th>Занять</th><th>Годин</th><th>Дохід, грн</th></tr></thead>
+                <tbody>
+                    @foreach (var tutor in Model.Tutors)
+                    {
+                        <tr><td>@tutor.Tutor</td><td>@tutor.Lessons</td><td>@tutor.Hours.ToString("0.##")</td><td>@tutor.Revenue.ToString("0.##")</td></tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

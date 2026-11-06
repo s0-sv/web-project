@@ -2,7 +2,7 @@
 
 ### Anonymous request is rejected
 http://localhost:5298/api/subjects -> HTTP 401 [OK]
-{"type":"https://tools.ietf.org/html/rfc9110#section-15.5.2","title":"Unauthorized","status":401,"traceId":"00-10a371c6ed85164a4e51351aac059684-f049009752bab36e-00"}
+{"type":"https://tools.ietf.org/html/rfc9110#section-15.5.2","title":"Unauthorized","status":401,"traceId":"00-bdf1c2fef9ca1c52812d46dd6c1a9d37-1444563b69b2d17f-00"}
 
 ### Register an account and a workspace
 http://localhost:5298/api/auth/register -> HTTP 201 [OK]
@@ -10,7 +10,7 @@ http://localhost:5298/api/auth/register -> HTTP 201 [OK]
 
 ### Wrong password is rejected
 http://localhost:5298/api/auth/token -> HTTP 401 [OK]
-{"type":"https://tools.ietf.org/html/rfc9110#section-15.5.2","title":"Invalid credentials","status":401,"detail":"The email or password is incorrect, or the account is temporarily locked.","traceId":"00-645ca2d0b8e0f644c23eacb337cf321f-91a1eaebb7d165c4-00"}
+{"type":"https://tools.ietf.org/html/rfc9110#section-15.5.2","title":"Invalid credentials","status":401,"detail":"The email or password is incorrect, or the account is temporarily locked.","traceId":"00-83e58da6b4e8d77dbdb748b443e62f93-9a7bae68bb205549-00"}
 
 ### Get an access token
 http://localhost:5298/api/auth/token -> HTTP 200 [OK]
@@ -18,7 +18,7 @@ http://localhost:5298/api/auth/token -> HTTP 200 [OK]
 
 ### Current user
 http://localhost:5298/api/auth/me -> HTTP 200 [OK]
-{"id":"36434af1-5738-493c-a155-af5868358f44","email":"demo.179393377115615@example.com","fullName":"Demo Owner","tenantId":4,"tenantName":"Demo 179393377115615","role":"Owner","studentId":null}
+{"id":"38f010a5-0bda-4b8c-ab1e-98da96d1442a","email":"demo.179393415618861@example.com","fullName":"Demo Owner","tenantId":6,"tenantName":"Demo 179393415618861","role":"Owner","studentId":null,"plan":"Free","features":[]}
 
 === Read collections ===
 
@@ -46,149 +46,149 @@ http://localhost:5298/api/materials -> HTTP 200 [OK]
 
 ### Create a subject
 http://localhost:5298/api/subjects -> HTTP 201 [OK]
-{"id":43,"name":"Chemistry 179393377115615","description":"Organic chemistry"}
+{"id":48,"name":"Chemistry 179393415618861","description":"Organic chemistry"}
 
 ### Create a tutor (email is normalised)
 http://localhost:5298/api/tutors -> HTTP 201 [OK]
-{"id":41,"fullName":"Demo Tutor","email":"tutor.179393377115615@example.com","phone":null,"bio":null,"hourlyRate":450.50}
+{"id":45,"fullName":"Demo Tutor","email":"tutor.179393415618861@example.com","phone":null,"bio":null,"hourlyRate":450.50}
 
 ### Create a student
 http://localhost:5298/api/students -> HTTP 201 [OK]
-{"id":27,"fullName":"Demo Student","email":"student.179393377115615@example.com","phone":null,"learningGoal":"Pass the exam"}
+{"id":30,"fullName":"Demo Student","email":"student.179393415618861@example.com","phone":null,"learningGoal":"Pass the exam"}
 
 ### Create a lesson
 http://localhost:5298/api/lessons -> HTTP 201 [OK]
-{"id":43,"tutorId":41,"tutorName":"Demo Tutor","studentId":27,"studentName":"Demo Student","subjectId":43,"subjectName":"Chemistry 179393377115615","topic":"Alkanes","startsAt":"2027-03-10T14:00:00+00:00","durationMinutes":60,"meetingUrl":"https://meet.example.com/demo","status":"Scheduled","notes":null,"materialsCount":0}
+{"id":47,"tutorId":45,"tutorName":"Demo Tutor","studentId":30,"studentName":"Demo Student","subjectId":48,"subjectName":"Chemistry 179393415618861","topic":"Alkanes","startsAt":"2027-03-10T14:00:00+00:00","durationMinutes":60,"meetingUrl":"https://meet.example.com/demo","status":"Scheduled","notes":null,"materialsCount":0}
 
 ### Upload a material file (multipart)
-http://localhost:5298/api/lessons/43/materials -> HTTP 201 [OK]
-{"id":27,"lessonId":43,"title":"Notes","fileName":"notes.txt","contentType":"text/plain","sizeBytes":13,"uploadedAt":"2026-11-06T02:56:11.784782+00:00","fileUrl":"/api/materials/27/file"}
+http://localhost:5298/api/lessons/47/materials -> HTTP 201 [OK]
+{"id":30,"lessonId":47,"title":"Notes","fileName":"notes.txt","contentType":"text/plain","sizeBytes":13,"uploadedAt":"2026-11-06T03:02:36.926699+00:00","fileUrl":"/api/materials/30/file"}
 
 === Read single records ===
 
 ### Get the lesson with related names
-http://localhost:5298/api/lessons/43 -> HTTP 200 [OK]
-{"id":43,"tutorId":41,"tutorName":"Demo Tutor","studentId":27,"studentName":"Demo Student","subjectId":43,"subjectName":"Chemistry 179393377115615","topic":"Alkanes","startsAt":"2027-03-10T14:00:00+00:00","durationMinutes":60,"meetingUrl":"https://meet.example.com/demo","status":"Scheduled","notes":null,"materialsCount":1}
+http://localhost:5298/api/lessons/47 -> HTTP 200 [OK]
+{"id":47,"tutorId":45,"tutorName":"Demo Tutor","studentId":30,"studentName":"Demo Student","subjectId":48,"subjectName":"Chemistry 179393415618861","topic":"Alkanes","startsAt":"2027-03-10T14:00:00+00:00","durationMinutes":60,"meetingUrl":"https://meet.example.com/demo","status":"Scheduled","notes":null,"materialsCount":1}
 
 ### List materials of the lesson
-http://localhost:5298/api/lessons/43/materials -> HTTP 200 [OK]
-{"items":[{"id":27,"lessonId":43,"title":"Notes","fileName":"notes.txt","contentType":"text/plain","sizeBytes":13,"uploadedAt":"2026-11-06T02:56:11.784782+00:00","fileUrl":"/api/materials/27/file"}],"skip":0,"limit":20,"total":1,"nextLink":null}
+http://localhost:5298/api/lessons/47/materials -> HTTP 200 [OK]
+{"items":[{"id":30,"lessonId":47,"title":"Notes","fileName":"notes.txt","contentType":"text/plain","sizeBytes":13,"uploadedAt":"2026-11-06T03:02:36.926699+00:00","fileUrl":"/api/materials/30/file"}],"skip":0,"limit":20,"total":1,"nextLink":null}
 
 ### Download the material file
-http://localhost:5298/api/materials/27/file -> HTTP 200 [OK]
+http://localhost:5298/api/materials/30/file -> HTTP 200 [OK]
 Lesson notes
 
 === Update ===
 
 ### Update the subject
-http://localhost:5298/api/subjects/43 -> HTTP 200 [OK]
-{"id":43,"name":"Chemistry 179393377115615 (advanced)","description":"Updated"}
+http://localhost:5298/api/subjects/48 -> HTTP 200 [OK]
+{"id":48,"name":"Chemistry 179393415618861 (advanced)","description":"Updated"}
 
 ### Update the tutor
-http://localhost:5298/api/tutors/41 -> HTTP 200 [OK]
-{"id":41,"fullName":"Demo Tutor Updated","email":"tutor.179393377115615@example.com","phone":null,"bio":null,"hourlyRate":500}
+http://localhost:5298/api/tutors/45 -> HTTP 200 [OK]
+{"id":45,"fullName":"Demo Tutor Updated","email":"tutor.179393415618861@example.com","phone":null,"bio":null,"hourlyRate":500}
 
 ### Update the student
-http://localhost:5298/api/students/27 -> HTTP 200 [OK]
-{"id":27,"fullName":"Demo Student Updated","email":"student.179393377115615@example.com","phone":null,"learningGoal":null}
+http://localhost:5298/api/students/30 -> HTTP 200 [OK]
+{"id":30,"fullName":"Demo Student Updated","email":"student.179393415618861@example.com","phone":null,"learningGoal":null}
 
 ### Mark the lesson as completed
-http://localhost:5298/api/lessons/43 -> HTTP 200 [OK]
-{"id":43,"tutorId":41,"tutorName":"Demo Tutor Updated","studentId":27,"studentName":"Demo Student Updated","subjectId":43,"subjectName":"Chemistry 179393377115615 (advanced)","topic":"Alkanes","startsAt":"2027-03-10T14:00:00+00:00","durationMinutes":60,"meetingUrl":"https://meet.example.com/demo","status":"Completed","notes":"Done","materialsCount":1}
+http://localhost:5298/api/lessons/47 -> HTTP 200 [OK]
+{"id":47,"tutorId":45,"tutorName":"Demo Tutor Updated","studentId":30,"studentName":"Demo Student Updated","subjectId":48,"subjectName":"Chemistry 179393415618861 (advanced)","topic":"Alkanes","startsAt":"2027-03-10T14:00:00+00:00","durationMinutes":60,"meetingUrl":"https://meet.example.com/demo","status":"Completed","notes":"Done","materialsCount":1}
 
 ### Rename the material
-http://localhost:5298/api/materials/27 -> HTTP 200 [OK]
-{"id":27,"lessonId":43,"title":"Notes (final)","fileName":"notes.txt","contentType":"text/plain","sizeBytes":13,"uploadedAt":"2026-11-06T02:56:11.784782+00:00","fileUrl":"/api/materials/27/file"}
+http://localhost:5298/api/materials/30 -> HTTP 200 [OK]
+{"id":30,"lessonId":47,"title":"Notes (final)","fileName":"notes.txt","contentType":"text/plain","sizeBytes":13,"uploadedAt":"2026-11-06T03:02:36.926699+00:00","fileUrl":"/api/materials/30/file"}
 
 ### Replace the material file
-http://localhost:5298/api/materials/27/file -> HTTP 200 [OK]
-{"id":27,"lessonId":43,"title":"Notes (final)","fileName":"notes-v2.txt","contentType":"text/plain","sizeBytes":15,"uploadedAt":"2026-11-06T02:56:11.91126+00:00","fileUrl":"/api/materials/27/file"}
+http://localhost:5298/api/materials/30/file -> HTTP 200 [OK]
+{"id":30,"lessonId":47,"title":"Notes (final)","fileName":"notes-v2.txt","contentType":"text/plain","sizeBytes":15,"uploadedAt":"2026-11-06T03:02:37.031289+00:00","fileUrl":"/api/materials/30/file"}
 
 === Errors: 4xx ===
 
 ### Unknown record
 http://localhost:5298/api/tutors/99999999 -> HTTP 404 [OK]
-{"type":"https://tools.ietf.org/html/rfc9110#section-15.5.5","title":"Not Found","status":404,"traceId":"00-a8e952e9433d8d1bf0c6a7ee7059c772-075ffeb5d472f730-00"}
+{"type":"https://tools.ietf.org/html/rfc9110#section-15.5.5","title":"Not Found","status":404,"traceId":"00-013e82aee1ce426281740fcbfa560ef6-50caef3cc78120f5-00"}
 
 ### Unknown route
 http://localhost:5298/api/does-not-exist -> HTTP 404 [OK]
-{"type":"https://tools.ietf.org/html/rfc9110#section-15.5.5","title":"Not Found","status":404,"traceId":"00-be80fcbe646189bf46cbfcfe744a6bd2-eccb79acb181b27c-00"}
+{"type":"https://tools.ietf.org/html/rfc9110#section-15.5.5","title":"Not Found","status":404,"traceId":"00-24ae5e53f24357e532ac58baff54cab7-a93c9d9ffa63b598-00"}
 
 ### Validation: empty name
 http://localhost:5298/api/subjects -> HTTP 400 [OK]
-{"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"One or more validation errors occurred.","status":400,"errors":{"Name":["The Name field is required."]},"traceId":"00-165f1f99aa4fce27a9c815632913178e-f11bc827eb9dc8bc-00"}
+{"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"One or more validation errors occurred.","status":400,"errors":{"Name":["The Name field is required."]},"traceId":"00-5328defe7df5ee35792509e74f634af4-dc7402a19498d0e5-00"}
 
 ### Validation: bad email and negative rate
 http://localhost:5298/api/tutors -> HTTP 400 [OK]
-{"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"One or more validation errors occurred.","status":400,"errors":{"Email":["The Email field is not a valid e-mail address."],"HourlyRate":["The field HourlyRate must be between 0 and 100000."]},"traceId":"00-0be9bc9339d43ec1cee63f678ae36523-e87cd385c8999b19-00"}
+{"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"One or more validation errors occurred.","status":400,"errors":{"Email":["The Email field is not a valid e-mail address."],"HourlyRate":["The field HourlyRate must be between 0 and 100000."]},"traceId":"00-a10d0b2344c0d4c9fd466f2445890004-cbcb8b92247f5e84-00"}
 
 ### Validation: lesson shorter than allowed
 http://localhost:5298/api/lessons -> HTTP 400 [OK]
-{"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"One or more validation errors occurred.","status":400,"errors":{"DurationMinutes":["The field DurationMinutes must be between 15 and 480."]},"traceId":"00-42c50f0dbc028d573d7136cea8432a7b-4de40f226eabeaa8-00"}
+{"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"One or more validation errors occurred.","status":400,"errors":{"DurationMinutes":["The field DurationMinutes must be between 15 and 480."]},"traceId":"00-14d48c91395121f561fd73fd53d8d30f-34f7fd9e48559817-00"}
 
 ### Validation: unknown status
 http://localhost:5298/api/lessons -> HTTP 400 [OK]
-{"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"One or more validation errors occurred.","status":400,"errors":{"request":["The request field is required."],"$.status":["The JSON value could not be converted to TutorHub.Contracts.LessonRequest. Path: $.status | LineNumber: 0 | BytePositionInLine: 184."]},"traceId":"00-3b37d84227a51a7c3b39d46836cf1a87-f563c70480ed0f87-00"}
+{"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"One or more validation errors occurred.","status":400,"errors":{"request":["The request field is required."],"$.status":["The JSON value could not be converted to TutorHub.Contracts.LessonRequest. Path: $.status | LineNumber: 0 | BytePositionInLine: 184."]},"traceId":"00-b058cad563feec685615a14a1ce1a71a-e8a57dede921b3b5-00"}
 
 ### Malformed JSON
 http://localhost:5298/api/subjects -> HTTP 400 [OK]
-{"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"One or more validation errors occurred.","status":400,"errors":{"request":["The request field is required."],"$.name":["Expected depth to be zero at the end of the JSON payload. There is an open JSON object or array that should be closed. Path: $.name | LineNumber: 0 | BytePositionInLine: 8."]},"traceId":"00-efb212338e7fd4d6682d8374916eeaa0-984fd046834683c3-00"}
+{"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"One or more validation errors occurred.","status":400,"errors":{"request":["The request field is required."],"$.name":["Expected depth to be zero at the end of the JSON payload. There is an open JSON object or array that should be closed. Path: $.name | LineNumber: 0 | BytePositionInLine: 8."]},"traceId":"00-22144215d3079e43d7ee82cf83279492-0d19a495af3f70c4-00"}
 
 ### Lesson references a tutor that does not exist
 http://localhost:5298/api/lessons -> HTTP 400 [OK]
-{"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"Unknown reference","status":400,"detail":"The referenced tutor, student or subject does not exist.","traceId":"00-7a5cff9e7182e7a4b5da8b387c10d2fb-4b4d028bde1ec3e5-00"}
+{"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"Unknown reference","status":400,"detail":"The referenced tutor, student or subject does not exist.","traceId":"00-1cbf31c1294b1277a63ed2441cbc11f0-4f259e5238421038-00"}
 
 ### Duplicate subject name
 http://localhost:5298/api/subjects -> HTTP 409 [OK]
-{"type":"https://tools.ietf.org/html/rfc9110#section-15.5.10","title":"Conflict","status":409,"detail":"A subject with this name already exists.","traceId":"00-f10c21783e2ba13208a188d6f803aa84-4934b8f535fd0e4c-00"}
+{"type":"https://tools.ietf.org/html/rfc9110#section-15.5.10","title":"Conflict","status":409,"detail":"A subject with this name already exists.","traceId":"00-4c955030c6f33e825c2356cb4b2b625c-3739bc314d762e00-00"}
 
 ### Duplicate email differing only by case
 http://localhost:5298/api/tutors -> HTTP 409 [OK]
-{"type":"https://tools.ietf.org/html/rfc9110#section-15.5.10","title":"Conflict","status":409,"detail":"A tutor with this email already exists.","traceId":"00-e4b6e65d8155f05a0f7d4c9531f6c06b-6add999d39efbe58-00"}
+{"type":"https://tools.ietf.org/html/rfc9110#section-15.5.10","title":"Conflict","status":409,"detail":"A tutor with this email already exists.","traceId":"00-deb0ceef223e9cf5a52366230e33e8c4-b373277b55180b77-00"}
 
 ### Delete a subject used by a lesson
-http://localhost:5298/api/subjects/43 -> HTTP 409 [OK]
-{"type":"https://tools.ietf.org/html/rfc9110#section-15.5.10","title":"Conflict","status":409,"detail":"The subject cannot be deleted while lessons reference it.","traceId":"00-eb612077705a91a3f5eed47b0028361a-8f141c4657ba9457-00"}
+http://localhost:5298/api/subjects/48 -> HTTP 409 [OK]
+{"type":"https://tools.ietf.org/html/rfc9110#section-15.5.10","title":"Conflict","status":409,"detail":"The subject cannot be deleted while lessons reference it.","traceId":"00-e7c97d577e3795cfc0f75850468c777a-ab797c32f6c22853-00"}
 
 ### Delete a tutor used by a lesson
-http://localhost:5298/api/tutors/41 -> HTTP 409 [OK]
-{"type":"https://tools.ietf.org/html/rfc9110#section-15.5.10","title":"Conflict","status":409,"detail":"The tutor cannot be deleted while lessons reference them.","traceId":"00-d2f81b552afafebab34a8a520a0fe6d3-bb7892ae8fe3034c-00"}
+http://localhost:5298/api/tutors/45 -> HTTP 409 [OK]
+{"type":"https://tools.ietf.org/html/rfc9110#section-15.5.10","title":"Conflict","status":409,"detail":"The tutor cannot be deleted while lessons reference them.","traceId":"00-e9e787bf64352ddd2d6f6be3bd7de60c-14b2a51287b7f258-00"}
 
 ### Delete a student used by a lesson
-http://localhost:5298/api/students/27 -> HTTP 409 [OK]
-{"type":"https://tools.ietf.org/html/rfc9110#section-15.5.10","title":"Conflict","status":409,"detail":"The student cannot be deleted while lessons reference them.","traceId":"00-e40d63671fde4a685710fc5eb51efa10-103bb79cc38b2d26-00"}
+http://localhost:5298/api/students/30 -> HTTP 409 [OK]
+{"type":"https://tools.ietf.org/html/rfc9110#section-15.5.10","title":"Conflict","status":409,"detail":"The student cannot be deleted while lessons reference them.","traceId":"00-348e6672cc88a9186507794028c7f940-f9ffb022742e5f1a-00"}
 
 ### Upload a disallowed file type
-http://localhost:5298/api/lessons/43/materials -> HTTP 400 [OK]
-{"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"One or more validation errors occurred.","status":400,"errors":{"file":["Недозволений тип файлу. Дозволено: .pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt,.png,.jpg,.jpeg,.mp3,.mp4,.zip"]},"traceId":"00-39825789c6e2fc9979f86ff027f19b17-6fa617695ee50d12-00"}
+http://localhost:5298/api/lessons/47/materials -> HTTP 400 [OK]
+{"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"One or more validation errors occurred.","status":400,"errors":{"file":["Недозволений тип файлу. Дозволено: .pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt,.png,.jpg,.jpeg,.mp3,.mp4,.zip"]},"traceId":"00-18e78181fdf0fe2d644ad3f3427cd99a-16ba8590856dbd76-00"}
 
 ### Wrong content type
 http://localhost:5298/api/subjects -> HTTP 415 [OK]
-{"type":"https://tools.ietf.org/html/rfc9110#section-15.5.16","title":"Unsupported Media Type","status":415,"traceId":"00-d1956dc9d7c6112832f27f1da2459519-4c57f9bc27f472e8-00"}
+{"type":"https://tools.ietf.org/html/rfc9110#section-15.5.16","title":"Unsupported Media Type","status":415,"traceId":"00-0adde24a91b9945de52d4aa6725464a5-a53dac07532412bc-00"}
 
 === Delete ===
 
 ### Delete the material
-http://localhost:5298/api/materials/27 -> HTTP 204 [OK]
+http://localhost:5298/api/materials/30 -> HTTP 204 [OK]
 
 ### The deleted material is gone
-http://localhost:5298/api/materials/27 -> HTTP 404 [OK]
-{"type":"https://tools.ietf.org/html/rfc9110#section-15.5.5","title":"Not Found","status":404,"traceId":"00-8dd4d1b7dc692f6379bd3989a4256d11-7a63b5aecaf6dd74-00"}
+http://localhost:5298/api/materials/30 -> HTTP 404 [OK]
+{"type":"https://tools.ietf.org/html/rfc9110#section-15.5.5","title":"Not Found","status":404,"traceId":"00-1c81524e13bd638db7b488dfbf712cb0-a9bb4f5d08b04047-00"}
 
 ### Delete the lesson
-http://localhost:5298/api/lessons/43 -> HTTP 204 [OK]
+http://localhost:5298/api/lessons/47 -> HTTP 204 [OK]
 
 ### Delete the subject
-http://localhost:5298/api/subjects/43 -> HTTP 204 [OK]
+http://localhost:5298/api/subjects/48 -> HTTP 204 [OK]
 
 ### Delete the tutor
-http://localhost:5298/api/tutors/41 -> HTTP 204 [OK]
+http://localhost:5298/api/tutors/45 -> HTTP 204 [OK]
 
 ### Delete the student
-http://localhost:5298/api/students/27 -> HTTP 204 [OK]
+http://localhost:5298/api/students/30 -> HTTP 204 [OK]
 
 ### The deleted tutor is gone
-http://localhost:5298/api/tutors/41 -> HTTP 404 [OK]
-{"type":"https://tools.ietf.org/html/rfc9110#section-15.5.5","title":"Not Found","status":404,"traceId":"00-b8260ea5605eb5cf7221664cca225b9e-4242742965dc078e-00"}
+http://localhost:5298/api/tutors/45 -> HTTP 404 [OK]
+{"type":"https://tools.ietf.org/html/rfc9110#section-15.5.5","title":"Not Found","status":404,"traceId":"00-9e01426a26000370852e8915050c287a-825d92f618803150-00"}
 
 All responses matched the expected status codes.
