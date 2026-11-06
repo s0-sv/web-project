@@ -288,6 +288,90 @@ public class PublicProfileTests(AuthTestFactory factory)
     }
 
     [Fact]
+    public async Task Page_has_search_metadata()
+    {
+        var owner = await factory.RegisterAsync();
+        var graph = await owner.Client.CreateLessonGraphAsync();
+        var slug = await PublishAsync(owner.Client, graph.TutorId);
+
+        var html = WebUtility.HtmlDecode(await factory.Anonymous().GetStringAsync($"/tutor/{slug}"));
+
+        Assert.Contains("<html lang=\"uk\">", html);
+        Assert.Contains("<meta name=\"description\"", html);
+        Assert.Contains("name=\"robots\" content=\"index, follow\"", html);
+        Assert.Contains($"rel=\"canonical\" href=\"http://localhost/tutor/{slug}\"", html);
+        Assert.Contains("property=\"og:title\"", html);
+        Assert.Contains("application/ld+json", html);
+        Assert.Contains("\"@type\":\"Person\"", html);
+        Assert.Single(System.Text.RegularExpressions.Regex.Matches(html, "<h1[ >]"));
+    }
+
+    [Fact]
+    public async Task Description_stays_within_the_search_snippet_length()
+    {
+        var owner = await factory.RegisterAsync();
+        var tutorId = await CreateTutorAsync(owner.Client, headline: new string('x', 200));
+        var slug = await PublishAsync(owner.Client, tutorId);
+
+        var html = WebUtility.HtmlDecode(await factory.Anonymous().GetStringAsync($"/tutor/{slug}"));
+
+        var match = System.Text.RegularExpressions.Regex.Match(html, "name=\"description\" content=\"([^\"]*)\"");
+        Assert.True(match.Success);
+        Assert.InRange(match.Groups[1].Value.Length, 1, 160);
+    }
+
+    [Fact]
+    public async Task Structured_data_cannot_break_out_of_its_script()
+    {
+        var owner = await factory.RegisterAsync();
+        var tutorId = await CreateTutorAsync(owner.Client, bio: "</script><script>alert(1)</script>");
+        var slug = await PublishAsync(owner.Client, tutorId);
+
+        var html = await factory.Anonymous().GetStringAsync($"/tutor/{slug}");
+
+        Assert.DoesNotContain("</script><script>alert", html);
+    }
+
+    [Theory]
+    [InlineData("/Account/Login")]
+    [InlineData("/Account/Register")]
+    public async Task Private_area_pages_ask_not_to_be_indexed(string path)
+    {
+        var html = await factory.Anonymous().GetStringAsync(path);
+        Assert.Contains("noindex", html);
+    }
+
+    [Fact]
+    public async Task Robots_allows_only_public_pages_and_links_the_sitemap()
+    {
+        var response = await factory.Anonymous().GetAsync("/robots.txt");
+        var body = await response.Content.ReadAsStringAsync();
+
+        Assert.Equal("text/plain", response.Content.Headers.ContentType?.MediaType);
+        Assert.Contains("Allow: /tutor/", body);
+        Assert.Contains("Disallow: /", body);
+        Assert.Contains("Sitemap: http://localhost/sitemap.xml", body);
+    }
+
+    [Fact]
+    public async Task Sitemap_lists_only_published_tutors()
+    {
+        var owner = await factory.RegisterAsync();
+        var published = await PublishAsync(owner.Client, await CreateTutorAsync(owner.Client));
+        var withdrawnId = await CreateTutorAsync(owner.Client);
+        var withdrawn = await PublishAsync(owner.Client, withdrawnId);
+        await owner.Client.PutAsJsonAsync($"/api/tutors/{withdrawnId}/publication", new { isPublished = false });
+
+        var response = await factory.Anonymous().GetAsync("/sitemap.xml");
+        var body = await response.Content.ReadAsStringAsync();
+
+        Assert.Equal("application/xml", response.Content.Headers.ContentType?.MediaType);
+        Assert.Contains($"<loc>http://localhost/tutor/{published}</loc>", body);
+        Assert.DoesNotContain(withdrawn, body);
+        System.Xml.Linq.XDocument.Parse(body);
+    }
+
+    [Fact]
     public void Slug_is_transliterated_from_ukrainian()
     {
         Assert.Equal("olena-koval", Tutor.GenerateSlug("Олена Коваль"));

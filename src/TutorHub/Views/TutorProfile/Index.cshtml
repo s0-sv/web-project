@@ -1,17 +1,60 @@
-@model TutorHub.Controllers.TutorProfilePage
+@using System.Text.Json
+@using TutorHub.Controllers
+@inject IConfiguration Configuration
+@model TutorProfilePage
 @{
     Layout = null;
     var tutor = Model.Tutor;
     var headline = tutor.Headline ?? "Індивідуальні онлайн-заняття";
     var initials = string.Concat(tutor.FullName.Split(' ', StringSplitOptions.RemoveEmptyEntries).Take(2).Select(p => p[0]));
     var subjectNames = string.Join(", ", Model.Subjects.Select(s => s.Name));
+    var baseUrl = SeoController.BaseUrl(Configuration, Context.Request);
+    var canonical = $"{baseUrl}/tutor/{tutor.Slug}";
+    var pageTitle = $"{tutor.FullName}: {headline} | TutorHub";
+    var fullDescription = subjectNames.Length > 0
+        ? $"{tutor.FullName}: {headline}. Предмети: {subjectNames}. Індивідуальні онлайн-заняття, {tutor.HourlyRate:0.##} грн/год."
+        : $"{tutor.FullName}: {headline}. Індивідуальні онлайн-заняття, {tutor.HourlyRate:0.##} грн/год.";
+    var description = fullDescription.Length <= 160 ? fullDescription : $"{fullDescription[..157].TrimEnd()}...";
+    var imageUrl = Model.PhotoUrl is null
+        ? null
+        : Model.PhotoUrl.StartsWith('/') ? $"{baseUrl}{Model.PhotoUrl}" : Model.PhotoUrl;
+    var structuredData = JsonSerializer.Serialize(new Dictionary<string, object?>
+    {
+        ["@context"] = "https://schema.org",
+        ["@type"] = "Person",
+        ["name"] = tutor.FullName,
+        ["jobTitle"] = "Репетитор",
+        ["description"] = tutor.Bio ?? headline,
+        ["url"] = canonical,
+        ["email"] = tutor.Email,
+        ["telephone"] = tutor.Phone,
+        ["image"] = imageUrl,
+        ["knowsAbout"] = Model.Subjects.Select(s => s.Name).ToArray(),
+        ["worksFor"] = new Dictionary<string, string> { ["@type"] = "Organization", ["name"] = Model.TenantName }
+    }.Where(p => p.Value is not null).ToDictionary());
 }
 <!DOCTYPE html>
 <html lang="uk">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@tutor.FullName: @headline | TutorHub</title>
+    <title>@pageTitle</title>
+    <meta name="description" content="@description" />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="@canonical" />
+    <link rel="icon" href="~/favicon.ico" />
+    <meta property="og:type" content="profile" />
+    <meta property="og:locale" content="uk_UA" />
+    <meta property="og:site_name" content="TutorHub" />
+    <meta property="og:title" content="@pageTitle" />
+    <meta property="og:description" content="@description" />
+    <meta property="og:url" content="@canonical" />
+    @if (imageUrl is not null)
+    {
+        <meta property="og:image" content="@imageUrl" />
+    }
+    <meta name="twitter:card" content="summary" />
+    <script type="application/ld+json">@Html.Raw(structuredData)</script>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 </head>

@@ -24,7 +24,9 @@ public class EndpointSecurityTests(AuthTestFactory factory)
         "AuthApi.Register",
         "AuthApi.Token",
         "TutorProfile.Index",
-        "TutorProfile.Photo"
+        "TutorProfile.Photo",
+        "Seo.Robots",
+        "Seo.Sitemap"
     ];
 
     private List<(string Name, EndpointMetadataCollection Metadata)> ControllerActions() =>
