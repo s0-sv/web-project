@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using TutorHub.Models;
+using TutorHub.Services;
 
 namespace TutorHub.Controllers;
 
@@ -44,6 +45,14 @@ public class RegisterForm
     [Compare(nameof(Password), ErrorMessage = "Паролі не збігаються")]
     [DataType(DataType.Password)]
     public string ConfirmPassword { get; set; } = "";
+
+    [Display(Name = "Назва робочого простору")]
+    [StringLength(100, ErrorMessage = "Назва не може перевищувати 100 символів")]
+    public string? WorkspaceName { get; set; }
+
+    [Display(Name = "Код запрошення")]
+    [StringLength(64, ErrorMessage = "Некоректний код запрошення")]
+    public string? InviteCode { get; set; }
 }
 
 public class ExternalRegisterForm
@@ -52,6 +61,14 @@ public class ExternalRegisterForm
     [Required(ErrorMessage = "Вкажіть ПІБ")]
     [StringLength(150, ErrorMessage = "ПІБ не може перевищувати 150 символів")]
     public string FullName { get; set; } = "";
+
+    [Display(Name = "Назва робочого простору")]
+    [StringLength(100, ErrorMessage = "Назва не може перевищувати 100 символів")]
+    public string? WorkspaceName { get; set; }
+
+    [Display(Name = "Код запрошення")]
+    [StringLength(64, ErrorMessage = "Некоректний код запрошення")]
+    public string? InviteCode { get; set; }
 
     public string? Email { get; set; }
 
@@ -62,6 +79,7 @@ public class ExternalRegisterForm
 public class AccountController(
     UserManager<ApplicationUser> users,
     SignInManager<ApplicationUser> signIn,
+    TenantRegistration registration,
     ILogger<AccountController> logger) : AppController
 {
     public async Task<IActionResult> Login(string? returnUrl = null)
@@ -109,16 +127,16 @@ public class AccountController(
             return View(input);
         }
 
-        var user = new ApplicationUser { UserName = input.Email, Email = input.Email, FullName = input.FullName };
-        var result = await users.CreateAsync(user, input.Password);
+        var result = await registration.RegisterAsync(new RegistrationRequest(
+            input.Email, input.FullName, input.Password, input.WorkspaceName, input.InviteCode));
 
-        if (!result.Succeeded)
+        if (result.User is null)
         {
-            AddIdentityErrors(result);
+            AddIdentityErrors(result.Errors);
             return View(input);
         }
 
-        await signIn.SignInAsync(user, isPersistent: false);
+        await signIn.SignInAsync(result.User, isPersistent: false);
         FlashSuccess("Обліковий запис створено.");
         return RedirectLocal(null);
     }
@@ -213,21 +231,16 @@ public class AccountController(
             return View(input);
         }
 
-        var user = new ApplicationUser { UserName = email, Email = email, FullName = input.FullName };
-        var result = await users.CreateAsync(user);
+        var result = await registration.RegisterAsync(new RegistrationRequest(
+            email, input.FullName, null, input.WorkspaceName, input.InviteCode, info));
 
-        if (result.Succeeded)
+        if (result.User is null)
         {
-            result = await users.AddLoginAsync(user, info);
-        }
-
-        if (!result.Succeeded)
-        {
-            AddIdentityErrors(result);
+            AddIdentityErrors(result.Errors);
             return View(input);
         }
 
-        await signIn.SignInAsync(user, isPersistent: false, info.LoginProvider);
+        await signIn.SignInAsync(result.User, isPersistent: false, info.LoginProvider);
         await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
         FlashSuccess("Обліковий запис створено.");
         return RedirectLocal(null);
@@ -244,12 +257,14 @@ public class AccountController(
             ? LocalRedirect(returnUrl)
             : RedirectToAction("Index", "Home");
 
-    private void AddIdentityErrors(IdentityResult result)
+    private void AddIdentityErrors(IReadOnlyList<IdentityError> errors)
     {
-        foreach (var error in result.Errors)
+        foreach (var error in errors)
         {
             ModelState.AddModelError("", error.Code switch
             {
+                TenantRegistration.InvalidInviteCode => "Код запрошення недійсний.",
+                TenantRegistration.WorkspaceRequired => "Вкажіть назву робочого простору або код запрошення.",
                 nameof(IdentityErrorDescriber.DuplicateEmail) or nameof(IdentityErrorDescriber.DuplicateUserName) =>
                     "Обліковий запис із цим email уже існує.",
                 nameof(IdentityErrorDescriber.PasswordTooShort) => "Пароль занадто короткий.",

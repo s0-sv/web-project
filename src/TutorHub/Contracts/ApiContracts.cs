@@ -109,10 +109,14 @@ public record MaterialUpdateRequest([Required, StringLength(200)] string Title);
 public record RegisterRequest(
     [Required, EmailAddress, StringLength(254)] string Email,
     [Required, StringLength(100, MinimumLength = 8)] string Password,
-    [Required, StringLength(150)] string FullName);
+    [Required, StringLength(150)] string FullName,
+    [StringLength(100)] string? WorkspaceName,
+    [StringLength(64)] string? InviteCode);
 
 public record TokenRequest([Required] string Email, [Required] string Password);
 
 public record TokenResponse(string AccessToken, string TokenType, int ExpiresIn);
 
-public record CurrentUserDto(string Id, string Email, string FullName);
+public record CurrentUserDto(string Id, string Email, string FullName, int TenantId, string TenantName, string Role, int? StudentId);
+
+public record InviteCodeDto(string InviteCode);

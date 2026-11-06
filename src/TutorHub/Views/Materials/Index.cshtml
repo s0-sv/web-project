@@ -4,6 +4,9 @@
 }
 
 <h1 class="h3 mb-1">Матеріали</h1>
-<p class="text-muted">Щоб додати матеріал, відкрийте потрібне заняття.</p>
+@if (!User.IsInRole(TenantRoles.Student))
+{
+    <p class="text-muted">Щоб додати матеріал, відкрийте потрібне заняття.</p>
+}
 
 <partial name="_MaterialsTable" model="Model" />

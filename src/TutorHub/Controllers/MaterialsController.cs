@@ -1,6 +1,8 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TutorHub.Data;
+using TutorHub.Models;
 using TutorHub.Services;
 using TutorHub.ViewModels;
 
@@ -24,6 +26,7 @@ public class MaterialsController(AppDbContext db, MaterialService materials) : A
             : File(stream, material!.ContentType, material.OriginalFileName);
     }
 
+    [Authorize(Policy = AppPolicies.Staff)]
     public async Task<IActionResult> Create(int lessonId)
     {
         var topic = await db.Lessons.Where(l => l.Id == lessonId).Select(l => l.Topic).FirstOrDefaultAsync();
@@ -35,6 +38,7 @@ public class MaterialsController(AppDbContext db, MaterialService materials) : A
     [HttpPost]
     [RequestSizeLimit(MaterialFileRules.MaxRequestBytes)]
     [RequestFormLimits(MultipartBodyLengthLimit = MaterialFileRules.MaxRequestBytes)]
+    [Authorize(Policy = AppPolicies.Staff)]
     public async Task<IActionResult> Create(MaterialFormModel input)
     {
         var topic = await db.Lessons.Where(l => l.Id == input.LessonId).Select(l => l.Topic).FirstOrDefaultAsync();
@@ -60,6 +64,7 @@ public class MaterialsController(AppDbContext db, MaterialService materials) : A
         return RedirectToAction("Details", "Lessons", new { id = input.LessonId });
     }
 
+    [Authorize(Policy = AppPolicies.Staff)]
     public async Task<IActionResult> Edit(int id)
     {
         var material = await db.LessonMaterials.AsNoTracking()
@@ -81,6 +86,7 @@ public class MaterialsController(AppDbContext db, MaterialService materials) : A
     [HttpPost]
     [RequestSizeLimit(MaterialFileRules.MaxRequestBytes)]
     [RequestFormLimits(MultipartBodyLengthLimit = MaterialFileRules.MaxRequestBytes)]
+    [Authorize(Policy = AppPolicies.Staff)]
     public async Task<IActionResult> Edit(int id, MaterialFormModel input)
     {
         var material = await db.LessonMaterials.Include(m => m.Lesson).FirstOrDefaultAsync(m => m.Id == id);
@@ -109,6 +115,7 @@ public class MaterialsController(AppDbContext db, MaterialService materials) : A
         return RedirectToAction("Details", "Lessons", new { id = material.LessonId });
     }
 
+    [Authorize(Policy = AppPolicies.Staff)]
     public async Task<IActionResult> Delete(int id)
     {
         var material = await db.LessonMaterials.AsNoTracking()
@@ -119,6 +126,7 @@ public class MaterialsController(AppDbContext db, MaterialService materials) : A
     }
 
     [HttpPost, ActionName("Delete")]
+    [Authorize(Policy = AppPolicies.Staff)]
     public async Task<IActionResult> DeleteConfirmed(int id)
     {
         var material = await db.LessonMaterials.FindAsync(id);

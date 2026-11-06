@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -24,6 +25,7 @@ public class LessonsController(AppDbContext db, MaterialService materials) : App
         return lesson is null ? NotFound() : View(lesson);
     }
 
+    [Authorize(Policy = AppPolicies.Staff)]
     public async Task<IActionResult> Create()
     {
         await PopulateSelectsAsync();
@@ -31,6 +33,7 @@ public class LessonsController(AppDbContext db, MaterialService materials) : App
     }
 
     [HttpPost]
+    [Authorize(Policy = AppPolicies.Staff)]
     public async Task<IActionResult> Create(LessonFormModel input)
     {
         if (!ModelState.IsValid)
@@ -53,6 +56,7 @@ public class LessonsController(AppDbContext db, MaterialService materials) : App
         return RedirectToAction(nameof(Details), new { id = lesson.Id });
     }
 
+    [Authorize(Policy = AppPolicies.Staff)]
     public async Task<IActionResult> Edit(int id)
     {
         var lesson = await db.Lessons.AsNoTracking().FirstOrDefaultAsync(l => l.Id == id);
@@ -78,6 +82,7 @@ public class LessonsController(AppDbContext db, MaterialService materials) : App
     }
 
     [HttpPost]
+    [Authorize(Policy = AppPolicies.Staff)]
     public async Task<IActionResult> Edit(int id, LessonFormModel input)
     {
         input.Id = id;
@@ -105,6 +110,7 @@ public class LessonsController(AppDbContext db, MaterialService materials) : App
         return RedirectToAction(nameof(Details), new { id });
     }
 
+    [Authorize(Policy = AppPolicies.Staff)]
     public async Task<IActionResult> Delete(int id)
     {
         var lesson = await LoadFullAsync(id);
@@ -112,6 +118,7 @@ public class LessonsController(AppDbContext db, MaterialService materials) : App
     }
 
     [HttpPost, ActionName("Delete")]
+    [Authorize(Policy = AppPolicies.Staff)]
     public async Task<IActionResult> DeleteConfirmed(int id)
     {
         var lesson = await db.Lessons.FindAsync(id);

@@ -2,7 +2,9 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using TutorHub.Contracts;
+using TutorHub.Data;
 using TutorHub.Models;
 using TutorHub.Services;
 
@@ -12,21 +14,21 @@ namespace TutorHub.Controllers.Api;
 public class AuthApiController(
     UserManager<ApplicationUser> users,
     SignInManager<ApplicationUser> signIn,
-    JwtTokenService tokens) : ApiControllerBase
+    JwtTokenService tokens,
+    TenantRegistration registration,
+    AppDbContext db,
+    TenantContext tenant) : ApiControllerBase
 {
     [AllowAnonymous]
     [HttpPost("register")]
     public async Task<ActionResult<TokenResponse>> Register(RegisterRequest request)
     {
-        var user = new ApplicationUser { UserName = request.Email, Email = request.Email, FullName = request.FullName };
-        var result = await users.CreateAsync(user, request.Password);
+        var result = await registration.RegisterAsync(new RegistrationRequest(
+            request.Email, request.FullName, request.Password, request.WorkspaceName, request.InviteCode));
 
-        if (!result.Succeeded)
-        {
-            return IdentityFailure(result);
-        }
-
-        return StatusCode(StatusCodes.Status201Created, await tokens.CreateAsync(user));
+        return result.User is null
+            ? IdentityFailure(result.Errors)
+            : StatusCode(StatusCodes.Status201Created, await tokens.CreateAsync(result.User));
     }
 
     [AllowAnonymous]
@@ -47,7 +49,23 @@ public class AuthApiController(
     public async Task<ActionResult<CurrentUserDto>> Me()
     {
         var user = await users.FindByIdAsync(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-        return user is null ? Unauthorized() : new CurrentUserDto(user.Id, user.Email!, user.FullName);
+        if (user is null)
+        {
+            return Unauthorized();
+        }
+
+        var tenantName = await db.Tenants.Where(t => t.Id == user.TenantId).Select(t => t.Name).FirstAsync();
+        return new CurrentUserDto(user.Id, user.Email!, user.FullName, user.TenantId, tenantName, user.Role, user.StudentId);
+    }
+
+    [Authorize(Policy = AppPolicies.OwnerOnly)]
+    [HttpPost("invite")]
+    public async Task<ActionResult<InviteCodeDto>> RegenerateMemberInvite()
+    {
+        var current = await db.Tenants.FirstAsync(t => t.Id == tenant.TenantId);
+        current.MemberInviteCode = Tenant.NewInviteCode();
+        await db.SaveChangesAsync();
+        return new InviteCodeDto(current.MemberInviteCode);
     }
 
     private ObjectResult InvalidCredentials() =>
@@ -56,14 +74,14 @@ public class AuthApiController(
             statusCode: StatusCodes.Status401Unauthorized,
             title: "Invalid credentials");
 
-    private ActionResult IdentityFailure(IdentityResult result)
+    private ActionResult IdentityFailure(IReadOnlyList<IdentityError> errors)
     {
-        if (result.Errors.Any(e => e.Code is nameof(IdentityErrorDescriber.DuplicateEmail) or nameof(IdentityErrorDescriber.DuplicateUserName)))
+        if (errors.Any(e => e.Code is nameof(IdentityErrorDescriber.DuplicateEmail) or nameof(IdentityErrorDescriber.DuplicateUserName)))
         {
             return ConflictProblem("An account with this email already exists.");
         }
 
-        foreach (var error in result.Errors)
+        foreach (var error in errors)
         {
             ModelState.AddModelError(error.Code, error.Description);
         }

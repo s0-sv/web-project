@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OutputCaching;
 using Microsoft.EntityFrameworkCore;
@@ -28,6 +29,7 @@ public class LessonsApiController(AppDbContext db, MaterialService materials) : 
     }
 
     [HttpPost]
+    [Authorize(Policy = AppPolicies.Staff)]
     public async Task<ActionResult<LessonDto>> Create(LessonRequest request, CancellationToken ct)
     {
         var lesson = new Lesson();
@@ -47,6 +49,7 @@ public class LessonsApiController(AppDbContext db, MaterialService materials) : 
     }
 
     [HttpPut("{id:int}")]
+    [Authorize(Policy = AppPolicies.Staff)]
     public async Task<ActionResult<LessonDto>> Update(int id, LessonRequest request, CancellationToken ct)
     {
         var lesson = await db.Lessons.FindAsync([id], ct);
@@ -70,6 +73,7 @@ public class LessonsApiController(AppDbContext db, MaterialService materials) : 
     }
 
     [HttpDelete("{id:int}")]
+    [Authorize(Policy = AppPolicies.Staff)]
     public async Task<IActionResult> Delete(int id, CancellationToken ct)
     {
         var lesson = await db.Lessons.FindAsync([id], ct);

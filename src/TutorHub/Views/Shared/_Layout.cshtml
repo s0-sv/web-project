@@ -23,9 +23,13 @@
                         @if (User.Identity?.IsAuthenticated == true)
                         {
                             <li class="nav-item"><a class="nav-link text-dark" asp-controller="Lessons" asp-action="Index">Заняття</a></li>
-                            <li class="nav-item"><a class="nav-link text-dark" asp-controller="Tutors" asp-action="Index">Репетитори</a></li>
-                            <li class="nav-item"><a class="nav-link text-dark" asp-controller="Students" asp-action="Index">Учні</a></li>
-                            <li class="nav-item"><a class="nav-link text-dark" asp-controller="Subjects" asp-action="Index">Предмети</a></li>
+                            @if (!User.IsInRole(TenantRoles.Student))
+                            {
+                                <li class="nav-item"><a class="nav-link text-dark" asp-controller="Tutors" asp-action="Index">Репетитори</a></li>
+                                <li class="nav-item"><a class="nav-link text-dark" asp-controller="Students" asp-action="Index">Учні</a></li>
+                                <li class="nav-item"><a class="nav-link text-dark" asp-controller="Subjects" asp-action="Index">Предмети</a></li>
+                                <li class="nav-item"><a class="nav-link text-dark" asp-controller="Plan" asp-action="Index">Простір</a></li>
+                            }
                             <li class="nav-item"><a class="nav-link text-dark" asp-controller="Materials" asp-action="Index">Матеріали</a></li>
                         }
                     </ul>

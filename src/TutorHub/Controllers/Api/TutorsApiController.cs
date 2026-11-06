@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OutputCaching;
 using Microsoft.EntityFrameworkCore;
@@ -7,6 +8,7 @@ using TutorHub.Models;
 
 namespace TutorHub.Controllers.Api;
 
+[Authorize(Policy = AppPolicies.Staff)]
 [Route("api/tutors")]
 public class TutorsApiController(AppDbContext db) : ApiControllerBase
 {

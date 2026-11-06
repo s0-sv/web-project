@@ -2,9 +2,11 @@ using System.ComponentModel.DataAnnotations;
 
 namespace TutorHub.Models;
 
-public class Subject
+public class Subject : ITenantEntity
 {
     public int Id { get; set; }
+
+    public int TenantId { get; set; }
 
     [Display(Name = "Назва")]
     [Required(ErrorMessage = "Вкажіть назву предмета")]

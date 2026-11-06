@@ -1,9 +1,11 @@
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OutputCaching;
 using Microsoft.EntityFrameworkCore;
 using TutorHub.Contracts;
 using TutorHub.Data;
+using TutorHub.Models;
 using TutorHub.Services;
 
 namespace TutorHub.Controllers.Api;
@@ -61,6 +63,7 @@ public class MaterialsApiController(AppDbContext db, MaterialService materials) 
     [Consumes("multipart/form-data")]
     [RequestSizeLimit(MaterialFileRules.MaxRequestBytes)]
     [RequestFormLimits(MultipartBodyLengthLimit = MaterialFileRules.MaxRequestBytes)]
+    [Authorize(Policy = AppPolicies.Staff)]
     public async Task<ActionResult<MaterialDto>> Upload(
         int lessonId,
         [FromForm, Required, StringLength(200)] string title,
@@ -82,6 +85,7 @@ public class MaterialsApiController(AppDbContext db, MaterialService materials) 
     }
 
     [HttpPut("materials/{id:int}")]
+    [Authorize(Policy = AppPolicies.Staff)]
     public async Task<ActionResult<MaterialDto>> Update(int id, MaterialUpdateRequest request, CancellationToken ct)
     {
         var material = await db.LessonMaterials.FindAsync([id], ct);
@@ -98,6 +102,7 @@ public class MaterialsApiController(AppDbContext db, MaterialService materials) 
     [Consumes("multipart/form-data")]
     [RequestSizeLimit(MaterialFileRules.MaxRequestBytes)]
     [RequestFormLimits(MultipartBodyLengthLimit = MaterialFileRules.MaxRequestBytes)]
+    [Authorize(Policy = AppPolicies.Staff)]
     public async Task<ActionResult<MaterialDto>> ReplaceFile(int id, IFormFile file, CancellationToken ct)
     {
         var material = await db.LessonMaterials.FindAsync([id], ct);
@@ -116,6 +121,7 @@ public class MaterialsApiController(AppDbContext db, MaterialService materials) 
     }
 
     [HttpDelete("materials/{id:int}")]
+    [Authorize(Policy = AppPolicies.Staff)]
     public async Task<IActionResult> Delete(int id, CancellationToken ct)
     {
         var material = await db.LessonMaterials.FindAsync([id], ct);

@@ -134,8 +134,19 @@ namespace TutorHub.Migrations
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("boolean");
 
+                    b.Property<string>("Role")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("text");
+
+                    b.Property<int?>("StudentId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("TenantId")
+                        .HasColumnType("integer");
 
                     b.Property<bool>("TwoFactorEnabled")
                         .HasColumnType("boolean");
@@ -152,6 +163,11 @@ namespace TutorHub.Migrations
                     b.HasIndex("NormalizedUserName")
                         .IsUnique()
                         .HasDatabaseName("UserNameIndex");
+
+                    b.HasIndex("StudentId")
+                        .IsUnique();
+
+                    b.HasIndex("TenantId");
 
                     b.ToTable("AspNetUsers", (string)null);
                 });
@@ -189,6 +205,9 @@ namespace TutorHub.Migrations
                     b.Property<int>("SubjectId")
                         .HasColumnType("integer");
 
+                    b.Property<int>("TenantId")
+                        .HasColumnType("integer");
+
                     b.Property<string>("Topic")
                         .IsRequired()
                         .HasMaxLength(200)
@@ -199,13 +218,13 @@ namespace TutorHub.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("StartsAt");
+                    b.HasIndex("TenantId", "StartsAt");
 
-                    b.HasIndex("StudentId");
+                    b.HasIndex("TenantId", "StudentId");
 
-                    b.HasIndex("SubjectId");
+                    b.HasIndex("TenantId", "SubjectId");
 
-                    b.HasIndex("TutorId");
+                    b.HasIndex("TenantId", "TutorId");
 
                     b.ToTable("Lessons");
                 });
@@ -239,6 +258,9 @@ namespace TutorHub.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
+                    b.Property<int>("TenantId")
+                        .HasColumnType("integer");
+
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(200)
@@ -249,10 +271,10 @@ namespace TutorHub.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("LessonId");
-
                     b.HasIndex("StorageKey")
                         .IsUnique();
+
+                    b.HasIndex("TenantId", "LessonId");
 
                     b.ToTable("LessonMaterials");
                 });
@@ -275,6 +297,10 @@ namespace TutorHub.Migrations
                         .HasMaxLength(150)
                         .HasColumnType("character varying(150)");
 
+                    b.Property<string>("InviteCode")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
                     b.Property<string>("LearningGoal")
                         .HasMaxLength(1000)
                         .HasColumnType("character varying(1000)");
@@ -283,9 +309,15 @@ namespace TutorHub.Migrations
                         .HasMaxLength(30)
                         .HasColumnType("character varying(30)");
 
+                    b.Property<int>("TenantId")
+                        .HasColumnType("integer");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("Email")
+                    b.HasIndex("InviteCode")
+                        .IsUnique();
+
+                    b.HasIndex("TenantId", "Email")
                         .IsUnique();
 
                     b.ToTable("Students");
@@ -308,12 +340,41 @@ namespace TutorHub.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
+                    b.Property<int>("TenantId")
+                        .HasColumnType("integer");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("Name")
+                    b.HasIndex("TenantId", "Name")
                         .IsUnique();
 
                     b.ToTable("Subjects");
+                });
+
+            modelBuilder.Entity("TutorHub.Models.Tenant", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("MemberInviteCode")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MemberInviteCode")
+                        .IsUnique();
+
+                    b.ToTable("Tenants");
                 });
 
             modelBuilder.Entity("TutorHub.Models.Tutor", b =>
@@ -346,9 +407,12 @@ namespace TutorHub.Migrations
                         .HasMaxLength(30)
                         .HasColumnType("character varying(30)");
 
+                    b.Property<int>("TenantId")
+                        .HasColumnType("integer");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("Email")
+                    b.HasIndex("TenantId", "Email")
                         .IsUnique();
 
                     b.ToTable("Tutors");
@@ -381,23 +445,50 @@ namespace TutorHub.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("TutorHub.Models.Lesson", b =>
+            modelBuilder.Entity("TutorHub.Models.ApplicationUser", b =>
                 {
                     b.HasOne("TutorHub.Models.Student", "Student")
-                        .WithMany("Lessons")
+                        .WithMany()
                         .HasForeignKey("StudentId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("TutorHub.Models.Tenant", "Tenant")
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Student");
+
+                    b.Navigation("Tenant");
+                });
+
+            modelBuilder.Entity("TutorHub.Models.Lesson", b =>
+                {
+                    b.HasOne("TutorHub.Models.Tenant", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("TutorHub.Models.Student", "Student")
+                        .WithMany("Lessons")
+                        .HasForeignKey("TenantId", "StudentId")
+                        .HasPrincipalKey("TenantId", "Id")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("TutorHub.Models.Subject", "Subject")
                         .WithMany("Lessons")
-                        .HasForeignKey("SubjectId")
+                        .HasForeignKey("TenantId", "SubjectId")
+                        .HasPrincipalKey("TenantId", "Id")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("TutorHub.Models.Tutor", "Tutor")
                         .WithMany("Lessons")
-                        .HasForeignKey("TutorId")
+                        .HasForeignKey("TenantId", "TutorId")
+                        .HasPrincipalKey("TenantId", "Id")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
@@ -410,13 +501,47 @@ namespace TutorHub.Migrations
 
             modelBuilder.Entity("TutorHub.Models.LessonMaterial", b =>
                 {
+                    b.HasOne("TutorHub.Models.Tenant", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("TutorHub.Models.Lesson", "Lesson")
                         .WithMany("Materials")
-                        .HasForeignKey("LessonId")
+                        .HasForeignKey("TenantId", "LessonId")
+                        .HasPrincipalKey("TenantId", "Id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Lesson");
+                });
+
+            modelBuilder.Entity("TutorHub.Models.Student", b =>
+                {
+                    b.HasOne("TutorHub.Models.Tenant", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("TutorHub.Models.Subject", b =>
+                {
+                    b.HasOne("TutorHub.Models.Tenant", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("TutorHub.Models.Tutor", b =>
+                {
+                    b.HasOne("TutorHub.Models.Tenant", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("TutorHub.Models.Lesson", b =>

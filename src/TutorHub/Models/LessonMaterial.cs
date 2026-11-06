@@ -1,8 +1,10 @@
 namespace TutorHub.Models;
 
-public class LessonMaterial
+public class LessonMaterial : ITenantEntity
 {
     public int Id { get; set; }
+
+    public int TenantId { get; set; }
 
     public int LessonId { get; set; }
     public Lesson? Lesson { get; set; }

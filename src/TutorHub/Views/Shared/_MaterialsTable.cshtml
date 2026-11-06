@@ -19,8 +19,11 @@ else
                         <td><a asp-controller="Lessons" asp-action="Details" asp-route-id="@material.LessonId">@material.Lesson?.Topic</a></td>
                         <td class="text-nowrap">@AppTime.Format(material.UploadedAt)</td>
                         <td class="text-end text-nowrap">
-                            <a class="btn btn-outline-secondary btn-sm" asp-controller="Materials" asp-action="Edit" asp-route-id="@material.Id">Редагувати</a>
-                            <a class="btn btn-outline-danger btn-sm" asp-controller="Materials" asp-action="Delete" asp-route-id="@material.Id">Видалити</a>
+                            @if (!User.IsInRole(TenantRoles.Student))
+                            {
+                                <a class="btn btn-outline-secondary btn-sm" asp-controller="Materials" asp-action="Edit" asp-route-id="@material.Id">Редагувати</a>
+                                <a class="btn btn-outline-danger btn-sm" asp-controller="Materials" asp-action="Delete" asp-route-id="@material.Id">Видалити</a>
+                            }
                         </td>
                     </tr>
                 }

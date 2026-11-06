@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OutputCaching;
 using Microsoft.EntityFrameworkCore;
@@ -7,6 +8,7 @@ using TutorHub.Models;
 
 namespace TutorHub.Controllers.Api;
 
+[Authorize(Policy = AppPolicies.Staff)]
 [Route("api/students")]
 public class StudentsApiController(AppDbContext db) : ApiControllerBase
 {
@@ -89,6 +91,26 @@ public class StudentsApiController(AppDbContext db) : ApiControllerBase
         }
 
         return NoContent();
+    }
+
+    [Authorize(Policy = AppPolicies.OwnerOnly)]
+    [HttpPost("{id:int}/invite")]
+    public async Task<ActionResult<InviteCodeDto>> CreateInvite(int id, CancellationToken ct)
+    {
+        var student = await db.Students.FindAsync([id], ct);
+        if (student is null)
+        {
+            return NotFound();
+        }
+
+        if (await db.Users.AnyAsync(u => u.StudentId == id, ct))
+        {
+            return ConflictProblem("This student already has an account.");
+        }
+
+        student.InviteCode = Tenant.NewInviteCode();
+        await db.SaveChangesAsync(ct);
+        return new InviteCodeDto(student.InviteCode);
     }
 
     private static void Apply(StudentRequest request, Student student)

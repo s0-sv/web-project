@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TutorHub.Data;
@@ -5,6 +6,7 @@ using TutorHub.Models;
 
 namespace TutorHub.Controllers;
 
+[Authorize(Policy = AppPolicies.Staff)]
 public class SubjectsController(AppDbContext db) : AppController
 {
     public async Task<IActionResult> Index() =>

@@ -20,6 +20,22 @@
     <dd class="col-sm-9">@(Model.LearningGoal ?? "—")</dd>
 </dl>
 
+@if (User.IsInRole(TenantRoles.Owner))
+{
+    <div class="card mb-3">
+        <div class="card-body">
+            <h2 class="h6">Доступ учня</h2>
+            @if (Model.InviteCode is not null)
+            {
+                <p class="mb-2">Код запрошення для реєстрації: <code>@Model.InviteCode</code></p>
+            }
+            <form asp-action="Invite" asp-route-id="@Model.Id" method="post">
+                <button type="submit" class="btn btn-outline-primary btn-sm">Створити новий код</button>
+            </form>
+        </div>
+    </div>
+}
+
 <h2 class="h5">Заняття</h2>
 <partial name="_LessonsTable" model="Model.Lessons.OrderByDescending(l => l.StartsAt)" />
 

@@ -2,11 +2,13 @@ using System.ComponentModel.DataAnnotations;
 
 namespace TutorHub.Models;
 
-public class Tutor
+public class Tutor : ITenantEntity
 {
     private string _email = "";
 
     public int Id { get; set; }
+
+    public int TenantId { get; set; }
 
     [Display(Name = "ПІБ")]
     [Required(ErrorMessage = "Вкажіть ПІБ")]

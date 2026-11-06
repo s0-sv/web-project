@@ -26,9 +26,11 @@ public static class LessonStatusExtensions
     };
 }
 
-public class Lesson
+public class Lesson : ITenantEntity
 {
     public int Id { get; set; }
+
+    public int TenantId { get; set; }
 
     public int TutorId { get; set; }
     public Tutor? Tutor { get; set; }

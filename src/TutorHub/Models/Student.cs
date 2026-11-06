@@ -2,11 +2,13 @@ using System.ComponentModel.DataAnnotations;
 
 namespace TutorHub.Models;
 
-public class Student
+public class Student : ITenantEntity
 {
     private string _email = "";
 
     public int Id { get; set; }
+
+    public int TenantId { get; set; }
 
     [Display(Name = "ПІБ")]
     [Required(ErrorMessage = "Вкажіть ПІБ")]
@@ -31,6 +33,8 @@ public class Student
     [Display(Name = "Навчальна мета")]
     [StringLength(1000, ErrorMessage = "Мета не може перевищувати 1000 символів")]
     public string? LearningGoal { get; set; }
+
+    public string? InviteCode { get; set; }
 
     public List<Lesson> Lessons { get; set; } = [];
 }

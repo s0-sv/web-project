@@ -15,6 +15,18 @@
                 <input asp-for="FullName" class="form-control" autocomplete="name" />
                 <span asp-validation-for="FullName" class="text-danger"></span>
             </div>
+            <div class="mb-3">
+                <label asp-for="WorkspaceName" class="form-label"></label>
+                <input asp-for="WorkspaceName" class="form-control" />
+                <div class="form-text">Для репетитора: буде створено новий простір, а ви станете його власником.</div>
+                <span asp-validation-for="WorkspaceName" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="InviteCode" class="form-label"></label>
+                <input asp-for="InviteCode" class="form-control" autocomplete="off" />
+                <div class="form-text">Для учасника чи учня: код від власника простору. Якщо код вказано, назва простору не потрібна.</div>
+                <span asp-validation-for="InviteCode" class="text-danger"></span>
+            </div>
             <button type="submit" class="btn btn-primary w-100">Завершити</button>
         </form>
     </div>

@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TutorHub.Data;
@@ -5,6 +6,7 @@ using TutorHub.Models;
 
 namespace TutorHub.Controllers;
 
+[Authorize(Policy = AppPolicies.Staff)]
 public class StudentsController(AppDbContext db) : AppController
 {
     public async Task<IActionResult> Index() =>
@@ -90,6 +92,28 @@ public class StudentsController(AppDbContext db) : AppController
 
         FlashSuccess("Учня видалено.");
         return RedirectToAction(nameof(Index));
+    }
+
+    [Authorize(Policy = AppPolicies.OwnerOnly)]
+    [HttpPost]
+    public async Task<IActionResult> Invite(int id)
+    {
+        var student = await db.Students.FindAsync(id);
+        if (student is null)
+        {
+            return NotFound();
+        }
+
+        if (await db.Users.AnyAsync(u => u.StudentId == id))
+        {
+            FlashError("Цей учень уже має обліковий запис.");
+            return RedirectToAction(nameof(Details), new { id });
+        }
+
+        student.InviteCode = Tenant.NewInviteCode();
+        await db.SaveChangesAsync();
+        FlashSuccess("Код запрошення створено. Передайте його учневі.");
+        return RedirectToAction(nameof(Details), new { id });
     }
 
     private async Task<IActionResult?> SaveAsync(Student student, string message)

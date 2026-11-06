@@ -5,6 +5,7 @@ using System.Text.Json.Serialization;
 using System.Text.Unicode;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.IdentityModel.Tokens;
 using TutorHub.Controllers.Api;
 using TutorHub.Data;
@@ -24,13 +25,17 @@ builder.Services.AddOutputCache(o => o.AddPolicy(
     CacheInvalidationInterceptor.PolicyName,
     new UserOutputCachePolicy()));
 builder.Services.AddSingleton<CacheInvalidationInterceptor>();
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<TenantContext>();
 
 builder.Services.AddDbContext<AppDbContext>((services, o) => o
     .UseNpgsql(connectionString)
-    .AddInterceptors(services.GetRequiredService<CacheInvalidationInterceptor>()));
+    .AddInterceptors(services.GetRequiredService<CacheInvalidationInterceptor>())
+    .ConfigureWarnings(w => w.Ignore(CoreEventId.PossibleIncorrectRequiredNavigationWithQueryFilterInteractionWarning)));
 builder.Services.AddSingleton<IFileStorage, LocalFileStorage>();
 builder.Services.AddScoped<MaterialService>();
 builder.Services.AddScoped<JwtTokenService>();
+builder.Services.AddScoped<TenantRegistration>();
 
 builder.Services.AddIdentityCore<ApplicationUser>(o =>
     {
@@ -46,7 +51,12 @@ builder.Services.AddIdentityCore<ApplicationUser>(o =>
     })
     .AddEntityFrameworkStores<AppDbContext>()
     .AddSignInManager()
-    .AddDefaultTokenProviders();
+    .AddDefaultTokenProviders()
+    .AddClaimsPrincipalFactory<AppUserClaimsFactory>();
+
+builder.Services.AddAuthorizationBuilder()
+    .AddPolicy(AppPolicies.Staff, p => p.RequireRole(TenantRoles.Owner, TenantRoles.Member))
+    .AddPolicy(AppPolicies.OwnerOnly, p => p.RequireRole(TenantRoles.Owner));
 
 var authentication = builder.Services.AddAuthentication(IdentityConstants.ApplicationScheme);
 authentication.AddIdentityCookies();
@@ -102,7 +112,11 @@ if (app.Environment.IsDevelopment())
     await using var scope = app.Services.CreateAsyncScope();
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     await db.Database.MigrateAsync();
-    await DbSeeder.SeedAsync(db, scope.ServiceProvider.GetRequiredService<IFileStorage>());
+    await DbSeeder.SeedAsync(
+        db,
+        scope.ServiceProvider.GetRequiredService<IFileStorage>(),
+        scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>(),
+        app.Configuration);
 }
 
 static bool IsApi(HttpContext context) => context.Request.Path.StartsWithSegments("/api");
