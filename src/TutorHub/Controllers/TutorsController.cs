@@ -8,7 +8,7 @@ using TutorHub.Services;
 namespace TutorHub.Controllers;
 
 [Authorize(Policy = AppPolicies.Staff)]
-public class TutorsController(AppDbContext db, IFileStorage storage, TutorPublishing publishing) : AppController
+public class TutorsController(AppDbContext db, IFileStorage storage, TutorPublishing publishing, TutorLocationService location) : AppController
 {
     public async Task<IActionResult> Index() =>
         View(await db.Tutors.AsNoTracking().Include(t => t.Lessons).OrderBy(t => t.FullName).ToListAsync());
@@ -26,15 +26,16 @@ public class TutorsController(AppDbContext db, IFileStorage storage, TutorPublis
     public IActionResult Create() => View(new Tutor());
 
     [HttpPost]
-    public async Task<IActionResult> Create([Bind("FullName,Email,Phone,Bio,HourlyRate,Headline,Slug")] Tutor input)
+    public async Task<IActionResult> Create([Bind("FullName,Email,Phone,Bio,HourlyRate,Headline,Slug,City")] Tutor input)
     {
         if (!ModelState.IsValid)
         {
             return View(input);
         }
 
+        var locationStatus = await location.ApplyCityAsync(input, input.City);
         db.Tutors.Add(input);
-        return await SaveAsync(input, "Репетитора додано.") ?? View(input);
+        return await SaveAsync(input, "Репетитора додано.", locationStatus) ?? View(input);
     }
 
     public async Task<IActionResult> Edit(int id)
@@ -44,7 +45,7 @@ public class TutorsController(AppDbContext db, IFileStorage storage, TutorPublis
     }
 
     [HttpPost]
-    public async Task<IActionResult> Edit(int id, [Bind("FullName,Email,Phone,Bio,HourlyRate,Headline,Slug")] Tutor input)
+    public async Task<IActionResult> Edit(int id, [Bind("FullName,Email,Phone,Bio,HourlyRate,Headline,Slug,City")] Tutor input)
     {
         input.Id = id;
         if (!ModelState.IsValid)
@@ -65,7 +66,8 @@ public class TutorsController(AppDbContext db, IFileStorage storage, TutorPublis
         tutor.HourlyRate = input.HourlyRate;
         tutor.Headline = input.Headline;
         tutor.Slug = input.Slug ?? tutor.Slug;
-        return await SaveAsync(tutor, "Зміни збережено.") ?? View(input);
+        var locationStatus = await location.ApplyCityAsync(tutor, input.City);
+        return await SaveAsync(tutor, "Зміни збережено.", locationStatus) ?? View(input);
     }
 
     public async Task<IActionResult> Delete(int id)
@@ -150,7 +152,7 @@ public class TutorsController(AppDbContext db, IFileStorage storage, TutorPublis
         return RedirectToAction(nameof(Details), new { id });
     }
 
-    private async Task<IActionResult?> SaveAsync(Tutor tutor, string message)
+    private async Task<IActionResult?> SaveAsync(Tutor tutor, string message, GeocodeStatus? locationStatus)
     {
         try
         {
@@ -168,6 +170,15 @@ public class TutorsController(AppDbContext db, IFileStorage storage, TutorPublis
         }
 
         FlashSuccess(message);
+        if (locationStatus == GeocodeStatus.NotFound)
+        {
+            FlashError($"Місто «{tutor.City}» не знайдено, тому репетитора не видно на мапі. Перевірте назву.");
+        }
+        else if (locationStatus == GeocodeStatus.Unavailable)
+        {
+            FlashError("Сервіс пошуку міст зараз недоступний, тому репетитора не видно на мапі. Збережіть форму ще раз пізніше.");
+        }
+
         return RedirectToAction(nameof(Details), new { id = tutor.Id });
     }
 }

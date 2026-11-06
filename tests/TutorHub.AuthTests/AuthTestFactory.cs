@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
@@ -17,6 +18,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Npgsql;
 using TutorHub.Data;
+using TutorHub.Services;
 using Xunit;
 
 namespace TutorHub.AuthTests;
@@ -52,11 +54,36 @@ public class FakeGoogleHandler(
     }
 }
 
+public class FakeGeocoder : IGeocoder
+{
+    public const string UnknownCity = "Невідоме";
+    public const string BrokenCity = "Збій";
+
+    public static readonly GeoPoint Point = new(50.45, 30.52);
+
+    public ConcurrentDictionary<string, int> Calls { get; } = new();
+
+    public bool ServiceRestored { get; set; }
+
+    public Task<GeocodeResult> FindCityAsync(string city, CancellationToken ct = default)
+    {
+        Calls.AddOrUpdate(city, 1, (_, count) => count + 1);
+
+        return Task.FromResult(city.StartsWith(UnknownCity)
+            ? new GeocodeResult(GeocodeStatus.NotFound)
+            : city.StartsWith(BrokenCity) && !ServiceRestored
+                ? new GeocodeResult(GeocodeStatus.Unavailable)
+                : new GeocodeResult(GeocodeStatus.Found, Point));
+    }
+}
+
 public record ApiUser(HttpClient Client, string Email, string Password, string Token);
 
 public class AuthTestFactory : WebApplicationFactory<Program>, IAsyncLifetime
 {
     public const string SigningKeyValue = "test-signing-key-that-is-long-enough-for-hs256";
+
+    public FakeGeocoder Geocoder { get; } = new();
 
     private readonly string _adminConnection;
     private readonly string _testConnection;
@@ -86,7 +113,10 @@ public class AuthTestFactory : WebApplicationFactory<Program>, IAsyncLifetime
     {
         builder.UseEnvironment("Testing");
         builder.ConfigureTestServices(services =>
-            services.AddAuthentication().AddScheme<AuthenticationSchemeOptions, FakeGoogleHandler>("Google", "Google", null));
+        {
+            services.AddAuthentication().AddScheme<AuthenticationSchemeOptions, FakeGoogleHandler>("Google", "Google", null);
+            services.AddSingleton<IGeocoder>(Geocoder);
+        });
     }
 
     public async Task InitializeAsync()

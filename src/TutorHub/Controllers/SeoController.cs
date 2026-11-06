@@ -18,6 +18,7 @@ public class SeoController(AppDbContext db, IConfiguration config) : AppControll
         var body = $"""
             User-agent: *
             Allow: /tutor/
+            Allow: /map
             Allow: /lib/
             Allow: /css/
             Allow: /js/
@@ -43,8 +44,10 @@ public class SeoController(AppDbContext db, IConfiguration config) : AppControll
         var baseUrl = BaseUrl(config, Request);
         var document = new XDocument(
             new XDeclaration("1.0", "utf-8", null),
-            new XElement(ns + "urlset", slugs.Select(slug =>
-                new XElement(ns + "url", new XElement(ns + "loc", $"{baseUrl}/tutor/{slug}")))));
+            new XElement(ns + "urlset",
+                new XElement(ns + "url", new XElement(ns + "loc", $"{baseUrl}/map")),
+                slugs.Select(slug =>
+                    new XElement(ns + "url", new XElement(ns + "loc", $"{baseUrl}/tutor/{slug}")))));
 
         return Content(document.Declaration + Environment.NewLine + document, "application/xml");
     }

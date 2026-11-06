@@ -22,6 +22,12 @@
     <span asp-validation-for="HourlyRate" class="text-danger"></span>
 </div>
 <div class="mb-3">
+    <label asp-for="City" class="form-label"></label>
+    <input asp-for="City" class="form-control" />
+    <div class="form-text">Лише місто, без вулиці й номера будинку. Після публікації центр цього міста з'явиться на публічній мапі, а назва міста піде в сервіс OpenStreetMap Nominatim.</div>
+    <span asp-validation-for="City" class="text-danger"></span>
+</div>
+<div class="mb-3">
     <label asp-for="Headline" class="form-label"></label>
     <input asp-for="Headline" class="form-control" />
     <span asp-validation-for="Headline" class="text-danger"></span>

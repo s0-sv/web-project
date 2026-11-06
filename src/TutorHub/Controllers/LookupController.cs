@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TutorHub.Data;
 using TutorHub.Models;
+using TutorHub.Services;
 
 namespace TutorHub.Controllers;
 
@@ -17,8 +18,6 @@ public class LookupController(AppDbContext db) : AppController
     public const int MaxResults = 20;
     public const int DelayMilliseconds = 300;
     private const int MaxCandidates = 500;
-    private const int MaxQueryLength = 100;
-    private const int MaxWords = 5;
 
     public async Task<LookupResponse> Tutors(string? q, CancellationToken ct)
     {
@@ -88,20 +87,6 @@ public class LookupController(AppDbContext db) : AppController
 
     private static List<string> Patterns(string? query)
     {
-        var text = query?.Trim() ?? "";
-        if (text.Length < MinQueryLength)
-        {
-            return [];
-        }
-
-        if (text.Length > MaxQueryLength)
-        {
-            text = text[..MaxQueryLength];
-        }
-
-        return text.Split(' ', StringSplitOptions.RemoveEmptyEntries)
-            .Take(MaxWords)
-            .Select(word => $"%{word.Replace("\\", "\\\\").Replace("%", "\\%").Replace("_", "\\_")}%")
-            .ToList();
+        return (query?.Trim().Length ?? 0) < MinQueryLength ? [] : LikePatterns.FromWords(query);
     }
 }

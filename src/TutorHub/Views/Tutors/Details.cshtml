@@ -18,6 +18,8 @@
     <dd class="col-sm-9">@(Model.Phone ?? "—")</dd>
     <dt class="col-sm-3">Ставка</dt>
     <dd class="col-sm-9">@Model.HourlyRate.ToString("0.##") грн/год</dd>
+    <dt class="col-sm-3">Місто</dt>
+    <dd class="col-sm-9">@(Model.City ?? "—")@(Model.City is not null && Model.Latitude is null ? " (немає на мапі)" : "")</dd>
     <dt class="col-sm-3">Про репетитора</dt>
     <dd class="col-sm-9">@(Model.Bio ?? "—")</dd>
 </dl>

@@ -11,7 +11,7 @@ namespace TutorHub.Controllers.Api;
 
 [Authorize(Policy = AppPolicies.Staff)]
 [Route("api/tutors")]
-public class TutorsApiController(AppDbContext db, IFileStorage storage, TutorPublishing publishing) : ApiControllerBase
+public class TutorsApiController(AppDbContext db, IFileStorage storage, TutorPublishing publishing, TutorLocationService location) : ApiControllerBase
 {
     [HttpGet]
     [OutputCache(PolicyName = CacheInvalidationInterceptor.PolicyName)]
@@ -34,6 +34,7 @@ public class TutorsApiController(AppDbContext db, IFileStorage storage, TutorPub
     {
         var tutor = new Tutor();
         Apply(request, tutor);
+        await location.ApplyCityAsync(tutor, request.City, ct);
         db.Tutors.Add(tutor);
 
         try
@@ -62,6 +63,7 @@ public class TutorsApiController(AppDbContext db, IFileStorage storage, TutorPub
         }
 
         Apply(request, tutor);
+        await location.ApplyCityAsync(tutor, request.City ?? tutor.City, ct);
 
         try
         {
@@ -133,5 +135,5 @@ public class TutorsApiController(AppDbContext db, IFileStorage storage, TutorPub
     }
 
     private static TutorDto ToDto(Tutor t) =>
-        new(t.Id, t.FullName, t.Email, t.Phone, t.Bio, t.HourlyRate, t.Headline, t.Slug, t.IsPublished);
+        new(t.Id, t.FullName, t.Email, t.Phone, t.Bio, t.HourlyRate, t.Headline, t.Slug, t.IsPublished, t.City, t.Latitude, t.Longitude);
 }

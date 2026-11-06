@@ -24,10 +24,13 @@ public record TutorDto(
     decimal HourlyRate,
     string? Headline,
     string? Slug,
-    bool IsPublished)
+    bool IsPublished,
+    string? City,
+    double? Latitude,
+    double? Longitude)
 {
     public static readonly Expression<Func<Tutor, TutorDto>> Projection =
-        t => new TutorDto(t.Id, t.FullName, t.Email, t.Phone, t.Bio, t.HourlyRate, t.Headline, t.Slug, t.IsPublished);
+        t => new TutorDto(t.Id, t.FullName, t.Email, t.Phone, t.Bio, t.HourlyRate, t.Headline, t.Slug, t.IsPublished, t.City, t.Latitude, t.Longitude);
 }
 
 public record TutorRequest(
@@ -37,7 +40,8 @@ public record TutorRequest(
     [StringLength(2000)] string? Bio,
     [Required, Range(typeof(decimal), "0", "100000")] decimal? HourlyRate,
     [StringLength(200)] string? Headline = null,
-    [StringLength(100), RegularExpression("^[a-z0-9]+(-[a-z0-9]+)*$")] string? Slug = null);
+    [StringLength(100), RegularExpression("^[a-z0-9]+(-[a-z0-9]+)*$")] string? Slug = null,
+    [StringLength(100)] string? City = null);
 
 public record TutorPublicationRequest([Required] bool? IsPublished);
 

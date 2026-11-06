@@ -10,6 +10,49 @@ public static class DbSeeder
 {
     public const string DemoTenant = "Demo School";
     public const string SecondTenant = "Second School";
+    public const string MapDemoTenant = "Map Demo School";
+
+    private static readonly Dictionary<string, (string City, double Latitude, double Longitude)> DemoTutorCities = new()
+    {
+        ["olena.koval@example.com"] = ("Київ", 50.4501, 30.5234),
+        ["andrii.melnyk@example.com"] = ("Львів", 49.8397, 24.0297),
+        ["iryna.shevchuk@example.com"] = ("Одеса", 46.4825, 30.7233)
+    };
+
+    private static readonly (string Name, string City, double Latitude, double Longitude, decimal Rate, string[] Subjects)[] MapDemoTutors =
+    [
+        ("Богдан Савчук", "Київ", 50.4501, 30.5234, 700, ["Математика", "Фізика"]),
+        ("Вікторія Гончар", "Київ", 50.4501, 30.5234, 650, ["Англійська мова"]),
+        ("Галина Руденко", "Київ", 50.4501, 30.5234, 800, ["Програмування"]),
+        ("Денис Кравчук", "Київ", 50.4501, 30.5234, 550, ["Хімія", "Біологія"]),
+        ("Євгенія Мороз", "Львів", 49.8397, 24.0297, 500, ["Англійська мова", "Німецька мова"]),
+        ("Захар Левицький", "Львів", 49.8397, 24.0297, 450, ["Історія України"]),
+        ("Ілона Федорів", "Львів", 49.8397, 24.0297, 600, ["Математика"]),
+        ("Кирило Білик", "Харків", 49.9935, 36.2304, 400, ["Фізика"]),
+        ("Лариса Павленко", "Харків", 49.9935, 36.2304, 350, ["Українська мова"]),
+        ("Микола Титаренко", "Харків", 49.9935, 36.2304, 550, ["Програмування", "Математика"]),
+        ("Надія Сидоренко", "Дніпро", 48.4647, 35.0462, 400, ["Математика"]),
+        ("Олег Тимошенко", "Дніпро", 48.4647, 35.0462, 500, ["Хімія"]),
+        ("Поліна Стеценко", "Одеса", 46.4825, 30.7233, 450, ["Англійська мова"]),
+        ("Руслан Грищенко", "Одеса", 46.4825, 30.7233, 600, ["Програмування"]),
+        ("Світлана Панченко", "Вінниця", 49.2331, 28.4682, 300, ["Українська мова", "Історія України"]),
+        ("Тимофій Яремчук", "Вінниця", 49.2331, 28.4682, 350, ["Математика"]),
+        ("Уляна Дмитренко", "Полтава", 49.5883, 34.5514, 300, ["Біологія"]),
+        ("Федір Ковтун", "Чернівці", 48.2921, 25.9358, 350, ["Німецька мова"]),
+        ("Христина Гринюк", "Івано-Франківськ", 48.9226, 24.7111, 400, ["Англійська мова"]),
+        ("Ярослав Вовк", "Тернопіль", 49.5535, 25.5948, 300, ["Математика", "Фізика"]),
+        ("Юлія Назарук", "Рівне", 50.6199, 26.2516, 350, ["Українська мова"]),
+        ("Артем Ткачук", "Луцьк", 50.7472, 25.3254, 400, ["Програмування"]),
+        ("Вероніка Остапчук", "Житомир", 50.2547, 28.6587, 300, ["Історія України"]),
+        ("Геннадій Лук'яненко", "Черкаси", 49.4444, 32.0598, 350, ["Фізика"]),
+        ("Дарія Коломієць", "Суми", 50.9077, 34.7981, 300, ["Хімія"]),
+        ("Жанна Литвин", "Чернігів", 51.4982, 31.2893, 350, ["Біологія", "Хімія"]),
+        ("Ігор Попович", "Ужгород", 48.6208, 22.2879, 400, ["Англійська мова"]),
+        ("Леся Бойчук", "Хмельницький", 49.4230, 26.9871, 300, ["Математика"]),
+        ("Максим Кириленко", "Запоріжжя", 47.8388, 35.1396, 450, ["Програмування"]),
+        ("Наталія Сергієнко", "Миколаїв", 46.9750, 31.9946, 350, ["Українська мова"]),
+        ("Павло Запорожець", "Кропивницький", 48.5079, 32.2623, 300, ["Фізика"])
+    ];
 
     public static async Task SeedAsync(
         AppDbContext db,
@@ -39,6 +82,9 @@ public static class DbSeeder
             featured.IsPublished = true;
             await db.SaveChangesAsync();
         }
+
+        await SeedDemoCitiesAsync(db, demo.Id);
+        await SeedMapDemoAsync(db);
 
         if (config["Seed:DemoPassword"] is not { Length: > 0 } password)
         {
@@ -96,6 +142,65 @@ public static class DbSeeder
         {
             throw new InvalidOperationException($"Could not seed {email}: {result.Errors.First().Description}");
         }
+    }
+
+    private static async Task SeedDemoCitiesAsync(AppDbContext db, int tenantId)
+    {
+        string[] emails = [.. DemoTutorCities.Keys];
+        var tutors = await db.Tutors.IgnoreQueryFilters()
+            .Where(t => t.TenantId == tenantId && t.City == null && emails.Contains(t.Email))
+            .ToListAsync();
+
+        foreach (var tutor in tutors)
+        {
+            (tutor.City, tutor.Latitude, tutor.Longitude) = DemoTutorCities[tutor.Email];
+        }
+
+        await db.SaveChangesAsync();
+    }
+
+    private static async Task SeedMapDemoAsync(AppDbContext db)
+    {
+        var tenant = await EnsureTenantAsync(db, MapDemoTenant, TenantPlan.Free);
+        if (await db.Tutors.IgnoreQueryFilters().AnyAsync(t => t.TenantId == tenant.Id))
+        {
+            return;
+        }
+
+        var student = new Student { TenantId = tenant.Id, FullName = "Демо Учень", Email = "map.student@example.com" };
+        var subjects = MapDemoTutors.SelectMany(t => t.Subjects).Distinct()
+            .ToDictionary(name => name, name => new Subject { TenantId = tenant.Id, Name = name });
+        var startsAt = new DateTimeOffset(DateTimeOffset.UtcNow.Date, TimeSpan.Zero).AddDays(-14).AddHours(15);
+
+        foreach (var (entry, index) in MapDemoTutors.Select((entry, index) => (entry, index)))
+        {
+            var tutor = new Tutor
+            {
+                TenantId = tenant.Id,
+                FullName = entry.Name,
+                Email = $"map.tutor{index + 1}@example.com",
+                HourlyRate = entry.Rate,
+                City = entry.City,
+                Latitude = entry.Latitude,
+                Longitude = entry.Longitude,
+                Slug = Tutor.GenerateSlug(entry.Name),
+                IsPublished = true
+            };
+
+            db.Lessons.AddRange(entry.Subjects.Select(subject => new Lesson
+            {
+                TenantId = tenant.Id,
+                Tutor = tutor,
+                Student = student,
+                Subject = subjects[subject],
+                Topic = "Демонстраційне заняття",
+                StartsAt = startsAt,
+                DurationMinutes = 60,
+                Status = LessonStatus.Completed
+            }));
+        }
+
+        await db.SaveChangesAsync();
     }
 
     private static async Task SeedSecondTenantAsync(AppDbContext db, int tenantId)

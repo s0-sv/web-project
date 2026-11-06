@@ -49,6 +49,13 @@ builder.Services.AddScoped<TenantRegistration>();
 builder.Services.AddScoped<FeatureFlags>();
 builder.Services.AddScoped<TutorHub.Controllers.TutorPublishing>();
 builder.Services.AddScoped<LearningAnalytics>();
+builder.Services.AddScoped<TutorLocationService>();
+builder.Services.AddSingleton(new NominatimThrottle(NominatimThrottle.PublicApiInterval));
+builder.Services.AddHttpClient<IGeocoder, NominatimGeocoder>(client =>
+{
+    client.BaseAddress = NominatimGeocoder.BaseAddress;
+    client.DefaultRequestHeaders.UserAgent.ParseAdd(NominatimGeocoder.UserAgent);
+});
 
 builder.Services.AddIdentityCore<ApplicationUser>(o =>
     {

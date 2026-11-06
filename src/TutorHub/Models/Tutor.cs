@@ -48,6 +48,14 @@ public class Tutor : ITenantEntity
     [RegularExpression("^[a-z0-9]+(-[a-z0-9]+)*$", ErrorMessage = "Лише малі латинські літери, цифри й дефіси")]
     public string? Slug { get; set; }
 
+    [Display(Name = "Місто")]
+    [StringLength(100, ErrorMessage = "Назва міста не може перевищувати 100 символів")]
+    public string? City { get; set; }
+
+    public double? Latitude { get; set; }
+
+    public double? Longitude { get; set; }
+
     public string? PhotoKey { get; set; }
 
     public bool IsPublished { get; set; }

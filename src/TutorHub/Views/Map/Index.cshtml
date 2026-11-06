@@ -1,0 +1,66 @@
+@using TutorHub.Controllers
+@inject IConfiguration Configuration
+@model IReadOnlyList<string>
+@{
+    ViewData["Title"] = "Мапа репетиторів";
+    ViewData["Robots"] = "index, follow";
+    const string description = "Репетитори TutorHub на мапі: фільтруйте за предметом, ставкою та містом і переходьте на сторінку репетитора.";
+    var canonical = $"{SeoController.BaseUrl(Configuration, Context.Request)}/map";
+}
+
+@section Styles {
+    <meta name="description" content="@description" />
+    <link rel="canonical" href="@canonical" />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="uk_UA" />
+    <meta property="og:site_name" content="TutorHub" />
+    <meta property="og:title" content="Мапа репетиторів | TutorHub" />
+    <meta property="og:description" content="@description" />
+    <meta property="og:url" content="@canonical" />
+    <link rel="stylesheet" href="~/lib/leaflet/dist/leaflet.css" />
+    <link rel="stylesheet" href="~/lib/leaflet.markercluster/dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="~/lib/leaflet.markercluster/dist/MarkerCluster.Default.css" />
+}
+
+<h1 class="h3 mb-3">Мапа репетиторів</h1>
+
+<form id="map-filters" class="row g-3 mb-3" data-tutors-url="/map/tutors">
+    <div class="col-md-4">
+        <label for="map-subject" class="form-label">Предмет</label>
+        <select id="map-subject" name="subject" class="form-select">
+            <option value="">Усі предмети</option>
+            @foreach (var subject in Model)
+            {
+                <option value="@subject">@subject</option>
+            }
+        </select>
+    </div>
+    <div class="col-md-3">
+        <label for="map-rate" class="form-label">Ставка до, грн/год</label>
+        <input id="map-rate" name="maxRate" type="number" min="0" step="50" class="form-control" />
+    </div>
+    <div class="col-md-3">
+        <label for="map-query" class="form-label">Місто або ім'я</label>
+        <input id="map-query" name="q" type="search" maxlength="100" class="form-control" />
+    </div>
+    <div class="col-md-2 d-flex align-items-end">
+        <button type="reset" class="btn btn-outline-secondary w-100">Скинути</button>
+    </div>
+</form>
+
+<p id="map-status" class="text-muted" role="status" aria-live="polite">Завантаження…</p>
+
+<div id="tutor-map" class="mb-4" role="region" aria-label="Мапа репетиторів"></div>
+
+<p class="text-muted small">Точка на мапі позначає центр міста, а не адресу репетитора.</p>
+
+<h2 class="h5">Результати</h2>
+<ul id="map-results" class="list-group mb-4"></ul>
+
+<noscript><div class="alert alert-warning">Щоб побачити мапу, увімкніть JavaScript.</div></noscript>
+
+@section Scripts {
+    <script src="~/lib/leaflet/dist/leaflet.js"></script>
+    <script src="~/lib/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
+    <script src="~/js/map.js" asp-append-version="true"></script>
+}

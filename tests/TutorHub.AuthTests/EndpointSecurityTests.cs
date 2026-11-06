@@ -26,7 +26,9 @@ public class EndpointSecurityTests(AuthTestFactory factory)
         "TutorProfile.Index",
         "TutorProfile.Photo",
         "Seo.Robots",
-        "Seo.Sitemap"
+        "Seo.Sitemap",
+        "Map.Index",
+        "Map.Tutors"
     ];
 
     private List<(string Name, EndpointMetadataCollection Metadata)> ControllerActions() =>
