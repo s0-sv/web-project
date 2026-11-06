@@ -25,6 +25,97 @@
   ],
   "item": [
     {
+      "name": "Authentication setup",
+      "item": [
+        {
+          "name": "Anonymous request is rejected",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 401\", function () {",
+                  "    pm.response.to.have.status(401);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/subjects"
+          }
+        },
+        {
+          "name": "Register owner",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "pm.collectionVariables.set('token', pm.response.json().accessToken);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/auth/register",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\": \"owner.{{runId}}@example.com\", \"password\": \"Owner-{{runId}}-pass\", \"fullName\": \"Collection Owner\", \"workspaceName\": \"Collection {{runId}}\"}"
+            }
+          }
+        },
+        {
+          "name": "Get access token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.collectionVariables.set('token', pm.response.json().accessToken);",
+                  "pm.test(\"Token type is Bearer\", function () {",
+                  "    pm.expect(pm.response.json().tokenType).to.eql('Bearer');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/auth/token",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\": \"owner.{{runId}}@example.com\", \"password\": \"Owner-{{runId}}-pass\"}"
+            }
+          }
+        }
+      ]
+    },
+    {
       "name": "Subjects",
       "item": [
         {
@@ -2894,5 +2985,15 @@
         }
       ]
     }
-  ]
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  }
 }

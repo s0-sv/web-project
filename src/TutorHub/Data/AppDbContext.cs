@@ -1,9 +1,10 @@
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using TutorHub.Models;
 
 namespace TutorHub.Data;
 
-public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
+public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityUserContext<ApplicationUser>(options)
 {
     public DbSet<Subject> Subjects => Set<Subject>();
     public DbSet<Tutor> Tutors => Set<Tutor>();
@@ -13,6 +14,10 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 
     protected override void OnModelCreating(ModelBuilder model)
     {
+        base.OnModelCreating(model);
+
+        model.Entity<ApplicationUser>(e => e.Property(x => x.FullName).HasMaxLength(150));
+
         model.Entity<Subject>(e =>
         {
             e.Property(x => x.Name).HasMaxLength(100);

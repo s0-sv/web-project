@@ -9,13 +9,14 @@ trap 'rm -rf "$TMP"' EXIT
 
 FAILED=0
 BODY=""
+TOKEN=""
 
 call() {
     local expected="$1" description="$2"
     shift 2
 
     local status
-    status="$(curl -s -o "$TMP/body" -w '%{http_code}' "$@")"
+    status="$(curl -s -o "$TMP/body" -w '%{http_code}' ${TOKEN:+-H "Authorization: Bearer $TOKEN"} "$@")"
     BODY="$(cat "$TMP/body")"
 
     local mark="OK"
@@ -26,13 +27,23 @@ call() {
 
     printf '\n### %s\n' "$description"
     printf '%s -> HTTP %s [%s]\n' "${*: -1}" "$status" "$mark"
-    [ -n "$BODY" ] && printf '%s\n' "$BODY" | cut -c1-600
+    [ -n "$BODY" ] && printf '%s\n' "$BODY" | sed -E 's/"accessToken":"[^"]+"/"accessToken":"***"/' | cut -c1-600
 }
 
 post_json() { call "$1" "$2" -X POST -H 'Content-Type: application/json' -d "$3" "$BASE$4"; }
 put_json() { call "$1" "$2" -X PUT -H 'Content-Type: application/json' -d "$3" "$BASE$4"; }
 new_id() { printf '%s' "$BODY" | grep -oE '"id":[0-9]+' | head -1 | cut -d: -f2; }
 
+echo "=== Authentication ==="
+call 401 "Anonymous request is rejected" "$BASE/subjects"
+ACCOUNT="{\"email\":\"demo.$RUN@example.com\",\"password\":\"Demo-$RUN-pass\",\"fullName\":\"Demo Owner\",\"workspaceName\":\"Demo $RUN\"}"
+post_json 201 "Register an account and a workspace" "$ACCOUNT" /auth/register
+post_json 401 "Wrong password is rejected" "{\"email\":\"demo.$RUN@example.com\",\"password\":\"wrong-password-1\"}" /auth/token
+post_json 200 "Get an access token" "{\"email\":\"demo.$RUN@example.com\",\"password\":\"Demo-$RUN-pass\"}" /auth/token
+TOKEN="$(printf '%s' "$BODY" | grep -oE '"accessToken":"[^"]+"' | cut -d'"' -f4)"
+call 200 "Current user" "$BASE/auth/me"
+
+echo
 echo "=== Read collections ==="
 call 200 "List subjects" "$BASE/subjects"
 call 200 "List tutors" "$BASE/tutors"

@@ -1,10 +1,14 @@
 using System.Globalization;
+using System.Security.Claims;
 using System.Text.Encodings.Web;
 using System.Text.Json.Serialization;
 using System.Text.Unicode;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using TutorHub.Controllers.Api;
 using TutorHub.Data;
+using TutorHub.Models;
 using TutorHub.Services;
 
 CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
@@ -18,7 +22,7 @@ var connectionString = builder.Configuration.GetConnectionString("Default")
 
 builder.Services.AddOutputCache(o => o.AddPolicy(
     CacheInvalidationInterceptor.PolicyName,
-    policy => policy.Expire(TimeSpan.FromSeconds(60)).Tag(CacheInvalidationInterceptor.Tag)));
+    new UserOutputCachePolicy()));
 builder.Services.AddSingleton<CacheInvalidationInterceptor>();
 
 builder.Services.AddDbContext<AppDbContext>((services, o) => o
@@ -26,6 +30,60 @@ builder.Services.AddDbContext<AppDbContext>((services, o) => o
     .AddInterceptors(services.GetRequiredService<CacheInvalidationInterceptor>()));
 builder.Services.AddSingleton<IFileStorage, LocalFileStorage>();
 builder.Services.AddScoped<MaterialService>();
+builder.Services.AddScoped<JwtTokenService>();
+
+builder.Services.AddIdentityCore<ApplicationUser>(o =>
+    {
+        o.User.RequireUniqueEmail = true;
+        o.Password.RequiredLength = 8;
+        o.Password.RequireDigit = true;
+        o.Password.RequireLowercase = false;
+        o.Password.RequireUppercase = false;
+        o.Password.RequireNonAlphanumeric = false;
+        o.Lockout.AllowedForNewUsers = true;
+        o.Lockout.MaxFailedAccessAttempts = 5;
+        o.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15);
+    })
+    .AddEntityFrameworkStores<AppDbContext>()
+    .AddSignInManager()
+    .AddDefaultTokenProviders();
+
+var authentication = builder.Services.AddAuthentication(IdentityConstants.ApplicationScheme);
+authentication.AddIdentityCookies();
+authentication.AddJwtBearer(o =>
+{
+    o.MapInboundClaims = false;
+    o.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidIssuer = JwtTokenService.Issuer,
+        ValidAudience = JwtTokenService.Audience,
+        IssuerSigningKey = JwtTokenService.SigningKey(builder.Configuration),
+        ValidAlgorithms = [SecurityAlgorithms.HmacSha256],
+        NameClaimType = ClaimTypes.Name,
+        RoleClaimType = ClaimTypes.Role
+    };
+});
+
+var googleClientId = builder.Configuration["Authentication:Google:ClientId"];
+var googleClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
+if (!string.IsNullOrEmpty(googleClientId) && !string.IsNullOrEmpty(googleClientSecret))
+{
+    authentication.AddGoogle(o =>
+    {
+        o.ClientId = googleClientId;
+        o.ClientSecret = googleClientSecret;
+        o.SignInScheme = IdentityConstants.ExternalScheme;
+    });
+}
+
+builder.Services.ConfigureApplicationCookie(o =>
+{
+    o.LoginPath = "/Account/Login";
+    o.AccessDeniedPath = "/Account/AccessDenied";
+    o.Cookie.HttpOnly = true;
+    o.Cookie.SameSite = SameSiteMode.Lax;
+    o.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+});
 
 builder.Services.AddControllersWithViews()
     .AddJsonOptions(o => o.JsonSerializerOptions.Converters.Add(
@@ -69,6 +127,7 @@ app.UseWhen(context => !IsApi(context), mvc =>
 app.UseHttpsRedirection();
 app.UseRouting();
 
+app.UseAuthentication();
 app.UseAuthorization();
 app.UseOutputCache();
 
@@ -80,3 +139,5 @@ app.MapControllerRoute(
     .WithStaticAssets();
 
 app.Run();
+
+public partial class Program;

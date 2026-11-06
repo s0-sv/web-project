@@ -1,0 +1,44 @@
+@using Microsoft.AspNetCore.Authentication
+@using TutorHub.Controllers
+@model LoginForm
+@{
+    ViewData["Title"] = "Вхід";
+    var externalSchemes = (List<AuthenticationScheme>)ViewBag.ExternalSchemes;
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+        <h1 class="h3 mb-3">Вхід</h1>
+        <form asp-action="Login" asp-route-returnUrl="@ViewBag.ReturnUrl" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="mb-3">
+                <label asp-for="Email" class="form-label"></label>
+                <input asp-for="Email" class="form-control" autocomplete="username" />
+                <span asp-validation-for="Email" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="Password" class="form-label"></label>
+                <input asp-for="Password" class="form-control" autocomplete="current-password" />
+                <span asp-validation-for="Password" class="text-danger"></span>
+            </div>
+            <button type="submit" class="btn btn-primary w-100">Увійти</button>
+        </form>
+
+        @if (externalSchemes.Count > 0)
+        {
+            <hr />
+            @foreach (var scheme in externalSchemes)
+            {
+                <form asp-action="ExternalLogin" asp-route-provider="@scheme.Name" asp-route-returnUrl="@ViewBag.ReturnUrl" method="post" class="mb-2">
+                    <button type="submit" class="btn btn-outline-secondary w-100">Увійти через @scheme.DisplayName</button>
+                </form>
+            }
+        }
+
+        <p class="mt-3">Немає облікового запису? <a asp-action="Register">Зареєструватися</a></p>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

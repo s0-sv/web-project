@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TutorHub.Data;
@@ -27,10 +28,12 @@ public class HomeController(AppDbContext db) : AppController
         return View(upcoming);
     }
 
+    [AllowAnonymous]
     [IgnoreAntiforgeryToken]
     [Route("/Home/Status/{code:int}")]
     public IActionResult Status(int code) => View("Status", code);
 
+    [AllowAnonymous]
     [IgnoreAntiforgeryToken]
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     public IActionResult Error() =>
