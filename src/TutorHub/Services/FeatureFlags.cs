@@ -33,6 +33,8 @@ public class FeatureFlags(AppDbContext db, TenantContext tenant)
 
 public class LearningAnalytics(AppDbContext db)
 {
+    public const int MaxMonths = 12;
+
     public async Task<AnalyticsDto> BuildAsync(CancellationToken ct = default)
     {
         var lessons = await db.Lessons.AsNoTracking()
@@ -40,6 +42,7 @@ public class LearningAnalytics(AppDbContext db)
             {
                 l.Status,
                 l.DurationMinutes,
+                l.StartsAt,
                 Subject = l.Subject!.Name,
                 Tutor = l.Tutor!.FullName,
                 Rate = l.Tutor.HourlyRate
@@ -66,6 +69,40 @@ public class LearningAnalytics(AppDbContext db)
                     Math.Round(g.Sum(l => l.DurationMinutes) / 60m, 2),
                     Math.Round(g.Sum(l => l.Rate * l.DurationMinutes / 60m), 2)))
                 .OrderByDescending(t => t.Revenue)
-                .ToList());
+                .ToList(),
+            BuildMonths(completed.Select(l => (l.StartsAt, l.DurationMinutes)).ToList()));
+    }
+
+    private static List<MonthAnalyticsDto> BuildMonths(List<(DateTimeOffset StartsAt, int DurationMinutes)> lessons)
+    {
+        if (lessons.Count == 0)
+        {
+            return [];
+        }
+
+        var byMonth = lessons
+            .GroupBy(l =>
+            {
+                var local = AppTime.ToLocal(l.StartsAt);
+                return new DateOnly(local.Year, local.Month, 1);
+            })
+            .ToDictionary(g => g.Key, g => (Lessons: g.Count(), Minutes: g.Sum(l => l.DurationMinutes)));
+
+        var last = byMonth.Keys.Max();
+        var first = byMonth.Keys.Min();
+        var earliest = last.AddMonths(1 - MaxMonths);
+        if (first < earliest)
+        {
+            first = earliest;
+        }
+
+        var months = new List<MonthAnalyticsDto>();
+        for (var month = first; month <= last; month = month.AddMonths(1))
+        {
+            var (count, minutes) = byMonth.GetValueOrDefault(month);
+            months.Add(new MonthAnalyticsDto(month.ToString("yyyy-MM"), count, Math.Round(minutes / 60m, 2)));
+        }
+
+        return months;
     }
 }

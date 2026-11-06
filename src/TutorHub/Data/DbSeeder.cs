@@ -85,6 +85,7 @@ public static class DbSeeder
 
         await SeedDemoCitiesAsync(db, demo.Id);
         await SeedMapDemoAsync(db);
+        await SeedAnalyticsHistoryAsync(db, demo.Id);
 
         if (config["Seed:DemoPassword"] is not { Length: > 0 } password)
         {
@@ -198,6 +199,54 @@ public static class DbSeeder
                 DurationMinutes = 60,
                 Status = LessonStatus.Completed
             }));
+        }
+
+        await db.SaveChangesAsync();
+    }
+
+    private static async Task SeedAnalyticsHistoryAsync(AppDbContext db, int tenantId)
+    {
+        const string topic = "Повторення матеріалу";
+        int[] lessonsPerMonth = [3, 5, 4, 7, 6, 8];
+
+        if (await db.Lessons.IgnoreQueryFilters().AnyAsync(l => l.TenantId == tenantId && l.Topic == topic))
+        {
+            return;
+        }
+
+        var pairs = await db.Lessons.IgnoreQueryFilters().AsNoTracking()
+            .Where(l => l.TenantId == tenantId)
+            .OrderBy(l => l.Id)
+            .Select(l => new { l.TutorId, l.StudentId, l.SubjectId })
+            .Distinct()
+            .ToListAsync();
+        if (pairs.Count == 0)
+        {
+            return;
+        }
+
+        var today = new DateTimeOffset(DateTimeOffset.UtcNow.Date, TimeSpan.Zero);
+        var firstOfMonth = today.AddDays(1 - today.Day);
+        var created = 0;
+
+        foreach (var (count, index) in lessonsPerMonth.Select((count, index) => (count, index)))
+        {
+            var month = firstOfMonth.AddMonths(index - lessonsPerMonth.Length);
+            for (var lesson = 0; lesson < count; lesson++)
+            {
+                var pair = pairs[created++ % pairs.Count];
+                db.Lessons.Add(new Lesson
+                {
+                    TenantId = tenantId,
+                    TutorId = pair.TutorId,
+                    StudentId = pair.StudentId,
+                    SubjectId = pair.SubjectId,
+                    Topic = topic,
+                    StartsAt = month.AddDays(lesson * 3).AddHours(15),
+                    DurationMinutes = 60,
+                    Status = LessonStatus.Completed
+                });
+            }
         }
 
         await db.SaveChangesAsync();

@@ -33,9 +33,11 @@ public class MapTests(AuthTestFactory factory)
         return (await response.ReadJsonAsync()).GetProperty("tutors").EnumerateArray().ToList();
     }
 
-    private static async Task TeachAsync(HttpClient client, int tutorId, string subject, string status = "Scheduled")
+    private static async Task TeachAsync(HttpClient client, int tutorId, string subject, string status = "Scheduled") =>
+        await TeachSubjectAsync(client, tutorId, await client.CreateAsync("/api/subjects", new { name = subject }), status);
+
+    private static async Task TeachSubjectAsync(HttpClient client, int tutorId, int subjectId, string status = "Scheduled")
     {
-        var subjectId = await client.CreateAsync("/api/subjects", new { name = subject });
         var studentId = await client.CreateStudentAsync();
         var response = await client.PostAsJsonAsync("/api/lessons", new
         {
@@ -340,6 +342,64 @@ public class MapTests(AuthTestFactory factory)
         });
 
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task Subject_statistics_follow_the_filters()
+    {
+        var owner = await factory.RegisterAsync();
+        var marker = Marker();
+        var popular = $"A {marker}";
+        var rare = $"B {marker}";
+        var cheap = await CreateTutorAsync(owner.Client, $"{marker} cheap", rate: 300);
+        var costly = await CreateTutorAsync(owner.Client, $"{marker} costly", rate: 800);
+        var popularId = await owner.Client.CreateAsync("/api/subjects", new { name = popular });
+        await TeachSubjectAsync(owner.Client, cheap, popularId);
+        await TeachSubjectAsync(owner.Client, cheap, popularId);
+        await TeachSubjectAsync(owner.Client, costly, popularId);
+        await TeachAsync(owner.Client, costly, rare);
+        await PublishAsync(owner.Client, cheap);
+        await PublishAsync(owner.Client, costly);
+
+        static (string?, int)[] Stats(JsonElement body) =>
+            body.GetProperty("subjects").EnumerateArray()
+                .Select(s => (s.GetProperty("name").GetString(), s.GetProperty("tutors").GetInt32()))
+                .ToArray();
+
+        var all = await (await factory.Anonymous().GetAsync($"/map/tutors?q={marker}")).ReadJsonAsync();
+        var filtered = await (await factory.Anonymous().GetAsync($"/map/tutors?q={marker}&maxRate=300")).ReadJsonAsync();
+
+        Assert.Equal([(popular, 2), (rare, 1)], Stats(all));
+        Assert.Equal([(popular, 1)], Stats(filtered));
+    }
+
+    [Fact]
+    public async Task Subject_statistics_are_limited_and_empty_without_results()
+    {
+        var owner = await factory.RegisterAsync();
+        var marker = Marker();
+        var tutorId = await CreateTutorAsync(owner.Client, marker);
+        for (var i = 0; i < 12; i++)
+        {
+            await TeachAsync(owner.Client, tutorId, $"Предмет {i:00} {marker}");
+        }
+        await PublishAsync(owner.Client, tutorId);
+
+        var body = await (await factory.Anonymous().GetAsync($"/map/tutors?q={marker}")).ReadJsonAsync();
+        var none = await (await factory.Anonymous().GetAsync($"/map/tutors?q={marker}&maxRate=0")).ReadJsonAsync();
+
+        Assert.Equal(10, body.GetProperty("subjects").GetArrayLength());
+        Assert.Equal(12, body.GetProperty("tutors")[0].GetProperty("subjects").GetArrayLength());
+        Assert.Equal(0, none.GetProperty("subjects").GetArrayLength());
+    }
+
+    [Fact]
+    public async Task Page_has_the_subject_chart()
+    {
+        var html = await factory.Anonymous().GetStringAsync("/map");
+
+        Assert.Contains("id=\"map-subjects-chart\"", html);
+        Assert.Contains("/lib/chart.js/dist/chart.umd.js", html);
     }
 
     [Fact]

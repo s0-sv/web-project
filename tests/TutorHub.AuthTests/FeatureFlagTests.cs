@@ -1,5 +1,7 @@
 using System.Net;
 using System.Net.Http.Json;
+using System.Text.Json;
+using System.Text.RegularExpressions;
 using Xunit;
 
 namespace TutorHub.AuthTests;
@@ -125,6 +127,114 @@ public class FeatureFlagTests(AuthTestFactory factory)
         Assert.Equal(1, analytics.GetProperty("scheduledLessons").GetInt32());
         Assert.Equal(1.5m, analytics.GetProperty("completedHours").GetDecimal());
         Assert.Equal(450m, analytics.GetProperty("estimatedRevenue").GetDecimal());
+    }
+
+    private static async Task CompleteLessonAsync(HttpClient client, LessonGraph graph, string startsAt, int minutes = 60)
+    {
+        var response = await client.PostAsJsonAsync("/api/lessons", new
+        {
+            tutorId = graph.TutorId,
+            studentId = graph.StudentId,
+            subjectId = graph.SubjectId,
+            topic = "Done",
+            startsAt,
+            durationMinutes = minutes,
+            status = "Completed"
+        });
+        Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+    }
+
+    private static List<(string?, int, decimal)> Months(JsonElement analytics) =>
+        analytics.GetProperty("months").EnumerateArray()
+            .Select(m => (m.GetProperty("month").GetString(), m.GetProperty("lessons").GetInt32(), m.GetProperty("hours").GetDecimal()))
+            .ToList();
+
+    [Fact]
+    public async Task Analytics_months_use_kyiv_time_and_fill_gaps()
+    {
+        var owner = await factory.RegisterAsync();
+        await SetPlanAsync(owner.Client, "Premium");
+        var graph = await owner.Client.CreateLessonGraphAsync();
+
+        await CompleteLessonAsync(owner.Client, graph, "2027-01-15T10:00:00Z", 90);
+        await CompleteLessonAsync(owner.Client, graph, "2027-02-28T22:30:00Z");
+        await CompleteLessonAsync(owner.Client, graph, "2027-03-20T10:00:00Z", 30);
+
+        var analytics = await (await owner.Client.GetAsync("/api/analytics")).ReadJsonAsync();
+
+        Assert.Equal(
+            [("2027-01", 1, 1.5m), ("2027-02", 0, 0m), ("2027-03", 2, 1.5m)],
+            Months(analytics));
+    }
+
+    [Fact]
+    public async Task Analytics_months_are_limited_to_the_latest_year()
+    {
+        var owner = await factory.RegisterAsync();
+        await SetPlanAsync(owner.Client, "Premium");
+        var graph = await owner.Client.CreateLessonGraphAsync();
+
+        await CompleteLessonAsync(owner.Client, graph, "2025-01-15T10:00:00Z");
+        await CompleteLessonAsync(owner.Client, graph, "2027-03-15T10:00:00Z");
+
+        var months = Months(await (await owner.Client.GetAsync("/api/analytics")).ReadJsonAsync());
+
+        Assert.Equal(12, months.Count);
+        Assert.Equal("2026-04", months[0].Item1);
+        Assert.Equal(("2027-03", 1, 1m), months[^1]);
+    }
+
+    [Fact]
+    public async Task Analytics_months_ignore_other_statuses_and_tenants()
+    {
+        var owner = await factory.RegisterAsync();
+        var stranger = await factory.RegisterAsync();
+        await SetPlanAsync(owner.Client, "Premium");
+        await SetPlanAsync(stranger.Client, "Premium");
+        await CompleteLessonAsync(stranger.Client, await stranger.Client.CreateLessonGraphAsync(), "2027-05-15T10:00:00Z");
+        await owner.Client.CreateLessonGraphAsync();
+
+        Assert.Empty(Months(await (await owner.Client.GetAsync("/api/analytics")).ReadJsonAsync()));
+    }
+
+    [Fact]
+    public async Task Charts_appear_only_with_data_and_on_the_premium_page()
+    {
+        var owner = await factory.RegisterAsync();
+        var browser = await factory.SignInAsync(owner);
+
+        Assert.DoesNotContain("chart.umd.js", await browser.GetStringAsync("/Analytics"));
+
+        await SetPlanAsync(owner.Client, "Premium");
+        var empty = await browser.GetStringAsync("/Analytics");
+        Assert.DoesNotContain("data-chart", empty);
+        Assert.DoesNotContain("chart.umd.js", empty);
+
+        var graph = await owner.Client.CreateLessonGraphAsync();
+        var scheduledOnly = await browser.GetStringAsync("/Analytics");
+        Assert.Single(Regex.Matches(scheduledOnly, "data-chart="));
+
+        await CompleteLessonAsync(owner.Client, graph, "2027-01-15T10:00:00Z");
+        var page = await browser.GetStringAsync("/Analytics");
+
+        Assert.Equal(3, Regex.Matches(page, "data-chart=").Count);
+        Assert.Contains("chart.umd.js", page);
+        Assert.Contains("01.2027", page);
+        Assert.Contains("Показати таблицею", page);
+    }
+
+    [Fact]
+    public async Task Chart_data_is_encoded_in_the_page()
+    {
+        var owner = await factory.RegisterAsync();
+        var browser = await factory.SignInAsync(owner);
+        await SetPlanAsync(owner.Client, "Premium");
+        var subjectId = await owner.Client.CreateAsync("/api/subjects", new { name = "\"><script>alert(1)</script>" });
+        var tutorId = await owner.Client.CreateAsync("/api/tutors", new { fullName = "Tutor", email = $"{AuthTestFactory.Unique("t")}@example.com", hourlyRate = 300 });
+        var studentId = await owner.Client.CreateStudentAsync();
+        await CompleteLessonAsync(owner.Client, new LessonGraph(subjectId, tutorId, studentId, 0), "2027-01-15T10:00:00Z");
+
+        Assert.DoesNotContain("<script>alert(1)", await browser.GetStringAsync("/Analytics"));
     }
 
     [Fact]

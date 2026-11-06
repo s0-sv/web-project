@@ -17,11 +17,15 @@ public record MapTutor(
     string? Headline,
     IReadOnlyList<string> Subjects);
 
-public record MapResponse(IReadOnlyList<MapTutor> Tutors);
+public record MapSubjectStat(string Name, int Tutors);
+
+public record MapResponse(IReadOnlyList<MapTutor> Tutors, IReadOnlyList<MapSubjectStat> Subjects);
 
 [AllowAnonymous]
 public class MapController(AppDbContext db) : AppController
 {
+    public const int MaxChartSubjects = 10;
+
     private IQueryable<Tutor> Located =>
         db.Tutors.IgnoreQueryFilters().AsNoTracking()
             .Where(t => t.IsPublished && t.Slug != null && t.City != null && t.Latitude != null && t.Longitude != null);
@@ -82,6 +86,12 @@ public class MapController(AppDbContext db) : AppController
 
         return new MapResponse(tutors
             .Select(t => new MapTutor(t.FullName, t.Slug!, t.City!, t.Latitude!.Value, t.Longitude!.Value, t.HourlyRate, t.Headline, t.Subjects))
-            .ToList());
+            .ToList(),
+            tutors.SelectMany(t => t.Subjects)
+                .GroupBy(name => name)
+                .Select(g => new MapSubjectStat(g.Key, g.Count()))
+                .OrderByDescending(s => s.Tutors).ThenBy(s => s.Name, StringComparer.Ordinal)
+                .Take(MaxChartSubjects)
+                .ToList());
     }
 }

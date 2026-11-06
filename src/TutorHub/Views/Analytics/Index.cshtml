@@ -1,3 +1,4 @@
+@using System.Text.Json
 @using TutorHub.Contracts
 @model AnalyticsDto
 @{
@@ -11,6 +12,36 @@
         ("Годин проведено", Model.CompletedHours.ToString("0.##")),
         ("Оцінка доходу, грн", Model.EstimatedRevenue.ToString("0.##"))
     };
+    static string MonthLabel(string month) => $"{month[5..]}.{month[..4]}";
+    var monthsChart = JsonSerializer.Serialize(new
+    {
+        kind = "column",
+        title = "Проведені заняття за місяцями",
+        label = "Занять",
+        labels = Model.Months.Select(m => MonthLabel(m.Month)),
+        values = Model.Months.Select(m => m.Lessons)
+    });
+    var subjectsChart = JsonSerializer.Serialize(new
+    {
+        kind = "bars",
+        title = "Години за предметами",
+        label = "Годин",
+        labels = Model.Subjects.Select(s => s.Subject),
+        values = Model.Subjects.Select(s => s.Hours)
+    });
+    var statuses = new (string Label, int Count)[]
+    {
+        ("Проведено", Model.CompletedLessons),
+        ("Заплановано", Model.ScheduledLessons),
+        ("Скасовано", Model.CancelledLessons)
+    };
+    var statusChart = JsonSerializer.Serialize(new
+    {
+        kind = "segmented",
+        title = "Заняття за статусами",
+        labels = statuses.Select(s => s.Label),
+        values = statuses.Select(s => s.Count)
+    });
 }
 
 <h1 class="h3 mb-3">Аналітика навчання <span class="badge text-bg-warning fs-6">Premium</span></h1>
@@ -30,6 +61,58 @@
 </div>
 
 <p class="text-muted">Години й дохід рахуються лише за проведеними заняттями.</p>
+
+@if (Model.TotalLessons > 0)
+{
+    <div class="card mb-3">
+        <div class="card-body">
+            <h2 class="h6">Заняття за статусами</h2>
+            <div class="chart-box chart-box-segmented">
+                <canvas role="img" aria-label="Заняття за статусами" data-chart="@statusChart"></canvas>
+            </div>
+        </div>
+    </div>
+}
+
+@if (Model.Months.Count > 0)
+{
+    <div class="row g-3 mb-4">
+        <div class="col-lg-7">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h2 class="h6">Проведені заняття за місяцями</h2>
+                    <div class="chart-box">
+                        <canvas role="img" aria-label="Проведені заняття за місяцями" data-chart="@monthsChart"></canvas>
+                    </div>
+                    <details class="mt-2">
+                        <summary>Показати таблицею</summary>
+                        <div class="table-responsive">
+                            <table class="table table-sm align-middle mb-0">
+                                <thead><tr><th>Місяць</th><th>Занять</th><th>Годин</th></tr></thead>
+                                <tbody>
+                                    @foreach (var month in Model.Months)
+                                    {
+                                        <tr><td>@MonthLabel(month.Month)</td><td>@month.Lessons</td><td>@month.Hours.ToString("0.##")</td></tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </details>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-5">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h2 class="h6">Години за предметами</h2>
+                    <div class="chart-box">
+                        <canvas role="img" aria-label="Години за предметами" data-chart="@subjectsChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
 
 <div class="row">
     <div class="col-lg-6">
@@ -61,3 +144,11 @@
         </div>
     </div>
 </div>
+
+@if (Model.TotalLessons > 0)
+{
+    @section Scripts {
+        <script src="~/lib/chart.js/dist/chart.umd.js"></script>
+        <script src="~/js/charts.js" asp-append-version="true"></script>
+    }
+}

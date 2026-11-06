@@ -152,6 +152,8 @@ public record SubjectAnalyticsDto(string Subject, int Lessons, decimal Hours);
 
 public record TutorAnalyticsDto(string Tutor, int Lessons, decimal Hours, decimal Revenue);
 
+public record MonthAnalyticsDto(string Month, int Lessons, decimal Hours);
+
 public record AnalyticsDto(
     int TotalLessons,
     int CompletedLessons,
@@ -160,6 +162,7 @@ public record AnalyticsDto(
     decimal CompletedHours,
     decimal EstimatedRevenue,
     IReadOnlyList<SubjectAnalyticsDto> Subjects,
-    IReadOnlyList<TutorAnalyticsDto> Tutors);
+    IReadOnlyList<TutorAnalyticsDto> Tutors,
+    IReadOnlyList<MonthAnalyticsDto> Months);
 
 public record InviteCodeDto(string InviteCode);

@@ -242,7 +242,7 @@ public class TenantIsolationTests(AuthTestFactory factory)
         var second = await db.Tenants.SingleAsync(t => t.Name == DbSeeder.SecondTenant);
         Assert.Equal(TenantPlan.Premium, demo.Plan);
         Assert.Equal(TenantPlan.Free, second.Plan);
-        Assert.Equal(7, await db.Lessons.IgnoreQueryFilters().CountAsync(l => l.TenantId == demo.Id));
+        Assert.Equal(40, await db.Lessons.IgnoreQueryFilters().CountAsync(l => l.TenantId == demo.Id));
         Assert.Equal(1, await db.Lessons.IgnoreQueryFilters().CountAsync(l => l.TenantId == second.Id));
 
         var student = await users.FindByEmailAsync("student@demo.example.com");

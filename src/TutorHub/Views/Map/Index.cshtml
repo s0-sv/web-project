@@ -50,9 +50,24 @@
 
 <p id="map-status" class="text-muted" role="status" aria-live="polite">Завантаження…</p>
 
-<div id="tutor-map" class="mb-4" role="region" aria-label="Мапа репетиторів"></div>
-
-<p class="text-muted small">Точка на мапі позначає центр міста, а не адресу репетитора.</p>
+<div class="row g-3 mb-4">
+    <div class="col-lg-8">
+        <div id="tutor-map" role="region" aria-label="Мапа репетиторів"></div>
+        <p class="text-muted small mt-2 mb-0">Точка на мапі позначає центр міста, а не адресу репетитора.</p>
+    </div>
+    <div class="col-lg-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h2 class="h6">Репетитори за предметами</h2>
+                <div class="chart-box chart-box-tall">
+                    <canvas id="map-subjects-chart" role="img" aria-label="Репетитори за предметами"></canvas>
+                </div>
+                <p id="map-subjects-empty" class="text-muted small mb-0 d-none">Немає предметів для показу.</p>
+                <p class="text-muted small mt-2 mb-0">Показано до @MapController.MaxChartSubjects предметів за поточними фільтрами.</p>
+            </div>
+        </div>
+    </div>
+</div>
 
 <h2 class="h5">Результати</h2>
 <ul id="map-results" class="list-group mb-4"></ul>
@@ -62,5 +77,7 @@
 @section Scripts {
     <script src="~/lib/leaflet/dist/leaflet.js"></script>
     <script src="~/lib/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
+    <script src="~/lib/chart.js/dist/chart.umd.js"></script>
+    <script src="~/js/charts.js" asp-append-version="true"></script>
     <script src="~/js/map.js" asp-append-version="true"></script>
 }
