@@ -50,6 +50,7 @@ builder.Services.AddScoped<FeatureFlags>();
 builder.Services.AddScoped<TutorHub.Controllers.TutorPublishing>();
 builder.Services.AddScoped<LearningAnalytics>();
 builder.Services.AddScoped<TutorLocationService>();
+builder.Services.AddScoped<LessonSummaryService>();
 builder.Services.AddSingleton(new NominatimThrottle(NominatimThrottle.PublicApiInterval));
 builder.Services.AddHttpClient<IGeocoder, NominatimGeocoder>(client =>
 {

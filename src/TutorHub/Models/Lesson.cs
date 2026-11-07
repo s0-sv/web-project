@@ -53,5 +53,7 @@ public class Lesson : ITenantEntity
 
     public string? Notes { get; set; }
 
+    public string? Summary { get; set; }
+
     public List<LessonMaterial> Materials { get; set; } = [];
 }

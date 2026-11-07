@@ -121,6 +121,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, TenantContext 
             e.Property(x => x.Topic).HasMaxLength(200);
             e.Property(x => x.MeetingUrl).HasMaxLength(500);
             e.Property(x => x.Notes).HasMaxLength(4000);
+            e.Property(x => x.Summary).HasMaxLength(LessonSummaryService.MaxLength);
             e.Property(x => x.Status).HasConversion<string>().HasMaxLength(20);
             e.HasAlternateKey(x => new { x.TenantId, x.Id });
             e.HasIndex(x => new { x.TenantId, x.StartsAt });

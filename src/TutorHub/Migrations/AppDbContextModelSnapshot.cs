@@ -206,6 +206,10 @@ namespace TutorHub.Migrations
                     b.Property<int>("SubjectId")
                         .HasColumnType("integer");
 
+                    b.Property<string>("Summary")
+                        .HasMaxLength(100000)
+                        .HasColumnType("character varying(100000)");
+
                     b.Property<int>("TenantId")
                         .HasColumnType("integer");
 

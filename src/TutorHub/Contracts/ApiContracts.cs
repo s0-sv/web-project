@@ -101,6 +101,12 @@ public record LessonRequest(
     [EnumDataType(typeof(LessonStatus))] LessonStatus Status = LessonStatus.Scheduled,
     [StringLength(4000)] string? Notes = null);
 
+public record LessonSummaryDto(string Markdown, string Version);
+
+public record LessonSummaryRequest(
+    [Required(AllowEmptyStrings = true), StringLength(LessonSummaryService.MaxLength), RegularExpression("^[^\\0]*$")] string Markdown,
+    [Required] string Version);
+
 public record MaterialDto(
     int Id,
     int LessonId,

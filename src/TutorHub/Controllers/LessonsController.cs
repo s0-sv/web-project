@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using TutorHub.Contracts;
 using TutorHub.Data;
 using TutorHub.Models;
 using TutorHub.Services;
@@ -9,7 +10,9 @@ using TutorHub.ViewModels;
 
 namespace TutorHub.Controllers;
 
-public class LessonsController(AppDbContext db, MaterialService materials) : AppController
+public record LessonSummaryPage(int LessonId, string Topic, string Markdown, string Version, bool CanEdit, int MaxLength);
+
+public class LessonsController(AppDbContext db, MaterialService materials, LessonSummaryService summaries) : AppController
 {
     public async Task<IActionResult> Index() =>
         View(await db.Lessons.AsNoTracking()
@@ -23,6 +26,42 @@ public class LessonsController(AppDbContext db, MaterialService materials) : App
     {
         var lesson = await LoadFullAsync(id);
         return lesson is null ? NotFound() : View(lesson);
+    }
+
+    public async Task<IActionResult> Summary(int id, CancellationToken ct)
+    {
+        var topic = await db.Lessons.AsNoTracking().Where(l => l.Id == id).Select(l => l.Topic).FirstOrDefaultAsync(ct);
+        var summary = await summaries.GetAsync(id, ct);
+        if (topic is null || summary is null)
+        {
+            return NotFound();
+        }
+
+        return View(new LessonSummaryPage(
+            id,
+            topic,
+            summary.Markdown,
+            summary.Version,
+            !User.IsInRole(TenantRoles.Student),
+            LessonSummaryService.MaxLength));
+    }
+
+    [HttpPost]
+    [Authorize(Policy = AppPolicies.Staff)]
+    public async Task<IActionResult> Summary(int id, [FromBody] LessonSummaryRequest request, CancellationToken ct)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
+        var result = await summaries.SaveAsync(id, request.Markdown, request.Version, ct);
+        return result.Status switch
+        {
+            LessonSummarySaveStatus.Saved => Json(result.Summary),
+            LessonSummarySaveStatus.Conflict => Conflict(result.Summary),
+            _ => NotFound()
+        };
     }
 
     [Authorize(Policy = AppPolicies.Staff)]

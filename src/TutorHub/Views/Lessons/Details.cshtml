@@ -6,13 +6,14 @@
 
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h1 class="h3 mb-0">@Model.Topic <span class="badge @Model.Status.BadgeClass() fs-6">@Model.Status.Label()</span></h1>
-    @if (!isStudent)
-    {
-        <div class="text-nowrap">
+    <div class="text-nowrap">
+        <a class="btn btn-outline-primary" asp-action="Summary" asp-route-id="@Model.Id">Конспект</a>
+        @if (!isStudent)
+        {
             <a class="btn btn-outline-secondary" asp-action="Edit" asp-route-id="@Model.Id">Редагувати</a>
             <a class="btn btn-outline-danger" asp-action="Delete" asp-route-id="@Model.Id">Видалити</a>
-        </div>
-    }
+        }
+    </div>
 </div>
 
 <dl class="row">

@@ -1,0 +1,60 @@
+@model TutorHub.Controllers.LessonSummaryPage
+@{
+    ViewData["Title"] = $"Конспект: {Model.Topic}";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/summary.css" asp-append-version="true" />
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3 gap-2 flex-wrap">
+    <h1 class="h3 mb-0">Конспект: @Model.Topic</h1>
+    <a class="btn btn-outline-secondary" asp-action="Details" asp-route-id="@Model.LessonId">До заняття</a>
+</div>
+
+@if (Model.CanEdit)
+{
+    @Html.AntiForgeryToken()
+
+    <div id="summary-conflict" class="alert alert-warning d-none" role="alert">
+        <p class="mb-2">Конспект змінили в іншому місці, поки тут були незбережені зміни. Автозбереження зупинено.</p>
+        <button type="button" id="summary-keep-mine" class="btn btn-sm btn-warning">Лишити мою версію</button>
+        <button type="button" id="summary-take-server" class="btn btn-sm btn-outline-secondary">Узяти версію із сервера</button>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center gap-2 flex-wrap mb-2">
+        <div id="summary-toolbar" class="btn-group btn-group-sm" role="group" aria-label="Тип блоку">
+            <button type="button" class="btn btn-outline-secondary" data-type="paragraph">Абзац</button>
+            <button type="button" class="btn btn-outline-secondary" data-type="h1">H1</button>
+            <button type="button" class="btn btn-outline-secondary" data-type="h2">H2</button>
+            <button type="button" class="btn btn-outline-secondary" data-type="h3">H3</button>
+            <button type="button" class="btn btn-outline-secondary" data-type="bullet">Список</button>
+            <button type="button" class="btn btn-outline-secondary" data-type="numbered">Нумерований</button>
+        </div>
+        <span id="summary-status" class="small text-muted" role="status" aria-live="polite"></span>
+    </div>
+}
+
+<div id="summary-editor"
+     class="summary-editor"
+     data-editable="@(Model.CanEdit ? "true" : "false")"
+     data-markdown="@Model.Markdown"
+     data-version="@Model.Version"
+     data-lesson-id="@Model.LessonId"
+     data-save-url="@Url.Action("Summary", new { id = Model.LessonId })"
+     data-max-length="@Model.MaxLength"></div>
+
+@if (Model.CanEdit)
+{
+    <p class="text-muted small mt-2">
+        Починайте рядок із <code>#</code>, <code>##</code>, <code>###</code>, <code>-</code> або <code>1.</code> і пробілу, щоб змінити тип блоку.
+        Зміни зберігаються автоматично.
+    </p>
+}
+
+<noscript><pre class="summary-source">@Model.Markdown</pre></noscript>
+
+@section Scripts {
+    <script src="~/js/summary-markdown.js" asp-append-version="true"></script>
+    <script src="~/js/summary-editor.js" asp-append-version="true"></script>
+}

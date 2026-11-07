@@ -10,7 +10,7 @@ using TutorHub.Services;
 namespace TutorHub.Controllers.Api;
 
 [Route("api/lessons")]
-public class LessonsApiController(AppDbContext db, MaterialService materials) : ApiControllerBase
+public class LessonsApiController(AppDbContext db, MaterialService materials, LessonSummaryService summaries) : ApiControllerBase
 {
     [HttpGet]
     [OutputCache(PolicyName = CacheInvalidationInterceptor.PolicyName)]
@@ -84,6 +84,26 @@ public class LessonsApiController(AppDbContext db, MaterialService materials) : 
 
         await materials.DeleteLessonAsync(lesson, ct);
         return NoContent();
+    }
+
+    [HttpGet("{id:int}/summary")]
+    public async Task<ActionResult<LessonSummaryDto>> GetSummary(int id, CancellationToken ct)
+    {
+        var summary = await summaries.GetAsync(id, ct);
+        return summary is null ? NotFound() : summary;
+    }
+
+    [HttpPut("{id:int}/summary")]
+    [Authorize(Policy = AppPolicies.Staff)]
+    public async Task<ActionResult<LessonSummaryDto>> SaveSummary(int id, LessonSummaryRequest request, CancellationToken ct)
+    {
+        var result = await summaries.SaveAsync(id, request.Markdown, request.Version, ct);
+        return result.Status switch
+        {
+            LessonSummarySaveStatus.Saved => result.Summary!,
+            LessonSummarySaveStatus.Conflict => Conflict(result.Summary),
+            _ => NotFound()
+        };
     }
 
     private Task<LessonDto?> LoadDtoAsync(int id, CancellationToken ct) =>
