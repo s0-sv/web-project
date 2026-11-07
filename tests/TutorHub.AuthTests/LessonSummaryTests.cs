@@ -266,6 +266,7 @@ public partial class LessonSummaryTests(AuthTestFactory factory)
         Assert.Contains("data-markdown=\"# Заголовок\"", html);
         Assert.Contains("id=\"summary-toolbar\"", html);
         Assert.Contains("__RequestVerificationToken", html);
+        Assert.Contains("/lib/sortablejs/Sortable.min.js", html);
     }
 
     [Fact]
@@ -280,6 +281,7 @@ public partial class LessonSummaryTests(AuthTestFactory factory)
         Assert.Contains("data-editable=\"false\"", html);
         Assert.Contains("мій конспект", html);
         Assert.DoesNotContain("id=\"summary-toolbar\"", html);
+        Assert.DoesNotContain("Sortable", html);
         Assert.Equal(HttpStatusCode.NotFound, (await browser.GetAsync($"/Lessons/Summary/{scenario.Other.LessonId}")).StatusCode);
     }
 
@@ -299,6 +301,18 @@ public partial class LessonSummaryTests(AuthTestFactory factory)
 
         Assert.StartsWith("/Account/AccessDenied", response.Headers.Location!.PathAndQuery);
         Assert.Equal("", (await GetAsync(scenario.Owner.Client, scenario.Own.LessonId)).GetProperty("markdown").GetString());
+    }
+
+    [Fact]
+    public async Task Saved_block_order_is_returned_as_saved()
+    {
+        var owner = await factory.RegisterAsync();
+        var graph = await owner.Client.CreateLessonGraphAsync();
+        var version = await SaveAsync(owner.Client, graph.LessonId, "перший\n\nдругий");
+
+        await SaveAsync(owner.Client, graph.LessonId, "другий\n\nперший", version);
+
+        Assert.Equal("другий\n\nперший", (await GetAsync(owner.Client, graph.LessonId)).GetProperty("markdown").GetString());
     }
 
     [Fact]

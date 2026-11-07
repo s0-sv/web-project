@@ -14,6 +14,46 @@
   border-radius: 0.25rem;
 }
 
+.summary-handle {
+  order: -1;
+  flex: 0 0 1.25rem;
+  height: 1.75rem;
+  padding: 0;
+  border: 0;
+  border-radius: 0.25rem;
+  background: none;
+  color: #6c757d;
+  line-height: 1.75rem;
+  cursor: grab;
+  opacity: 0;
+  touch-action: none;
+  transition: opacity 0.1s;
+}
+
+.summary-block:hover .summary-handle,
+.summary-block:focus-within .summary-handle {
+  opacity: 1;
+}
+
+.summary-handle:hover {
+  background-color: #e9ecef;
+}
+
+.summary-block-chosen .summary-handle {
+  cursor: grabbing;
+}
+
+.summary-block-ghost {
+  background-color: #e7f1ff;
+  opacity: 0.6;
+}
+
+@media (hover: none) {
+  .summary-handle {
+    opacity: 1;
+  }
+}
+
 .summary-block[data-marker]::before {
   content: attr(data-marker);
   flex: 0 0 1.75rem;

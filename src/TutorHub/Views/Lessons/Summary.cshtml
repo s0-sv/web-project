@@ -48,6 +48,7 @@
 {
     <p class="text-muted small mt-2">
         Починайте рядок із <code>#</code>, <code>##</code>, <code>###</code>, <code>-</code> або <code>1.</code> і пробілу, щоб змінити тип блоку.
+        Перетягуйте блоки за ручку ліворуч або пересувайте їх клавішами <kbd>Alt</kbd>+<kbd>↑</kbd> і <kbd>Alt</kbd>+<kbd>↓</kbd>.
         Зміни зберігаються автоматично.
     </p>
 }
@@ -55,6 +56,10 @@
 <noscript><pre class="summary-source">@Model.Markdown</pre></noscript>
 
 @section Scripts {
+    @if (Model.CanEdit)
+    {
+        <script src="~/lib/sortablejs/Sortable.min.js"></script>
+    }
     <script src="~/js/summary-markdown.js" asp-append-version="true"></script>
     <script src="~/js/summary-editor.js" asp-append-version="true"></script>
 }

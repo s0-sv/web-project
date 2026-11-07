@@ -61,6 +61,8 @@
     const toolbar = document.getElementById('summary-toolbar');
     const conflictBox = document.getElementById('summary-conflict');
     const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+    const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const moveDuration = 150;
     const saveDelay = 1000;
     const maxRetryDelay = 30000;
     const maxLength = Number(root.dataset.maxLength);
@@ -158,7 +160,15 @@
         input.textContent = text;
         makeEditable(input);
 
-        block.append(input);
+        const handle = document.createElement('button');
+        handle.type = 'button';
+        handle.className = 'summary-handle';
+        handle.tabIndex = -1;
+        handle.title = 'Перетягніть, щоб змінити порядок';
+        handle.textContent = '⠿';
+        handle.setAttribute('aria-hidden', 'true');
+
+        block.append(handle, input);
         return block;
     };
 
@@ -368,6 +378,37 @@
         });
     };
 
+    const moveBlock = (block, direction) => {
+        const neighbour = direction < 0 ? block.previousElementSibling : block.nextElementSibling;
+        if (!neighbour) {
+            return;
+        }
+
+        const input = inputOf(block);
+        const offset = offsetIn(input);
+        const moved = [block, neighbour];
+        const before = moved.map((element) => element.getBoundingClientRect().top);
+
+        if (direction < 0) {
+            neighbour.before(block);
+        } else {
+            neighbour.after(block);
+        }
+
+        placeCaret(input, offset);
+
+        if (!reducedMotion) {
+            moved.forEach((element, index) => {
+                const shift = before[index] - element.getBoundingClientRect().top;
+                element.animate(
+                    [{ transform: `translateY(${shift}px)` }, { transform: 'translateY(0)' }],
+                    { duration: moveDuration, easing: 'ease-out' });
+            });
+        }
+
+        changed();
+    };
+
     const insertPlainText = (input, text) => {
         deleteSelection();
         const value = textOf(input);
@@ -421,6 +462,9 @@
 
         if ((event.ctrlKey || event.metaKey) && ['b', 'i', 'u'].includes(event.key.toLowerCase())) {
             event.preventDefault();
+        } else if (event.altKey && (event.key === 'ArrowUp' || event.key === 'ArrowDown')) {
+            event.preventDefault();
+            moveBlock(block, event.key === 'ArrowUp' ? -1 : 1);
         } else if (event.key === 'Enter') {
             event.preventDefault();
             splitBlock(block);
@@ -499,6 +543,21 @@
     });
 
     toolbar.addEventListener('mousedown', (event) => event.preventDefault());
+
+    Sortable.create(root, {
+        draggable: '.summary-block',
+        handle: '.summary-handle',
+        animation: reducedMotion ? 0 : moveDuration,
+        forceFallback: true,
+        fallbackOnBody: true,
+        ghostClass: 'summary-block-ghost',
+        chosenClass: 'summary-block-chosen',
+        onEnd: (event) => {
+            if (event.oldIndex !== event.newIndex) {
+                changed();
+            }
+        }
+    });
 
     toolbar.addEventListener('click', (event) => {
         const button = event.target.closest('button');
