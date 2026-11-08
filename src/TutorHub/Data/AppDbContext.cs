@@ -14,6 +14,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, TenantContext 
     public DbSet<Student> Students => Set<Student>();
     public DbSet<Lesson> Lessons => Set<Lesson>();
     public DbSet<LessonMaterial> LessonMaterials => Set<LessonMaterial>();
+    public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();
 
     private int? CurrentTenantId => tenant.TenantId;
     private int? CurrentStudentId => tenant.StudentId;
@@ -157,6 +158,14 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, TenantContext 
                 .OnDelete(DeleteBehavior.Cascade);
 
             e.HasQueryFilter(x => x.TenantId == CurrentTenantId && (!IsStudentScope || x.Lesson!.StudentId == CurrentStudentId));
+        });
+
+        model.Entity<OutboxMessage>(e =>
+        {
+            e.Property(x => x.Queue).HasMaxLength(63);
+            e.Property(x => x.LastError).HasMaxLength(OutboxProcessor.MaxErrorLength);
+            e.HasIndex(x => x.AvailableAt).HasFilter("\"SentAt\" IS NULL");
+            e.HasIndex(x => x.SentAt).HasFilter("\"SentAt\" IS NOT NULL");
         });
     }
 }

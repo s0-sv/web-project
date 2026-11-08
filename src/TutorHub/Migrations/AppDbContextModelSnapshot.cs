@@ -284,6 +284,50 @@ namespace TutorHub.Migrations
                     b.ToTable("LessonMaterials");
                 });
 
+            modelBuilder.Entity("TutorHub.Models.OutboxMessage", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<int>("Attempts")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTimeOffset>("AvailableAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("LastError")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<string>("Payload")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Queue")
+                        .IsRequired()
+                        .HasMaxLength(63)
+                        .HasColumnType("character varying(63)");
+
+                    b.Property<DateTimeOffset?>("SentAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AvailableAt")
+                        .HasFilter("\"SentAt\" IS NULL");
+
+                    b.HasIndex("SentAt")
+                        .HasFilter("\"SentAt\" IS NOT NULL");
+
+                    b.ToTable("OutboxMessages");
+                });
+
             modelBuilder.Entity("TutorHub.Models.Student", b =>
                 {
                     b.Property<int>("Id")

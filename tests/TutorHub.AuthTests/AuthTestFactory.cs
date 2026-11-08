@@ -85,6 +85,8 @@ public class AuthTestFactory : WebApplicationFactory<Program>, IAsyncLifetime
 
     public FakeGeocoder Geocoder { get; } = new();
 
+    public FakeMessageQueue Queue { get; } = new();
+
     private readonly string _adminConnection;
     private readonly string _testConnection;
     private readonly string _database = $"tutorhub_authtests_{Guid.NewGuid():N}";
@@ -116,6 +118,8 @@ public class AuthTestFactory : WebApplicationFactory<Program>, IAsyncLifetime
         {
             services.AddAuthentication().AddScheme<AuthenticationSchemeOptions, FakeGoogleHandler>("Google", "Google", null);
             services.AddSingleton<IGeocoder>(Geocoder);
+            services.AddSingleton<IMessageQueue>(Queue);
+            services.AddScoped<OutboxProcessor>();
         });
     }
 

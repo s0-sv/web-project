@@ -51,6 +51,16 @@ builder.Services.AddScoped<TutorHub.Controllers.TutorPublishing>();
 builder.Services.AddScoped<LearningAnalytics>();
 builder.Services.AddScoped<TutorLocationService>();
 builder.Services.AddScoped<LessonSummaryService>();
+builder.Services.AddSingleton(TimeProvider.System);
+builder.Services.AddSingleton<OutboxSignal>();
+builder.Services.AddScoped<Outbox>();
+var queueConnection = builder.Configuration[AzureMessageQueue.ConfigurationKey];
+if (!string.IsNullOrEmpty(queueConnection))
+{
+    builder.Services.AddSingleton<IMessageQueue>(new AzureMessageQueue(queueConnection));
+    builder.Services.AddScoped<OutboxProcessor>();
+    builder.Services.AddHostedService<OutboxDispatcher>();
+}
 builder.Services.AddSingleton(new NominatimThrottle(NominatimThrottle.PublicApiInterval));
 builder.Services.AddHttpClient<IGeocoder, NominatimGeocoder>(client =>
 {

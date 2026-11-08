@@ -1,5 +1,6 @@
 <Solution>
   <Folder Name="/src/">
+    <Project Path="src/TutorHub.Integrations/TutorHub.Integrations.csproj" />
     <Project Path="src/TutorHub/TutorHub.csproj" />
   </Folder>
   <Folder Name="/tests/">
