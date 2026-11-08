@@ -3,6 +3,7 @@ using System.Security.Claims;
 using System.Text.Encodings.Web;
 using System.Text.Json.Serialization;
 using System.Text.Unicode;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
@@ -27,6 +28,7 @@ builder.Services.AddOutputCache(o => o.AddPolicy(
     new UserOutputCachePolicy()));
 builder.Services.AddSingleton<CacheInvalidationInterceptor>();
 builder.Services.AddSingleton<LessonNotificationInterceptor>();
+builder.Services.AddSingleton<CrmSyncInterceptor>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<TenantContext>();
 
@@ -34,7 +36,8 @@ builder.Services.AddDbContext<AppDbContext>((services, o) => o
     .UseNpgsql(connectionString)
     .AddInterceptors(
         services.GetRequiredService<CacheInvalidationInterceptor>(),
-        services.GetRequiredService<LessonNotificationInterceptor>())
+        services.GetRequiredService<LessonNotificationInterceptor>(),
+        services.GetRequiredService<CrmSyncInterceptor>())
     .ConfigureWarnings(w => w.Ignore(
         CoreEventId.PossibleIncorrectRequiredNavigationWithQueryFilterInteractionWarning,
         CoreEventId.RowLimitingOperationWithoutOrderByWarning)));
@@ -73,6 +76,17 @@ builder.Services.AddSingleton<ITelegramBotDirectory, TelegramBotDirectory>();
 builder.Services.AddScoped<TelegramLinks>();
 builder.Services.AddScoped<TelegramUpdateHandler>();
 builder.Services.AddScoped<LessonReminders>();
+builder.Services.AddDataProtection()
+    .SetApplicationName("TutorHub")
+    .PersistKeysToDbContext<AppDbContext>();
+builder.Services.AddSingleton<HubSpotTokens>();
+builder.Services.AddHttpClient<HubSpotClient>(HubSpotClient.HttpClientName, client =>
+    {
+        client.BaseAddress = HubSpotClient.BaseAddress;
+        client.Timeout = TimeSpan.FromSeconds(30);
+    })
+    .RemoveAllLoggers();
+builder.Services.AddScoped<CrmSync>();
 if (telegram.HasBotToken)
 {
     builder.Services.AddHostedService<LessonReminderService>();
@@ -85,6 +99,7 @@ if (!string.IsNullOrEmpty(queueConnection))
     builder.Services.AddScoped<OutboxProcessor>();
     builder.Services.AddHostedService<OutboxDispatcher>();
     builder.Services.AddHostedService<TelegramUpdateConsumer>();
+    builder.Services.AddHostedService<CrmSyncConsumer>();
     if (telegram.HasBotToken && telegramMode == TelegramMode.Polling)
     {
         builder.Services.AddHostedService<TelegramPollingService>();

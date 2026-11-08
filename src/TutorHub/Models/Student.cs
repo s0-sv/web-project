@@ -42,5 +42,7 @@ public class Student : ITenantEntity
 
     public DateTimeOffset? TelegramLinkExpiresAt { get; set; }
 
+    public string? HubSpotContactId { get; set; }
+
     public List<Lesson> Lessons { get; set; } = [];
 }

@@ -7,14 +7,16 @@ namespace TutorHub.Services;
 
 public enum AppFeature
 {
-    Analytics
+    Analytics,
+    CrmSync
 }
 
 public class FeatureFlags(AppDbContext db, TenantContext tenant)
 {
     private static readonly Dictionary<AppFeature, TenantPlan[]> PlansByFeature = new()
     {
-        [AppFeature.Analytics] = [TenantPlan.Premium]
+        [AppFeature.Analytics] = [TenantPlan.Premium],
+        [AppFeature.CrmSync] = [TenantPlan.Premium]
     };
 
     public static IReadOnlyList<AppFeature> FeaturesFor(TenantPlan plan) =>

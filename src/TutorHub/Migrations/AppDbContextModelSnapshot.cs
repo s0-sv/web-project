@@ -22,6 +22,25 @@ namespace TutorHub.Migrations
             NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "pg_trgm");
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("Microsoft.AspNetCore.DataProtection.EntityFrameworkCore.DataProtectionKey", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("FriendlyName")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Xml")
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("DataProtectionKeys");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
                 {
                     b.Property<int>("Id")
@@ -183,6 +202,10 @@ namespace TutorHub.Migrations
 
                     b.Property<int>("DurationMinutes")
                         .HasColumnType("integer");
+
+                    b.Property<string>("HubSpotNoteId")
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
 
                     b.Property<string>("MeetingUrl")
                         .HasMaxLength(500)
@@ -355,6 +378,10 @@ namespace TutorHub.Migrations
                         .HasMaxLength(150)
                         .HasColumnType("character varying(150)");
 
+                    b.Property<string>("HubSpotContactId")
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
+
                     b.Property<string>("InviteCode")
                         .HasMaxLength(64)
                         .HasColumnType("character varying(64)");
@@ -446,6 +473,23 @@ namespace TutorHub.Migrations
                         .HasColumnType("integer");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("HubSpotAccessToken")
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
+
+                    b.Property<DateTimeOffset?>("HubSpotConnectedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("HubSpotLastError")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<DateTimeOffset?>("HubSpotLastSyncAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<long?>("HubSpotPortalId")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("MemberInviteCode")
                         .IsRequired()

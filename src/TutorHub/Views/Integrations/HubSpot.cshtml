@@ -1,0 +1,74 @@
+@model TutorHub.ViewModels.HubSpotViewModel
+@{
+    ViewData["Title"] = "HubSpot CRM";
+}
+
+<h1 class="h3 mb-3">HubSpot CRM <span class="badge text-bg-warning fs-6">Premium</span></h1>
+
+<p>Учні передаються в HubSpot як контакти (за email), а проведені заняття — як нотатки до контакту. Зміни синхронізуються автоматично у фоні.</p>
+
+@if (!Model.BackgroundProcessing)
+{
+    <div class="alert alert-warning">Фонова обробка черг у цьому середовищі вимкнена: зміни накопичуються й будуть передані, щойно черга запрацює.</div>
+}
+
+@if (Model.Connected)
+{
+    <div class="card mb-3">
+        <div class="card-body">
+            <h2 class="h5"><span class="badge text-bg-success">Підключено</span></h2>
+            <dl class="row mb-0">
+                <dt class="col-sm-4">Портал HubSpot</dt>
+                <dd class="col-sm-8">
+                    @if (Model.PortalId is { } portal)
+                    {
+                        <a href="https://app.hubspot.com/contacts/@portal" target="_blank" rel="noopener noreferrer">@portal</a>
+                    }
+                    else
+                    {
+                        <span>—</span>
+                    }
+                </dd>
+                <dt class="col-sm-4">Підключено</dt>
+                <dd class="col-sm-8">@AppTime.Format(Model.ConnectedAt!.Value)</dd>
+                <dt class="col-sm-4">Остання синхронізація</dt>
+                <dd class="col-sm-8">@(Model.LastSyncAt is { } synced ? AppTime.Format(synced) : "ще не було")</dd>
+                <dt class="col-sm-4">Учні в HubSpot</dt>
+                <dd class="col-sm-8" data-synced-students>@Model.SyncedStudents з @Model.Students</dd>
+                <dt class="col-sm-4">Заняття в HubSpot</dt>
+                <dd class="col-sm-8" data-synced-lessons>@Model.SyncedLessons з @Model.CompletedLessons проведених</dd>
+            </dl>
+            @if (Model.LastError is not null)
+            {
+                <div class="alert alert-danger mt-3 mb-0" data-hubspot-error>@Model.LastError</div>
+            }
+        </div>
+    </div>
+
+    <div class="d-flex flex-wrap gap-2 mb-4">
+        <form asp-action="Sync" method="post">
+            <button type="submit" class="btn btn-primary">Синхронізувати все</button>
+        </form>
+        <form asp-action="Disconnect" method="post">
+            <button type="submit" class="btn btn-outline-danger">Відключити</button>
+        </form>
+    </div>
+}
+
+<div class="card">
+    <div class="card-body">
+        <h2 class="h5">@(Model.Connected ? "Замінити токен" : "Підключити HubSpot")</h2>
+        <ol class="small">
+            <li>У HubSpot відкрийте Settings → Integrations → Private Apps і створіть застосунок.</li>
+            <li>Надайте права <code>crm.objects.contacts.read</code> і <code>crm.objects.contacts.write</code>.</li>
+            <li>Скопіюйте Access token і вставте нижче. Токен зберігається зашифрованим і більше не показується.</li>
+        </ol>
+        <form asp-action="Connect" method="post" autocomplete="off">
+            <div class="mb-2">
+                <label class="form-label" for="accessToken">Access token</label>
+                <input class="form-control" type="password" id="accessToken" name="accessToken" maxlength="500" required autocomplete="off" spellcheck="false">
+            </div>
+            <button type="submit" class="btn btn-primary">Підключити</button>
+        </form>
+    </div>
+</div>

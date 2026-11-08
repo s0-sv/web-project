@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using TutorHub.Models;
@@ -6,7 +7,7 @@ using TutorHub.Services;
 namespace TutorHub.Data;
 
 public class AppDbContext(DbContextOptions<AppDbContext> options, TenantContext tenant)
-    : IdentityUserContext<ApplicationUser>(options)
+    : IdentityUserContext<ApplicationUser>(options), IDataProtectionKeyContext
 {
     public DbSet<Tenant> Tenants => Set<Tenant>();
     public DbSet<Subject> Subjects => Set<Subject>();
@@ -15,6 +16,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, TenantContext 
     public DbSet<Lesson> Lessons => Set<Lesson>();
     public DbSet<LessonMaterial> LessonMaterials => Set<LessonMaterial>();
     public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();
+    public DbSet<DataProtectionKey> DataProtectionKeys => Set<DataProtectionKey>();
 
     private int? CurrentTenantId => tenant.TenantId;
     private int? CurrentStudentId => tenant.StudentId;
@@ -56,6 +58,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, TenantContext 
             e.Property(x => x.MemberInviteCode).HasMaxLength(64);
             e.Property(x => x.Plan).HasConversion<string>().HasMaxLength(20).HasDefaultValue(TenantPlan.Free);
             e.HasIndex(x => x.MemberInviteCode).IsUnique();
+            e.Property(x => x.HubSpotAccessToken).HasMaxLength(2000);
+            e.Property(x => x.HubSpotLastError).HasMaxLength(CrmSync.MaxErrorLength);
         });
 
         model.Entity<ApplicationUser>(e =>
@@ -114,6 +118,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, TenantContext 
             e.Property(x => x.TelegramLinkCode).HasMaxLength(64);
             e.HasIndex(x => x.TelegramLinkCode).IsUnique();
             e.HasIndex(x => x.TelegramChatId);
+            e.Property(x => x.HubSpotContactId).HasMaxLength(32);
             e.HasIndex(x => x.FullName, "IX_Students_FullName_Trgm").HasMethod("gin").HasOperators("gin_trgm_ops");
             e.HasIndex(x => x.Email, "IX_Students_Email_Trgm").HasMethod("gin").HasOperators("gin_trgm_ops");
             e.HasOne<Tenant>().WithMany().HasForeignKey(x => x.TenantId).OnDelete(DeleteBehavior.Restrict);
@@ -130,6 +135,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, TenantContext 
             e.HasAlternateKey(x => new { x.TenantId, x.Id });
             e.HasIndex(x => new { x.TenantId, x.StartsAt });
             e.HasIndex(x => x.StartsAt, "IX_Lessons_StartsAt_Scheduled").HasFilter("\"Status\" = 'Scheduled'");
+            e.Property(x => x.HubSpotNoteId).HasMaxLength(32);
 
             e.HasOne<Tenant>().WithMany().HasForeignKey(x => x.TenantId).OnDelete(DeleteBehavior.Restrict);
             e.HasOne(x => x.Tutor).WithMany(x => x.Lessons)

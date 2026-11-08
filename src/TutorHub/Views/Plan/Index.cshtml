@@ -10,8 +10,8 @@
         <h2 class="h5">План: <span class="badge @(Model.Plan == TenantPlan.Premium ? "text-bg-warning" : "text-bg-secondary")">@Model.Plan</span></h2>
         <p>
             @(Model.Plan == TenantPlan.Premium
-                ? "Доступна аналітика навчання."
-                : "Перейдіть на Premium, щоб відкрити аналітику навчання.")
+                ? "Доступні аналітика навчання та інтеграція з HubSpot CRM."
+                : "Перейдіть на Premium, щоб відкрити аналітику навчання та інтеграцію з HubSpot CRM.")
         </p>
         <p class="text-muted small">Це навчальний проєкт: зміна плану безкоштовна й миттєва.</p>
         @if (User.IsInRole(TenantRoles.Owner))
@@ -30,6 +30,14 @@
 
 @if (User.IsInRole(TenantRoles.Owner))
 {
+    <div class="card mb-3">
+        <div class="card-body">
+            <h2 class="h5">Інтеграції</h2>
+            <p class="mb-2">HubSpot CRM: @(Model.HasHubSpot ? "підключено" : "не підключено")</p>
+            <a class="btn btn-outline-primary btn-sm" asp-controller="Integrations" asp-action="HubSpot">Налаштувати HubSpot</a>
+        </div>
+    </div>
+
     <div class="card mb-3">
         <div class="card-body">
             <h2 class="h5">Запрошення учасників</h2>

@@ -23,5 +23,17 @@ public class Tenant
 
     public TenantPlan Plan { get; set; } = TenantPlan.Free;
 
+    public string? HubSpotAccessToken { get; set; }
+
+    public long? HubSpotPortalId { get; set; }
+
+    public DateTimeOffset? HubSpotConnectedAt { get; set; }
+
+    public DateTimeOffset? HubSpotLastSyncAt { get; set; }
+
+    public string? HubSpotLastError { get; set; }
+
+    public bool HasHubSpot => HubSpotAccessToken is not null;
+
     public static string NewInviteCode() => RandomNumberGenerator.GetHexString(32, lowercase: true);
 }

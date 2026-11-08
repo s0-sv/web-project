@@ -98,6 +98,8 @@ public class AuthTestFactory : WebApplicationFactory<Program>, IAsyncLifetime
 
     public FakeTelegramDirectory Telegram { get; } = new();
 
+    public FakeHubSpotHandler HubSpot { get; } = new();
+
     private readonly string _adminConnection;
     private readonly string _testConnection;
     private readonly string _database = $"tutorhub_authtests_{Guid.NewGuid():N}";
@@ -131,6 +133,8 @@ public class AuthTestFactory : WebApplicationFactory<Program>, IAsyncLifetime
             services.AddSingleton<IGeocoder>(Geocoder);
             services.AddSingleton<IMessageQueue>(Queue);
             services.AddSingleton<ITelegramBotDirectory>(Telegram);
+            services.AddHttpClient(TutorHub.Integrations.HubSpotClient.HttpClientName)
+                .ConfigurePrimaryHttpMessageHandler(() => HubSpot);
             services.AddScoped<OutboxProcessor>();
         });
     }

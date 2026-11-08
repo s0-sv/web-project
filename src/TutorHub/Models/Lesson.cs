@@ -59,5 +59,7 @@ public class Lesson : ITenantEntity
 
     public DateTimeOffset? ReminderHourSentAt { get; set; }
 
+    public string? HubSpotNoteId { get; set; }
+
     public List<LessonMaterial> Materials { get; set; } = [];
 }

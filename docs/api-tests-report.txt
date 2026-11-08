@@ -6,79 +6,79 @@ TutorHub API
 
 ❏ Authentication setup
 ↳ Anonymous request is rejected
-  GET http://localhost:5298/api/subjects [401 Unauthorized, 379B, 75ms]
+  GET http://localhost:5298/api/subjects [401 Unauthorized, 379B, 40ms]
   ✓  Status is 401
 
 ↳ Register owner
-  POST http://localhost:5298/api/auth/register [201 Created, 993B, 292ms]
+  POST http://localhost:5298/api/auth/register [201 Created, 993B, 60ms]
   ✓  Status is 201
 
 ↳ Get access token
-  POST http://localhost:5298/api/auth/token [200 OK, 988B, 110ms]
+  POST http://localhost:5298/api/auth/token [200 OK, 988B, 61ms]
   ✓  Status is 200
   ✓  Token type is Bearer
 
 ❏ Subjects
 ↳ Create subject
-  POST http://localhost:5298/api/subjects [201 Created, 268B, 38ms]
+  POST http://localhost:5298/api/subjects [201 Created, 268B, 22ms]
   ✓  Status is 201
   ✓  Location points to the record
   ✓  description is correct
 
 ↳ Create second subject
-  POST http://localhost:5298/api/subjects [201 Created, 261B, 6ms]
+  POST http://localhost:5298/api/subjects [201 Created, 261B, 4ms]
   ✓  Status is 201
 
 ↳ Get subject
-  GET http://localhost:5298/api/subjects/55 [200 OK, 214B, 30ms]
+  GET http://localhost:5298/api/subjects/83 [200 OK, 214B, 24ms]
   ✓  Status is 200
   ✓  Returns the created record
 
 ↳ Update subject
-  PUT http://localhost:5298/api/subjects/55 [200 OK, 223B, 28ms]
+  PUT http://localhost:5298/api/subjects/83 [200 OK, 223B, 16ms]
   ✓  Status is 200
   ✓  description is correct
 
 ↳ Empty name is rejected
-  POST http://localhost:5298/api/subjects [400 Bad Request, 407B, 6ms]
+  POST http://localhost:5298/api/subjects [400 Bad Request, 407B, 5ms]
   ✓  Status is 400
   ✓  Reports Name error
   ✓  Error uses problem+json
 
 ↳ Too long name is rejected
-  POST http://localhost:5298/api/subjects [400 Bad Request, 441B, 3ms]
+  POST http://localhost:5298/api/subjects [400 Bad Request, 441B, 2ms]
   ✓  Status is 400
   ✓  Reports Name error
 
 ↳ Malformed JSON is rejected
-  POST http://localhost:5298/api/subjects [400 Bad Request, 599B, 5ms]
+  POST http://localhost:5298/api/subjects [400 Bad Request, 599B, 3ms]
   ✓  Status is 400
   ✓  Error uses problem+json
 
 ↳ Wrong content type is rejected
-  POST http://localhost:5298/api/subjects [415 Unsupported Media Type, 352B, 3ms]
+  POST http://localhost:5298/api/subjects [415 Unsupported Media Type, 352B, 2ms]
   ✓  Status is 415
 
 ↳ Duplicate name conflicts
-  POST http://localhost:5298/api/subjects [409 Conflict, 376B, 25ms]
+  POST http://localhost:5298/api/subjects [409 Conflict, 376B, 21ms]
   ✓  Status is 409
   ✓  Error uses problem+json
 
 ↳ Update to a taken name conflicts
-  PUT http://localhost:5298/api/subjects/56 [409 Conflict, 376B, 8ms]
+  PUT http://localhost:5298/api/subjects/84 [409 Conflict, 376B, 6ms]
   ✓  Status is 409
 
 ↳ Unknown subject is 404
-  GET http://localhost:5298/api/subjects/99999999 [404 Not Found, 325B, 4ms]
+  GET http://localhost:5298/api/subjects/99999999 [404 Not Found, 325B, 2ms]
   ✓  Status is 404
   ✓  Error uses problem+json
 
 ↳ Update of unknown subject is 404
-  PUT http://localhost:5298/api/subjects/99999999 [404 Not Found, 325B, 3ms]
+  PUT http://localhost:5298/api/subjects/99999999 [404 Not Found, 325B, 2ms]
   ✓  Status is 404
 
 ↳ Delete of unknown subject is 404
-  DELETE http://localhost:5298/api/subjects/99999999 [404 Not Found, 325B, 12ms]
+  DELETE http://localhost:5298/api/subjects/99999999 [404 Not Found, 325B, 7ms]
   ✓  Status is 404
 
 ↳ Unknown route is 404
@@ -88,18 +88,18 @@ TutorHub API
 
 ❏ Tutors
 ↳ Create tutor
-  POST http://localhost:5298/api/tutors [201 Created, 366B, 43ms]
+  POST http://localhost:5298/api/tutors [201 Created, 411B, 40ms]
   ✓  Status is 201
   ✓  Email is normalised
   ✓  hourlyRate is correct
 
 ↳ Get tutor
-  GET http://localhost:5298/api/tutors/51 [200 OK, 315B, 16ms]
+  GET http://localhost:5298/api/tutors/97 [200 OK, 360B, 12ms]
   ✓  Status is 200
   ✓  fullName is correct
 
 ↳ Update tutor
-  PUT http://localhost:5298/api/tutors/51 [200 OK, 326B, 18ms]
+  PUT http://localhost:5298/api/tutors/97 [200 OK, 371B, 15ms]
   ✓  Status is 200
   ✓  fullName is correct
   ✓  hourlyRate is correct
@@ -111,12 +111,12 @@ TutorHub API
   ✓  Reports HourlyRate error
 
 ↳ Missing rate is rejected
-  POST http://localhost:5298/api/tutors [400 Bad Request, 419B, 2ms]
+  POST http://localhost:5298/api/tutors [400 Bad Request, 419B, 1ms]
   ✓  Status is 400
   ✓  Reports HourlyRate error
 
 ↳ Duplicate email in another case conflicts
-  POST http://localhost:5298/api/tutors [409 Conflict, 375B, 6ms]
+  POST http://localhost:5298/api/tutors [409 Conflict, 375B, 5ms]
   ✓  Status is 409
 
 ↳ Unknown tutor is 404
@@ -125,36 +125,36 @@ TutorHub API
 
 ❏ Students
 ↳ Create student
-  POST http://localhost:5298/api/students [201 Created, 325B, 20ms]
+  POST http://localhost:5298/api/students [201 Created, 325B, 4ms]
   ✓  Status is 201
   ✓  learningGoal is correct
 
 ↳ Get student
-  GET http://localhost:5298/api/students/34 [200 OK, 271B, 15ms]
+  GET http://localhost:5298/api/students/48 [200 OK, 271B, 12ms]
   ✓  Status is 200
   ✓  fullName is correct
 
 ↳ Update student
-  PUT http://localhost:5298/api/students/34 [200 OK, 263B, 16ms]
+  PUT http://localhost:5298/api/students/48 [200 OK, 263B, 9ms]
   ✓  Status is 200
   ✓  fullName is correct
 
 ↳ Bad email is rejected
-  POST http://localhost:5298/api/students [400 Bad Request, 427B, 2ms]
+  POST http://localhost:5298/api/students [400 Bad Request, 427B, 1ms]
   ✓  Status is 400
   ✓  Reports Email error
 
 ↳ Duplicate email conflicts
-  POST http://localhost:5298/api/students [409 Conflict, 377B, 7ms]
+  POST http://localhost:5298/api/students [409 Conflict, 377B, 5ms]
   ✓  Status is 409
 
 ↳ Unknown student is 404
-  GET http://localhost:5298/api/students/99999999 [404 Not Found, 325B, 3ms]
+  GET http://localhost:5298/api/students/99999999 [404 Not Found, 325B, 2ms]
   ✓  Status is 404
 
 ❏ Lessons
 ↳ Create lesson
-  POST http://localhost:5298/api/lessons [201 Created, 538B, 91ms]
+  POST http://localhost:5298/api/lessons [201 Created, 540B, 112ms]
   ✓  Status is 201
   ✓  status is correct
   ✓  tutorName is correct
@@ -163,27 +163,27 @@ TutorHub API
   ✓  Start time is stored in UTC
 
 ↳ Get lesson
-  GET http://localhost:5298/api/lessons/53 [200 OK, 485B, 10ms]
+  GET http://localhost:5298/api/lessons/175 [200 OK, 486B, 8ms]
   ✓  Status is 200
   ✓  topic is correct
 
 ↳ Complete lesson
-  PUT http://localhost:5298/api/lessons/53 [200 OK, 487B, 24ms]
+  PUT http://localhost:5298/api/lessons/175 [200 OK, 488B, 25ms]
   ✓  Status is 200
   ✓  status is correct
   ✓  notes is correct
 
 ↳ Too short lesson is rejected
-  POST http://localhost:5298/api/lessons [400 Bad Request, 444B, 2ms]
+  POST http://localhost:5298/api/lessons [400 Bad Request, 444B, 1ms]
   ✓  Status is 400
   ✓  Reports DurationMinutes error
 
 ↳ Unknown status is rejected
-  POST http://localhost:5298/api/lessons [400 Bad Request, 561B, 4ms]
+  POST http://localhost:5298/api/lessons [400 Bad Request, 561B, 3ms]
   ✓  Status is 400
 
 ↳ Numeric status is rejected
-  POST http://localhost:5298/api/lessons [400 Bad Request, 561B, 3ms]
+  POST http://localhost:5298/api/lessons [400 Bad Request, 561B, 1ms]
   ✓  Status is 400
 
 ↳ Script URL is rejected
@@ -192,37 +192,37 @@ TutorHub API
   ✓  Reports MeetingUrl error
 
 ↳ Unknown tutor reference is rejected
-  POST http://localhost:5298/api/lessons [400 Bad Request, 403B, 7ms]
+  POST http://localhost:5298/api/lessons [400 Bad Request, 403B, 6ms]
   ✓  Status is 400
   ✓  Error uses problem+json
 
 ↳ Missing start time is rejected
-  POST http://localhost:5298/api/lessons [400 Bad Request, 415B, 2ms]
+  POST http://localhost:5298/api/lessons [400 Bad Request, 415B, 1ms]
   ✓  Status is 400
   ✓  Reports StartsAt error
 
 ↳ Subject in use cannot be deleted
-  DELETE http://localhost:5298/api/subjects/55 [409 Conflict, 393B, 12ms]
+  DELETE http://localhost:5298/api/subjects/83 [409 Conflict, 393B, 8ms]
   ✓  Status is 409
   ✓  Error uses problem+json
 
 ↳ Tutor in use cannot be deleted
-  DELETE http://localhost:5298/api/tutors/51 [409 Conflict, 393B, 16ms]
+  DELETE http://localhost:5298/api/tutors/97 [409 Conflict, 393B, 10ms]
   ✓  Status is 409
 
 ↳ Student in use cannot be deleted
-  DELETE http://localhost:5298/api/students/34 [409 Conflict, 395B, 12ms]
+  DELETE http://localhost:5298/api/students/48 [409 Conflict, 395B, 9ms]
   ✓  Status is 409
 
 ↳ Unknown lesson is 404
-  GET http://localhost:5298/api/lessons/99999999 [404 Not Found, 325B, 4ms]
+  GET http://localhost:5298/api/lessons/99999999 [404 Not Found, 325B, 2ms]
   ✓  Status is 404
 
 ❏ Materials
 ↳ Upload material
-  POST http://localhost:5298/api/lessons/53/materials (node:37500) [DEP0044] DeprecationWarning: The `util.isArray` API is deprecated. Please use `Array.isArray()` instead.
+  POST http://localhost:5298/api/lessons/175/materials (node:67125) [DEP0044] DeprecationWarning: The `util.isArray` API is deprecated. Please use `Array.isArray()` instead.
 (Use `node --trace-deprecation ...` to show where the warning was created)
-[201 Created, 402B, 75ms]
+[201 Created, 404B, 57ms]
   ✓  Status is 201
   ✓  title is correct
   ✓  fileName is correct
@@ -230,52 +230,52 @@ TutorHub API
   ✓  Size is recorded
 
 ↳ Second material for cascade check
-  POST http://localhost:5298/api/lessons/53/materials [201 Created, 403B, 7ms]
+  POST http://localhost:5298/api/lessons/175/materials [201 Created, 404B, 6ms]
   ✓  Status is 201
 
 ↳ Lesson counts its materials
-  GET http://localhost:5298/api/lessons/53 [200 OK, 487B, 3ms]
+  GET http://localhost:5298/api/lessons/175 [200 OK, 488B, 2ms]
   ✓  Status is 200
   ✓  materialsCount is correct
 
 ↳ List lesson materials
-  GET http://localhost:5298/api/lessons/53/materials [200 OK, 606B, 31ms]
+  GET http://localhost:5298/api/lessons/175/materials [200 OK, 609B, 20ms]
   ✓  Status is 200
   ✓  Has the page envelope
   ✓  total is correct
 
 ↳ Get material
-  GET http://localhost:5298/api/materials/34 [200 OK, 347B, 9ms]
+  GET http://localhost:5298/api/materials/43 [200 OK, 349B, 7ms]
   ✓  Status is 200
   ✓  title is correct
 
 ↳ Download file
-  GET http://localhost:5298/api/materials/34/file [200 OK, 12.06kB, 19ms]
+  GET http://localhost:5298/api/materials/43/file [200 OK, 12.16kB, 14ms]
   ✓  Status is 200
   ✓  Sent as an attachment
   ✓  Content is not empty
 
 ↳ Rename material
-  PUT http://localhost:5298/api/materials/34 [200 OK, 353B, 19ms]
+  PUT http://localhost:5298/api/materials/43 [200 OK, 355B, 16ms]
   ✓  Status is 200
   ✓  title is correct
 
 ↳ Replace file
-  PUT http://localhost:5298/api/materials/34/file [200 OK, 354B, 15ms]
+  PUT http://localhost:5298/api/materials/43/file [200 OK, 355B, 11ms]
   ✓  Status is 200
   ✓  title is correct
 
 ↳ Disallowed file type is rejected
-  POST http://localhost:5298/api/lessons/53/materials [400 Bad Request, 517B, 4ms]
+  POST http://localhost:5298/api/lessons/175/materials [400 Bad Request, 517B, 2ms]
   ✓  Status is 400
   ✓  Reports file error
 
 ↳ Upload without file is rejected
-  POST http://localhost:5298/api/lessons/53/materials [400 Bad Request, 407B, 2ms]
+  POST http://localhost:5298/api/lessons/175/materials [400 Bad Request, 407B, 2ms]
   ✓  Status is 400
 
 ↳ Upload without title is rejected
-  POST http://localhost:5298/api/lessons/53/materials [400 Bad Request, 409B, 3ms]
+  POST http://localhost:5298/api/lessons/175/materials [400 Bad Request, 409B, 1ms]
   ✓  Status is 400
 
 ↳ Upload to unknown lesson is 404
@@ -283,23 +283,23 @@ TutorHub API
   ✓  Status is 404
 
 ↳ Unknown material is 404
-  GET http://localhost:5298/api/materials/99999999 [404 Not Found, 325B, 4ms]
+  GET http://localhost:5298/api/materials/99999999 [404 Not Found, 325B, 2ms]
   ✓  Status is 404
 
 ↳ Unknown material file is 404
-  GET http://localhost:5298/api/materials/99999999/file [404 Not Found, 325B, 3ms]
+  GET http://localhost:5298/api/materials/99999999/file [404 Not Found, 325B, 2ms]
   ✓  Status is 404
 
 ❏ Pagination (B1)
 ↳ Defaults
-  GET http://localhost:5298/api/subjects [200 OK, 341B, 16ms]
+  GET http://localhost:5298/api/subjects [200 OK, 341B, 12ms]
   ✓  Status is 200
   ✓  Has the page envelope
   ✓  skip is correct
   ✓  limit is correct
 
 ↳ First page
-  GET http://localhost:5298/api/subjects?limit=1 [200 OK, 290B, 10ms]
+  GET http://localhost:5298/api/subjects?limit=1 [200 OK, 290B, 7ms]
   ✓  Status is 200
   ✓  Has the page envelope
   ✓  limit is correct
@@ -307,40 +307,40 @@ TutorHub API
   ✓  Links to the next page
 
 ↳ Follow nextLink
-  GET http://localhost:5298/api/subjects?skip=1&limit=1 [200 OK, 280B, 32ms]
+  GET http://localhost:5298/api/subjects?skip=1&limit=1 [200 OK, 280B, 5ms]
   ✓  Status is 200
   ✓  skip is correct
   ✓  Holds a different item
 
 ↳ Last page has no nextLink
-  GET http://localhost:5298/api/subjects?skip=1&limit=1 [200 OK, 281B, 3ms]
+  GET http://localhost:5298/api/subjects?skip=1&limit=1 [200 OK, 281B, 2ms]
   ✓  Status is 200
   ✓  Holds one item
   ✓  nextLink is correct
 
 ↳ Past the end is empty
-  GET http://localhost:5298/api/subjects?skip=2 [200 OK, 206B, 4ms]
+  GET http://localhost:5298/api/subjects?skip=2 [200 OK, 206B, 2ms]
   ✓  Status is 200
   ✓  Holds no items
   ✓  nextLink is correct
 
 ↳ Maximum limit is accepted
-  GET http://localhost:5298/api/subjects?limit=100 [200 OK, 342B, 4ms]
+  GET http://localhost:5298/api/subjects?limit=100 [200 OK, 342B, 3ms]
   ✓  Status is 200
   ✓  limit is correct
 
 ↳ Zero limit is rejected
-  GET http://localhost:5298/api/subjects?limit=0 [400 Bad Request, 423B, 2ms]
+  GET http://localhost:5298/api/subjects?limit=0 [400 Bad Request, 423B, 1ms]
   ✓  Status is 400
   ✓  Reports Limit error
 
 ↳ Limit above maximum is rejected
-  GET http://localhost:5298/api/subjects?limit=101 [400 Bad Request, 423B, 2ms]
+  GET http://localhost:5298/api/subjects?limit=101 [400 Bad Request, 423B, 1ms]
   ✓  Status is 400
   ✓  Reports Limit error
 
 ↳ Negative skip is rejected
-  GET http://localhost:5298/api/subjects?skip=-1 [400 Bad Request, 428B, 2ms]
+  GET http://localhost:5298/api/subjects?skip=-1 [400 Bad Request, 428B, 1ms]
   ✓  Status is 400
   ✓  Reports Skip error
 
@@ -349,59 +349,59 @@ TutorHub API
   ✓  Status is 400
 
 ↳ Largest skip does not overflow
-  GET http://localhost:5298/api/subjects?skip=2147483647&limit=100 [200 OK, 216B, 4ms]
+  GET http://localhost:5298/api/subjects?skip=2147483647&limit=100 [200 OK, 216B, 2ms]
   ✓  Status is 200
   ✓  nextLink is correct
 
 ↳ Tutors are paged
-  GET http://localhost:5298/api/tutors?limit=1 [200 OK, 386B, 18ms]
+  GET http://localhost:5298/api/tutors?limit=1 [200 OK, 431B, 13ms]
   ✓  Status is 200
   ✓  Has the page envelope
   ✓  limit is correct
 
 ↳ Students are paged
-  GET http://localhost:5298/api/students?limit=1 [200 OK, 320B, 16ms]
+  GET http://localhost:5298/api/students?limit=1 [200 OK, 320B, 12ms]
   ✓  Status is 200
   ✓  Has the page envelope
   ✓  limit is correct
 
 ↳ Lessons are paged
-  GET http://localhost:5298/api/lessons?limit=1 [200 OK, 544B, 25ms]
+  GET http://localhost:5298/api/lessons?limit=1 [200 OK, 545B, 17ms]
   ✓  Status is 200
   ✓  Has the page envelope
   ✓  limit is correct
 
 ↳ Materials are paged
-  GET http://localhost:5298/api/materials?limit=1 [200 OK, 438B, 18ms]
+  GET http://localhost:5298/api/materials?limit=1 [200 OK, 439B, 13ms]
   ✓  Status is 200
   ✓  Has the page envelope
   ✓  limit is correct
 
 ↳ Lesson materials link keeps the path
-  GET http://localhost:5298/api/lessons/53/materials?limit=1 [200 OK, 443B, 4ms]
+  GET http://localhost:5298/api/lessons/175/materials?limit=1 [200 OK, 445B, 3ms]
   ✓  Status is 200
   ✓  Has the page envelope
   ✓  Links to the next page
 
 ❏ Caching (B9)
 ↳ Write clears the cache
-  PUT http://localhost:5298/api/subjects/55 [200 OK, 220B, 6ms]
+  PUT http://localhost:5298/api/subjects/83 [200 OK, 220B, 4ms]
   ✓  Status is 200
 
 ↳ First read is a miss
-  GET http://localhost:5298/api/subjects/55 [200 OK, 220B, 3ms]
+  GET http://localhost:5298/api/subjects/83 [200 OK, 220B, 2ms]
   ✓  Status is 200
   ✓  Not served from cache
   ✓  description is correct
 
 ↳ Second read is a hit
-  GET http://localhost:5298/api/subjects/55 [200 OK, 220B, 2ms]
+  GET http://localhost:5298/api/subjects/83 [200 OK, 220B, 1ms]
   ✓  Status is 200
   ✓  Served from cache
   ✓  description is correct
 
 ↳ List first read is a miss
-  GET http://localhost:5298/api/subjects?limit=2 [200 OK, 337B, 4ms]
+  GET http://localhost:5298/api/subjects?limit=2 [200 OK, 337B, 2ms]
   ✓  Status is 200
   ✓  Not served from cache
 
@@ -411,67 +411,67 @@ TutorHub API
   ✓  Served from cache
 
 ↳ Other query is cached separately
-  GET http://localhost:5298/api/subjects?limit=3 [200 OK, 337B, 12ms]
+  GET http://localhost:5298/api/subjects?limit=3 [200 OK, 337B, 3ms]
   ✓  Status is 200
   ✓  Not served from cache
   ✓  limit is correct
 
 ↳ Update evicts the cache
-  PUT http://localhost:5298/api/subjects/55 [200 OK, 219B, 6ms]
+  PUT http://localhost:5298/api/subjects/83 [200 OK, 219B, 3ms]
   ✓  Status is 200
 
 ↳ Record is fresh after update
-  GET http://localhost:5298/api/subjects/55 [200 OK, 219B, 2ms]
+  GET http://localhost:5298/api/subjects/83 [200 OK, 219B, 2ms]
   ✓  Status is 200
   ✓  Not served from cache
   ✓  description is correct
 
 ↳ List is fresh after update
-  GET http://localhost:5298/api/subjects?limit=2 [200 OK, 336B, 3ms]
+  GET http://localhost:5298/api/subjects?limit=2 [200 OK, 336B, 2ms]
   ✓  Status is 200
   ✓  Not served from cache
 
 ↳ Lesson is cached
-  GET http://localhost:5298/api/lessons/53 [200 OK, 485B, 4ms]
+  GET http://localhost:5298/api/lessons/175 [200 OK, 486B, 3ms]
   ✓  Status is 200
 
 ↳ Lesson read is a hit
-  GET http://localhost:5298/api/lessons/53 [200 OK, 486B, 2ms]
+  GET http://localhost:5298/api/lessons/175 [200 OK, 487B, 1ms]
   ✓  Status is 200
   ✓  Served from cache
 
 ↳ Rename tutor
-  PUT http://localhost:5298/api/tutors/51 [200 OK, 315B, 4ms]
+  PUT http://localhost:5298/api/tutors/97 [200 OK, 360B, 4ms]
   ✓  Status is 200
 
 ↳ Lesson shows the new tutor name
-  GET http://localhost:5298/api/lessons/53 [200 OK, 485B, 5ms]
+  GET http://localhost:5298/api/lessons/175 [200 OK, 486B, 15ms]
   ✓  Status is 200
   ✓  Not served from cache
   ✓  tutorName is correct
 
 ↳ File download first read
-  GET http://localhost:5298/api/materials/34/file [200 OK, 12.06kB, 4ms]
+  GET http://localhost:5298/api/materials/43/file [200 OK, 12.16kB, 2ms]
   ✓  Status is 200
   ✓  Not served from cache
 
 ↳ File download is not cached
-  GET http://localhost:5298/api/materials/34/file [200 OK, 12.06kB, 4ms]
+  GET http://localhost:5298/api/materials/43/file [200 OK, 12.16kB, 2ms]
   ✓  Status is 200
   ✓  Not served from cache
 
 ↳ Not found first read
-  GET http://localhost:5298/api/subjects/99999999 [404 Not Found, 325B, 3ms]
+  GET http://localhost:5298/api/subjects/99999999 [404 Not Found, 325B, 2ms]
   ✓  Status is 404
   ✓  Not served from cache
 
 ↳ Not found is not cached
-  GET http://localhost:5298/api/subjects/99999999 [404 Not Found, 325B, 3ms]
+  GET http://localhost:5298/api/subjects/99999999 [404 Not Found, 325B, 2ms]
   ✓  Status is 404
   ✓  Not served from cache
 
 ↳ Bad request first read
-  GET http://localhost:5298/api/subjects?limit=0 [400 Bad Request, 423B, 2ms]
+  GET http://localhost:5298/api/subjects?limit=0 [400 Bad Request, 423B, 1ms]
   ✓  Status is 400
   ✓  Not served from cache
 
@@ -480,75 +480,110 @@ TutorHub API
   ✓  Status is 400
   ✓  Not served from cache
 
+❏ Telegram (B2)
+↳ Create student invite
+  POST http://localhost:5298/api/students/48/invite [200 OK, 197B, 5ms]
+  ✓  Status is 200
+
+↳ Register student
+  POST http://localhost:5298/api/auth/register [201 Created, 1.05kB, 56ms]
+  ✓  Status is 201
+
+↳ Anonymous link status is rejected
+  GET http://localhost:5298/api/telegram/link [401 Unauthorized, 357B, 2ms]
+  ✓  Status is 401
+
+↳ Staff cannot use student link
+  GET http://localhost:5298/api/telegram/link [403 Forbidden, 325B, 2ms]
+  ✓  Status is 403
+
+↳ Student link status
+  GET http://localhost:5298/api/telegram/link [200 OK, 218B, 10ms]
+  ✓  Status is 200
+  ✓  Not linked yet
+
+↳ Student creates link
+  POST http://localhost:5298/api/telegram/link [503 Service Unavailable, 403B, 12ms]
+  ✓  Status is 503 without bot
+
+↳ Student unlinks
+  DELETE http://localhost:5298/api/telegram/link [204 No Content, 81B, 7ms]
+  ✓  Status is 204
+
+↳ Status after unlink
+  GET http://localhost:5298/api/telegram/link [200 OK, 218B, 2ms]
+  ✓  Status is 200
+  ✓  Not linked
+
 ❏ Cleanup
 ↳ Delete material
-  DELETE http://localhost:5298/api/materials/34 [204 No Content, 81B, 14ms]
+  DELETE http://localhost:5298/api/materials/43 [204 No Content, 81B, 11ms]
   ✓  Status is 204
 
 ↳ Deleted material is gone
-  GET http://localhost:5298/api/materials/34 [404 Not Found, 325B, 3ms]
+  GET http://localhost:5298/api/materials/43 [404 Not Found, 325B, 1ms]
   ✓  Status is 404
 
 ↳ Deleted material file is gone
-  GET http://localhost:5298/api/materials/34/file [404 Not Found, 325B, 2ms]
+  GET http://localhost:5298/api/materials/43/file [404 Not Found, 325B, 2ms]
   ✓  Status is 404
 
 ↳ Delete lesson
-  DELETE http://localhost:5298/api/lessons/53 [204 No Content, 81B, 15ms]
+  DELETE http://localhost:5298/api/lessons/175 [204 No Content, 81B, 13ms]
   ✓  Status is 204
 
 ↳ Deleted lesson is gone
-  GET http://localhost:5298/api/lessons/53 [404 Not Found, 325B, 3ms]
+  GET http://localhost:5298/api/lessons/175 [404 Not Found, 325B, 3ms]
   ✓  Status is 404
 
 ↳ Lesson materials went with it
-  GET http://localhost:5298/api/materials/35 [404 Not Found, 325B, 3ms]
+  GET http://localhost:5298/api/materials/44 [404 Not Found, 325B, 2ms]
   ✓  Status is 404
 
 ↳ Delete subject
-  DELETE http://localhost:5298/api/subjects/55 [204 No Content, 81B, 4ms]
+  DELETE http://localhost:5298/api/subjects/83 [204 No Content, 81B, 3ms]
   ✓  Status is 204
 
 ↳ Delete second subject
-  DELETE http://localhost:5298/api/subjects/56 [204 No Content, 81B, 4ms]
+  DELETE http://localhost:5298/api/subjects/84 [204 No Content, 81B, 3ms]
   ✓  Status is 204
 
 ↳ Delete tutor
-  DELETE http://localhost:5298/api/tutors/51 [204 No Content, 81B, 4ms]
+  DELETE http://localhost:5298/api/tutors/97 [204 No Content, 81B, 3ms]
   ✓  Status is 204
 
 ↳ Delete student
-  DELETE http://localhost:5298/api/students/34 [204 No Content, 81B, 4ms]
+  DELETE http://localhost:5298/api/students/48 [204 No Content, 81B, 4ms]
   ✓  Status is 204
 
 ↳ Deleted subject is gone
-  GET http://localhost:5298/api/subjects/55 [404 Not Found, 325B, 3ms]
+  GET http://localhost:5298/api/subjects/83 [404 Not Found, 325B, 1ms]
   ✓  Status is 404
 
 ↳ Deleted tutor is gone
-  GET http://localhost:5298/api/tutors/51 [404 Not Found, 325B, 3ms]
+  GET http://localhost:5298/api/tutors/97 [404 Not Found, 325B, 2ms]
   ✓  Status is 404
 
 ↳ Deleted student is gone
-  GET http://localhost:5298/api/students/34 [404 Not Found, 325B, 3ms]
+  GET http://localhost:5298/api/students/48 [404 Not Found, 325B, 2ms]
   ✓  Status is 404
 
-┌─────────────────────────┬───────────────────┬──────────────────┐
-│                         │          executed │           failed │
-├─────────────────────────┼───────────────────┼──────────────────┤
-│              iterations │                 1 │                0 │
-├─────────────────────────┼───────────────────┼──────────────────┤
-│                requests │               105 │                0 │
-├─────────────────────────┼───────────────────┼──────────────────┤
-│            test-scripts │               105 │                0 │
-├─────────────────────────┼───────────────────┼──────────────────┤
-│      prerequest-scripts │               105 │                0 │
-├─────────────────────────┼───────────────────┼──────────────────┤
-│              assertions │               203 │                0 │
-├─────────────────────────┴───────────────────┴──────────────────┤
-│ total run duration: 2.8s                                       │
-├────────────────────────────────────────────────────────────────┤
-│ total data received: 56.75kB (approx)                          │
-├────────────────────────────────────────────────────────────────┤
-│ average response time: 14ms [min: 1ms, max: 292ms, s.d.: 32ms] │
-└────────────────────────────────────────────────────────────────┘
+┌─────────────────────────┬──────────────────┬──────────────────┐
+│                         │         executed │           failed │
+├─────────────────────────┼──────────────────┼──────────────────┤
+│              iterations │                1 │                0 │
+├─────────────────────────┼──────────────────┼──────────────────┤
+│                requests │              113 │                0 │
+├─────────────────────────┼──────────────────┼──────────────────┤
+│            test-scripts │              113 │                0 │
+├─────────────────────────┼──────────────────┼──────────────────┤
+│      prerequest-scripts │              113 │                0 │
+├─────────────────────────┼──────────────────┼──────────────────┤
+│              assertions │              213 │                0 │
+├─────────────────────────┴──────────────────┴──────────────────┤
+│ total run duration: 2.3s                                      │
+├───────────────────────────────────────────────────────────────┤
+│ total data received: 58.93kB (approx)                         │
+├───────────────────────────────────────────────────────────────┤
+│ average response time: 9ms [min: 1ms, max: 112ms, s.d.: 15ms] │
+└───────────────────────────────────────────────────────────────┘
