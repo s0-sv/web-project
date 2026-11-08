@@ -1,9 +1,11 @@
 <Solution>
   <Folder Name="/src/">
+    <Project Path="src/TutorHub.Functions/TutorHub.Functions.csproj" />
     <Project Path="src/TutorHub.Integrations/TutorHub.Integrations.csproj" />
     <Project Path="src/TutorHub/TutorHub.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/TutorHub.AuthTests/TutorHub.AuthTests.csproj" />
+    <Project Path="tests/TutorHub.FunctionsTests/TutorHub.FunctionsTests.csproj" />
   </Folder>
 </Solution>
