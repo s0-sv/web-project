@@ -30,7 +30,7 @@ public class Outbox(AppDbContext db, TimeProvider time, OutboxSignal signal)
 
     private bool _subscribed;
 
-    public void Add<T>(string queue, T message)
+    public static OutboxMessage Create<T>(string queue, T message, DateTimeOffset now)
     {
         var payload = QueueJson.Serialize(message);
         if (Encoding.UTF8.GetByteCount(payload) > MaxPayloadBytes)
@@ -38,14 +38,18 @@ public class Outbox(AppDbContext db, TimeProvider time, OutboxSignal signal)
             throw new InvalidOperationException($"Queue message for '{queue}' exceeds {MaxPayloadBytes} bytes.");
         }
 
-        var now = time.GetUtcNow();
-        db.OutboxMessages.Add(new OutboxMessage
+        return new OutboxMessage
         {
             Queue = queue,
             Payload = payload,
             CreatedAt = now,
             AvailableAt = now
-        });
+        };
+    }
+
+    public void Add<T>(string queue, T message)
+    {
+        db.OutboxMessages.Add(Create(queue, message, time.GetUtcNow()));
 
         if (!_subscribed)
         {

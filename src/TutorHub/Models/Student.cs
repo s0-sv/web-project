@@ -36,5 +36,11 @@ public class Student : ITenantEntity
 
     public string? InviteCode { get; set; }
 
+    public long? TelegramChatId { get; set; }
+
+    public string? TelegramLinkCode { get; set; }
+
+    public DateTimeOffset? TelegramLinkExpiresAt { get; set; }
+
     public List<Lesson> Lessons { get; set; } = [];
 }

@@ -111,6 +111,9 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, TenantContext 
             e.HasAlternateKey(x => new { x.TenantId, x.Id });
             e.HasIndex(x => new { x.TenantId, x.Email }).IsUnique();
             e.HasIndex(x => x.InviteCode).IsUnique();
+            e.Property(x => x.TelegramLinkCode).HasMaxLength(64);
+            e.HasIndex(x => x.TelegramLinkCode).IsUnique();
+            e.HasIndex(x => x.TelegramChatId);
             e.HasIndex(x => x.FullName, "IX_Students_FullName_Trgm").HasMethod("gin").HasOperators("gin_trgm_ops");
             e.HasIndex(x => x.Email, "IX_Students_Email_Trgm").HasMethod("gin").HasOperators("gin_trgm_ops");
             e.HasOne<Tenant>().WithMany().HasForeignKey(x => x.TenantId).OnDelete(DeleteBehavior.Restrict);
@@ -126,6 +129,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, TenantContext 
             e.Property(x => x.Status).HasConversion<string>().HasMaxLength(20);
             e.HasAlternateKey(x => new { x.TenantId, x.Id });
             e.HasIndex(x => new { x.TenantId, x.StartsAt });
+            e.HasIndex(x => x.StartsAt, "IX_Lessons_StartsAt_Scheduled").HasFilter("\"Status\" = 'Scheduled'");
 
             e.HasOne<Tenant>().WithMany().HasForeignKey(x => x.TenantId).OnDelete(DeleteBehavior.Restrict);
             e.HasOne(x => x.Tutor).WithMany(x => x.Lessons)

@@ -1,0 +1,46 @@
+@model TelegramLinkStatus
+@{
+    ViewData["Title"] = "Telegram";
+}
+
+<h1 class="h3 mb-3">Сповіщення в Telegram</h1>
+
+<p>Бот повідомляє про нові, перенесені й скасовані заняття та нагадує про них за добу й за годину до початку.</p>
+
+@if (!Model.BotConfigured)
+{
+    <div class="alert alert-secondary">Telegram-бот у цьому середовищі не налаштований.</div>
+}
+else
+{
+    <div class="card mb-3">
+        <div class="card-body">
+            @if (Model.Linked)
+            {
+                <p class="mb-2"><span class="badge text-bg-success">Підключено</span> Сповіщення надходять у ваш Telegram.</p>
+                <form asp-action="Unlink" method="post" class="d-inline">
+                    <button type="submit" class="btn btn-outline-danger btn-sm">Відключити</button>
+                </form>
+            }
+            else
+            {
+                <p class="mb-2"><span class="badge text-bg-secondary">Не підключено</span></p>
+            }
+
+            @if (Model.LinkUrl is not null)
+            {
+                <hr>
+                <p class="mb-2">Відкрийте посилання й натисніть «Start» у Telegram. Посилання діє до @AppTime.Format(Model.ExpiresAt!.Value) і спрацьовує один раз.</p>
+                <a class="btn btn-primary" href="@Model.LinkUrl" target="_blank" rel="noopener noreferrer" data-telegram-link>Відкрити Telegram</a>
+            }
+            else
+            {
+                <form asp-action="Link" method="post" class="mt-2">
+                    <button type="submit" class="btn btn-primary">@(Model.Linked ? "Підключити інший акаунт" : "Отримати посилання")</button>
+                </form>
+            }
+        </div>
+    </div>
+
+    <p class="text-muted small">Команди бота: /lessons — найближчі заняття, /stop — вимкнути сповіщення, /help — довідка.</p>
+}

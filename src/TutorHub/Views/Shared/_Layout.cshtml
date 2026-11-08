@@ -35,6 +35,10 @@
                                 <li class="nav-item"><a class="nav-link text-dark" asp-controller="Plan" asp-action="Index">Простір</a></li>
                             }
                             <li class="nav-item"><a class="nav-link text-dark" asp-controller="Materials" asp-action="Index">Матеріали</a></li>
+                            @if (User.IsInRole(TenantRoles.Student))
+                            {
+                                <li class="nav-item"><a class="nav-link text-dark" asp-controller="Telegram" asp-action="Index">Telegram</a></li>
+                            }
                         }
                     </ul>
                     <ul class="navbar-nav align-items-sm-center">

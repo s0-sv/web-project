@@ -192,6 +192,12 @@ namespace TutorHub.Migrations
                         .HasMaxLength(4000)
                         .HasColumnType("character varying(4000)");
 
+                    b.Property<DateTimeOffset?>("ReminderDaySentAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset?>("ReminderHourSentAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<DateTimeOffset>("StartsAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -230,6 +236,9 @@ namespace TutorHub.Migrations
                     b.HasIndex("TenantId", "SubjectId");
 
                     b.HasIndex("TenantId", "TutorId");
+
+                    b.HasIndex(new[] { "StartsAt" }, "IX_Lessons_StartsAt_Scheduled")
+                        .HasFilter("\"Status\" = 'Scheduled'");
 
                     b.ToTable("Lessons");
                 });
@@ -358,12 +367,27 @@ namespace TutorHub.Migrations
                         .HasMaxLength(30)
                         .HasColumnType("character varying(30)");
 
+                    b.Property<long?>("TelegramChatId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("TelegramLinkCode")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<DateTimeOffset?>("TelegramLinkExpiresAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<int>("TenantId")
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
 
                     b.HasIndex("InviteCode")
+                        .IsUnique();
+
+                    b.HasIndex("TelegramChatId");
+
+                    b.HasIndex("TelegramLinkCode")
                         .IsUnique();
 
                     b.HasIndex("TenantId", "Email")

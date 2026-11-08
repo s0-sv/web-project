@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.IdentityModel.Tokens;
 using TutorHub.Controllers.Api;
 using TutorHub.Data;
+using TutorHub.Integrations;
 using TutorHub.Models;
 using TutorHub.Services;
 
@@ -25,12 +26,15 @@ builder.Services.AddOutputCache(o => o.AddPolicy(
     CacheInvalidationInterceptor.PolicyName,
     new UserOutputCachePolicy()));
 builder.Services.AddSingleton<CacheInvalidationInterceptor>();
+builder.Services.AddSingleton<LessonNotificationInterceptor>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<TenantContext>();
 
 builder.Services.AddDbContext<AppDbContext>((services, o) => o
     .UseNpgsql(connectionString)
-    .AddInterceptors(services.GetRequiredService<CacheInvalidationInterceptor>())
+    .AddInterceptors(
+        services.GetRequiredService<CacheInvalidationInterceptor>(),
+        services.GetRequiredService<LessonNotificationInterceptor>())
     .ConfigureWarnings(w => w.Ignore(
         CoreEventId.PossibleIncorrectRequiredNavigationWithQueryFilterInteractionWarning,
         CoreEventId.RowLimitingOperationWithoutOrderByWarning)));
@@ -54,12 +58,37 @@ builder.Services.AddScoped<LessonSummaryService>();
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddSingleton<OutboxSignal>();
 builder.Services.AddScoped<Outbox>();
+
+var telegram = builder.Configuration.GetSection(TelegramSettings.Section).Get<TelegramSettings>() ?? new TelegramSettings();
+var telegramMode = builder.Configuration.GetValue<TelegramMode?>("Telegram:Mode") ?? TelegramMode.Webhook;
+builder.Services.AddSingleton(telegram);
+builder.Services.AddHttpClient(TelegramBotClient.HttpClientName, client =>
+    {
+        client.BaseAddress = telegram.ApiBaseUrl ?? TelegramBotClient.BaseAddress;
+        client.Timeout = TimeSpan.FromSeconds(TelegramPollingService.LongPollSeconds + 30);
+    })
+    .RemoveAllLoggers();
+builder.Services.AddSingleton<TelegramClients>();
+builder.Services.AddSingleton<ITelegramBotDirectory, TelegramBotDirectory>();
+builder.Services.AddScoped<TelegramLinks>();
+builder.Services.AddScoped<TelegramUpdateHandler>();
+builder.Services.AddScoped<LessonReminders>();
+if (telegram.HasBotToken)
+{
+    builder.Services.AddHostedService<LessonReminderService>();
+}
+
 var queueConnection = builder.Configuration[AzureMessageQueue.ConfigurationKey];
 if (!string.IsNullOrEmpty(queueConnection))
 {
     builder.Services.AddSingleton<IMessageQueue>(new AzureMessageQueue(queueConnection));
     builder.Services.AddScoped<OutboxProcessor>();
     builder.Services.AddHostedService<OutboxDispatcher>();
+    builder.Services.AddHostedService<TelegramUpdateConsumer>();
+    if (telegram.HasBotToken && telegramMode == TelegramMode.Polling)
+    {
+        builder.Services.AddHostedService<TelegramPollingService>();
+    }
 }
 builder.Services.AddSingleton(new NominatimThrottle(NominatimThrottle.PublicApiInterval));
 builder.Services.AddHttpClient<IGeocoder, NominatimGeocoder>(client =>

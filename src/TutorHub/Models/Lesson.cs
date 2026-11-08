@@ -55,5 +55,9 @@ public class Lesson : ITenantEntity
 
     public string? Summary { get; set; }
 
+    public DateTimeOffset? ReminderDaySentAt { get; set; }
+
+    public DateTimeOffset? ReminderHourSentAt { get; set; }
+
     public List<LessonMaterial> Materials { get; set; } = [];
 }

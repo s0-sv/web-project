@@ -77,6 +77,15 @@ public class FakeGeocoder : IGeocoder
     }
 }
 
+public class FakeTelegramDirectory : ITelegramBotDirectory
+{
+    public const string DefaultUsername = "tutorhub_test_bot";
+
+    public string? Username { get; set; } = DefaultUsername;
+
+    public Task<string?> GetUsernameAsync(CancellationToken ct = default) => Task.FromResult(Username);
+}
+
 public record ApiUser(HttpClient Client, string Email, string Password, string Token);
 
 public class AuthTestFactory : WebApplicationFactory<Program>, IAsyncLifetime
@@ -86,6 +95,8 @@ public class AuthTestFactory : WebApplicationFactory<Program>, IAsyncLifetime
     public FakeGeocoder Geocoder { get; } = new();
 
     public FakeMessageQueue Queue { get; } = new();
+
+    public FakeTelegramDirectory Telegram { get; } = new();
 
     private readonly string _adminConnection;
     private readonly string _testConnection;
@@ -119,6 +130,7 @@ public class AuthTestFactory : WebApplicationFactory<Program>, IAsyncLifetime
             services.AddAuthentication().AddScheme<AuthenticationSchemeOptions, FakeGoogleHandler>("Google", "Google", null);
             services.AddSingleton<IGeocoder>(Geocoder);
             services.AddSingleton<IMessageQueue>(Queue);
+            services.AddSingleton<ITelegramBotDirectory>(Telegram);
             services.AddScoped<OutboxProcessor>();
         });
     }

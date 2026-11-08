@@ -18,6 +18,8 @@
     <dd class="col-sm-9">@(Model.Phone ?? "—")</dd>
     <dt class="col-sm-3">Навчальна мета</dt>
     <dd class="col-sm-9">@(Model.LearningGoal ?? "—")</dd>
+    <dt class="col-sm-3">Telegram</dt>
+    <dd class="col-sm-9">@(Model.TelegramChatId is null ? "не підключено" : "підключено")</dd>
 </dl>
 
 @if (User.IsInRole(TenantRoles.Owner))
