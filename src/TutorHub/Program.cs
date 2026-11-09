@@ -178,6 +178,7 @@ builder.Services.AddWebEncoders(o =>
     o.TextEncoderSettings = new TextEncoderSettings(UnicodeRanges.All));
 
 builder.Services.AddProblemDetails();
+builder.Services.AddHealthChecks().AddDbContextCheck<AppDbContext>();
 builder.Services.AddExceptionHandler<ApiExceptionHandler>();
 
 var app = builder.Build();
@@ -220,6 +221,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.UseOutputCache();
 
+app.MapHealthChecks("/healthz");
 app.MapStaticAssets();
 
 app.MapControllerRoute(

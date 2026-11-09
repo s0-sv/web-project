@@ -39,6 +39,15 @@ public class EndpointSecurityTests(AuthTestFactory factory)
             .ToList();
 
     [Fact]
+    public async Task Health_endpoint_is_public_and_reports_the_database()
+    {
+        var response = await factory.Anonymous().GetAsync("/healthz");
+
+        Assert.Equal(System.Net.HttpStatusCode.OK, response.StatusCode);
+        Assert.Equal("Healthy", await response.Content.ReadAsStringAsync());
+    }
+
+    [Fact]
     public void Every_action_outside_the_allow_list_requires_authorization()
     {
         var actions = ControllerActions();

@@ -1,0 +1,16 @@
+**/bin/
+**/obj/
+**/.vs/
+**/*.user
+**/node_modules/
+**/local.settings.json
+**/App_Data/
+.git/
+.github/
+.env
+.env.*
+tests/
+docs/
+*.pdf
+compose*.yaml
+**/Dockerfile

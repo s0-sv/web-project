@@ -1,0 +1,86 @@
+name: tutorhub
+
+x-database: &database "Host=db;Port=5432;Database=tutorhub;Username=tutorhub;GSS Encryption Mode=Disable;Password=${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}"
+x-storage: &storage "DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://azurite:10000/devstoreaccount1;QueueEndpoint=http://azurite:10001/devstoreaccount1;TableEndpoint=http://azurite:10002/devstoreaccount1;"
+x-jwt: &jwt "${JWT_SIGNING_KEY:?Set JWT_SIGNING_KEY in .env}"
+
+services:
+  db:
+    image: postgres:18
+    environment:
+      POSTGRES_DB: tutorhub
+      POSTGRES_USER: tutorhub
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+    volumes:
+      - db-data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tutorhub -d tutorhub"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  azurite:
+    image: mcr.microsoft.com/azure-storage/azurite:3.35.0
+    command: azurite --blobHost 0.0.0.0 --queueHost 0.0.0.0 --tableHost 0.0.0.0 --location /data --skipApiVersionCheck
+    volumes:
+      - azurite-data:/data
+    healthcheck:
+      test: ["CMD", "nc", "-z", "127.0.0.1", "10001"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  migrate:
+    build:
+      context: .
+      dockerfile: src/TutorHub/Dockerfile
+      target: migrate
+    environment:
+      ConnectionStrings__Default: *database
+      Jwt__SigningKey: *jwt
+    depends_on:
+      db:
+        condition: service_healthy
+
+  app:
+    build:
+      context: .
+      dockerfile: src/TutorHub/Dockerfile
+    image: tutorhub:local
+    ports:
+      - "8080:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ConnectionStrings__Default: *database
+      Jwt__SigningKey: *jwt
+      Storage__Queues__ConnectionString: *storage
+      Telegram__BotToken: ${TELEGRAM_BOT_TOKEN:-}
+      Telegram__Mode: Polling
+    volumes:
+      - uploads:/app/storage
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      azurite:
+        condition: service_healthy
+    restart: unless-stopped
+
+  functions:
+    build:
+      context: .
+      dockerfile: src/TutorHub.Functions/Dockerfile
+    image: tutorhub-functions:local
+    ports:
+      - "7071:80"
+    environment:
+      AzureWebJobsStorage: *storage
+      Telegram__BotToken: ${TELEGRAM_BOT_TOKEN:-}
+    depends_on:
+      azurite:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  db-data:
+  azurite-data:
+  uploads:
